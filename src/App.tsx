@@ -134,6 +134,13 @@ class StickmanRenderer {
   }
 }
 
+interface Character {
+  level: number; xp: number; gold: number;
+  stats: Record<Stat, number>; statPoints: number; health: number; maxHealth: number;
+  equipment: { weapon: string; armor: string; skill: string; };
+  unlockedItems: Record<string, number>; defeatCount: number;
+}
+
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
@@ -143,7 +150,7 @@ export default function App() {
   const [enemy, setEnemy] = useState<Character>({ ...INITIAL_CHAR, stats: { strength: 8, agility: 7, constitution: 8 }, health: 90, maxHealth: 90 });
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
-  const [battleLog, setBattleLog] = useState<string[]>(['等待连接...']);
+  const [battleLog, setBattleLog] = useState<string[]>(['等待中...']);
   const [currentPose, setCurrentPose] = useState<{player: any, enemy: any}>({player: 'idle', enemy: 'idle'});
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
@@ -220,7 +227,7 @@ export default function App() {
     setBattleHistory(prev => [...prev, { round, pDmg: curP_Dmg, eDmg: curE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
     const finalize = (isW: boolean, isK: boolean) => {
       const gR = isW ? (60 + player.level * 25) : (20 + player.level * 10); const xR = isW ? (70 + player.level * 10) : 0;
-      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; addLog('等级提升！'); } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
+      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
       else { setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 })); setGameState('defeat'); }
     };
     if (pHP <= 0) finalize(false, true); else if (eHP <= 0) finalize(true, true); else if (round >= 3) finalize(pHP > eHP, false); else { setRound(prev => prev + 1); setGameState('tactics'); }
@@ -242,11 +249,29 @@ export default function App() {
     setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]); addLog(`部署至: ${nF.name}`);
   };
 
+  if (!token) {
+    return (
+      <div className="h-screen w-full bg-slate-100 flex items-center justify-center p-4 font-sans text-slate-800">
+        <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-200 w-full max-w-md animate-in zoom-in-95 duration-300">
+          <div className="text-center mb-6"><h1 className="text-4xl font-black italic text-indigo-600 tracking-tighter">影迹战术</h1><p className="text-slate-400 font-bold text-[11px] uppercase tracking-[0.2em] mt-2">IDENTITY AUTHENTICATION</p></div>
+          <form onSubmit={handleAuth} className="space-y-3">
+            <div className="space-y-1"><label className="text-[11px] font-black text-slate-400 ml-2 uppercase">用户名</label><input type="text" placeholder="档案代号" className="w-full px-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-400 font-bold text-[14px]" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} /></div>
+            <div className="space-y-1"><label className="text-[11px] font-black text-slate-400 ml-2 uppercase">密码</label><input type={showPassword ? "text" : "password"} placeholder="加密密钥" className="w-full px-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-400 font-bold text-[14px]" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} /></div>
+            {authView === 'register' && (<div className="space-y-1 animate-in slide-in-from-top-2 duration-200"><label className="text-[11px] font-black text-slate-400 ml-2 uppercase">确认密码</label><input type={showPassword ? "text" : "password"} placeholder="确认密钥" className="w-full px-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-400 font-bold text-[14px]" value={authForm.confirmPassword} onChange={e => setAuthForm({...authForm, confirmPassword: e.target.value})} /></div>)}
+            <div className="flex items-center gap-2 ml-2 py-1"><input type="checkbox" id="show-pass" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /><label htmlFor="show-pass" className="text-[12px] font-bold text-slate-500 cursor-pointer">显示原文</label></div>
+            <button type="submit" className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 hover:bg-indigo-500 transition-all mt-2 active:scale-95">{authView === 'login' ? '进入系统' : '建立档案'}</button>
+          </form>
+          <p className="mt-6 text-center text-[13px] text-slate-400 font-bold">{authView === 'login' ? '尚未分配编号?' : '已有现存档案?'} <button className="text-indigo-600 ml-2 underline hover:text-indigo-800 font-black" onClick={() => { setAuthView(authView === 'login' ? 'register' : 'login'); setAuthForm({username: '', password: '', confirmPassword: ''}); }}>{authView === 'login' ? '注册新档案' : '返回验证'}</button></p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen w-full bg-slate-50 text-slate-800 p-4 font-sans overflow-hidden flex flex-col gap-4">
       <div className="flex justify-between items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-sm flex-none">
         <div className="flex items-center gap-12"><div className="flex flex-col items-center"><span className="text-[13px] text-slate-400 font-bold uppercase tracking-widest">神经等级</span><span className="text-2xl font-black text-indigo-600">LV.{player.level}</span></div>
-          <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold whitespace-nowrap">{player.xp} / {player.level * 100} XP</span></div></div>
+          <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold">{player.xp} / {player.level * 100} XP</span></div></div>
         </div>
         <div className="flex items-center gap-8"><div className="text-right"><span className="text-[13px] text-slate-400 font-bold uppercase block">储备</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div><div className="flex gap-2"><button onClick={() => setGameState('shop')} className="px-5 py-2.5 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 shadow-lg shadow-slate-200">黑市</button><button onClick={() => { localStorage.removeItem('token'); setToken(''); }} className="px-3 py-2.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded-xl hover:bg-slate-200">退出</button></div></div>
       </div>
@@ -261,14 +286,17 @@ export default function App() {
           <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
           {(gameState === 'victory' || gameState === 'defeat') && (
             <div className={`absolute inset-0 z-[150] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overflow-hidden`}>
-              <div className={`absolute inset-0 tactical-stripes ${gameState === 'victory' ? 'opacity-[0.08] bg-emerald-500' : 'opacity-[0.08] bg-rose-500'}`}></div>
+              <div className={`absolute inset-0 tactical-stripes ${gameState === 'victory' ? 'bg-emerald-500/10' : 'bg-rose-500/10'} z-0`}></div>
               <div className="w-full max-w-lg flex flex-col items-center max-h-full relative z-10">
                 <h1 className={`text-5xl font-black italic uppercase tracking-tighter mb-6 drop-shadow-sm flex-none ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>{gameState === 'victory' ? 'SUCCESS' : 'FAILURE'}</h1>
                 <div className="w-full bg-white/40 border border-slate-200/50 rounded-[2rem] p-6 shadow-xl backdrop-blur-md mb-8 flex flex-col min-h-0 overflow-hidden">
                   <div className="flex justify-between items-center gap-4 mb-5 border-b border-slate-200/30 pb-5 flex-none">
-                    <div className="flex-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Neural Unit</p><div className="text-[13px] font-black text-slate-800"><p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[11px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p><p className="text-slate-400 font-bold text-[11px] truncate">{player.equipment.armor}</p></div></div>
-                    <div className="px-4 py-1 bg-slate-800 text-white rounded-lg flex-none rotate-[-2deg] shadow-lg"><span className="text-[11px] font-black italic tracking-tighter">DATA REV.</span></div>
-                    <div className="flex-1 text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Host</p><div className="text-[13px] font-black text-slate-800"><p className="truncate"><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-slate-400 font-bold text-[11px] truncate">{enemy.equipment.armor}</p></div></div>
+                    <div className="flex-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Neural Unit</p><div className="text-[13px] font-black text-slate-800"><p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[11px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p><p className="text-slate-400 font-bold text-[10px] truncate">{player.equipment.armor}</p></div></div>
+                    <div className="px-4 py-1 bg-slate-800 text-white rounded-lg flex-none shadow-lg"><span className="text-[11px] font-black italic tracking-tighter">DATA REV.</span></div>
+                    <div className="flex-1 text-right">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Host</p>
+                      <div className="text-[13px] font-black text-slate-800"><p className="truncate"><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-slate-400 font-bold text-[10px] truncate">{enemy.equipment.armor}</p></div>
+                    </div>
                   </div>
                   <div className="flex-1 overflow-y-auto custom-scrollbar pr-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] text-center mb-4">Round Analysis</p>
                     <div className="space-y-2.5">
@@ -290,7 +318,7 @@ export default function App() {
         <div className="w-72 bg-white border border-slate-200 rounded-3xl p-5 flex flex-col shadow-sm">
            <h3 className="text-[13px] font-black text-slate-300 uppercase mb-4 tracking-widest border-b border-slate-50 pb-2">链路日志</h3>
            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
-              {battleLog.map((log, i) => ( <p key={i} className={`text-[13px] leading-relaxed border-l-2 pl-3 ${log.includes('造成') || log.includes('伤害') ? 'text-indigo-600 font-bold border-indigo-200' : log.includes('成功') || log.includes('强化') ? 'text-amber-500 border-amber-200' : 'text-slate-400 border-slate-100'}`}>{log}</p> ))}
+              {battleLog.map((log, i) => ( <p key={i} className={`text-[13px] leading-relaxed border-l-2 pl-3 ${log.includes('造成') || log.includes('受创') ? 'text-indigo-600 font-bold border-indigo-200' : log.includes('成功') || log.includes('强化') ? 'text-amber-500 border-amber-200' : 'text-slate-400 border-slate-100'}`}>{log}</p> ))}
            </div>
         </div>
       </div>
@@ -396,10 +424,20 @@ export default function App() {
 
       <style>{`
         .tactical-stripes {
-          background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(0,0,0,0.1) 20px, rgba(0,0,0,0.1) 40px);
-          animation: slide-stripes 20s linear infinite;
+          background-image: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 20px,
+            rgba(0, 0, 0, 0.08) 20px,
+            rgba(0, 0, 0, 0.08) 40px
+          );
+          background-size: 200% 200%;
+          animation: slide-stripes 30s linear infinite;
         }
-        @keyframes slide-stripes { from { background-position: 0 0; } to { background-position: 1000px 0; } }
+        @keyframes slide-stripes {
+          from { background-position: 0 0; }
+          to { background-position: 100% 100%; }
+        }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
