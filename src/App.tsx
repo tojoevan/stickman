@@ -411,26 +411,47 @@ export default function App() {
              <div className="flex justify-between items-center mb-3 flex-none">
                 <div className="flex items-center gap-4">
                   <h3 className="text-xl font-black italic text-indigo-600 tracking-widest uppercase">战术部署</h3>
-                  <div className="flex items-center gap-2 bg-indigo-50 px-4 py-1.5 rounded-2xl border border-indigo-100"><span className="text-[11px] font-black text-indigo-400 uppercase tracking-tighter">当前战场:</span><span className="text-[13px] font-black text-indigo-600">{field.name}</span></div>
+                  <div className="flex items-center gap-2 bg-indigo-50 px-4 py-1.5 rounded-2xl border border-indigo-100">
+                    <span className="text-[11px] font-black text-indigo-400 uppercase tracking-tighter">当前战场:</span>
+                    <span className="text-[13px] font-black text-indigo-600">{field.name}</span>
+                  </div>
                 </div>
-                <button onClick={startRound} className="px-12 py-2 bg-slate-800 text-white font-black rounded-xl hover:bg-slate-700 active:scale-95 transition-all text-[15px]">出击</button>
+                <button onClick={startRound} className="px-12 py-2 bg-slate-800 text-white font-black rounded-xl hover:bg-slate-700 active:scale-95 transition-all text-[15px] shadow-lg shadow-slate-200">开始出击</button>
              </div>
-             <div className="bg-slate-50 border border-slate-100 p-3 rounded-2xl mb-3 flex-none"><p className="text-[13px] font-bold text-slate-600 leading-relaxed"><b className="text-indigo-500">{field.name}：</b>{field.desc} <span className="ml-2 text-rose-500 font-black underline decoration-rose-200 underline-offset-4">{field.effect}</span></p></div>
+             
+             <div className="grid grid-cols-2 gap-3 mb-4 flex-none">
+                <div className="bg-slate-50 border border-slate-100 p-3 rounded-2xl">
+                  <p className="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">环境修正</p>
+                  <p className="text-[12px] font-bold text-slate-600 leading-snug">{field.desc} <span className="text-rose-500">{field.effect}</span></p>
+                </div>
+                <div className="bg-indigo-600 border border-indigo-500 p-3 rounded-2xl shadow-inner relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none"></div>
+                  <p className="text-[10px] font-black text-white/50 uppercase mb-1 tracking-widest relative z-10">神经探测：敌方单位配置</p>
+                  <div className="flex items-center gap-4 text-white font-black text-[12px] relative z-10">
+                    <span title="武器">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon} <b className="text-indigo-300 ml-1">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b></span>
+                    <span className="w-[1px] h-3 bg-white/20"></span>
+                    <span title="防具">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
+                    <span className="w-[1px] h-3 bg-white/20"></span>
+                    <span title="技能">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon} {enemy.equipment.skill}</span>
+                  </div>
+                </div>
+             </div>
+
              <div className="flex-1 grid grid-cols-3 gap-4 min-h-0">
                 <div className="flex flex-col gap-1 min-h-0 h-full border-r border-slate-50 pr-2">
-                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">主武器</p>
+                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">主武器库</p>
                   <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1">
                     {ITEMS.weapons.filter(w => player.unlockedItems[w.name]).map(w => ( <button key={w.name} onClick={() => setPlayer(p => ({...p, equipment: {...p.equipment, weapon: w.name}}))} className={`w-full text-left py-2 px-3 rounded-xl border text-[12px] font-bold transition-all ${player.equipment.weapon === w.name ? 'border-indigo-400 bg-indigo-50 text-indigo-600 shadow-sm' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'}`}>{w.icon} {w.name} <span className="float-right text-[10px] opacity-60">Lv.{player.unlockedItems[w.name]}</span></button> ))}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 min-h-0 h-full border-r border-slate-50 pr-2">
-                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">防御件</p>
+                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">防御矩阵</p>
                   <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1">
                     {ITEMS.armors.filter(a => player.unlockedItems[a.name]).map(a => ( <button key={a.name} onClick={() => setPlayer(p => ({...p, equipment: {...p.equipment, armor: a.name}}))} className={`w-full text-left py-2 px-3 rounded-xl border text-[12px] font-bold transition-all ${player.equipment.armor === a.name ? 'border-indigo-400 bg-indigo-50 text-indigo-600 shadow-sm' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'}`}>{a.icon} {a.name} <span className="float-right text-[10px] opacity-60">Lv.{player.unlockedItems[a.name]}</span></button> ))}
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 min-h-0 h-full">
-                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">技能组</p>
+                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">神经技能</p>
                   <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1">
                     {ITEMS.skills.filter(s => player.unlockedItems[s.name]).map(s => ( <button key={s.name} onClick={() => setPlayer(p => ({...p, equipment: {...p.equipment, skill: s.name}}))} className={`w-full text-left py-2 px-3 rounded-xl border text-[12px] font-bold transition-all ${player.equipment.skill === s.name ? 'border-indigo-400 bg-indigo-50 text-indigo-600 shadow-sm' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'}`}>{s.icon} {s.name} <span className="float-right text-[10px] opacity-60">Lv.{player.unlockedItems[s.name]}</span></button> ))}
                   </div>
