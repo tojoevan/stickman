@@ -112,7 +112,7 @@ const getDefenseCounterMult = (aTag: string, wTag: string) => {
 // --- 神经滚轮组件 (Native Scroll 版) ---
 const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { label: string, items: any[], selected: string, onSelect: (name: string) => void, unlockedItems: Record<string, number> }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const itemHeight = 48; 
+  const itemHeight = 64; 
   const tripleItems = [...items, ...items, ...items];
   const centerOffset = items.length * itemHeight;
 
@@ -153,38 +153,37 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
   return (
     <div className="flex-1 flex flex-row items-center gap-2 min-w-0 h-full">
       <div className="flex-none flex flex-col items-center justify-center">
-         <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] [writing-mode:vertical-rl] py-2 border-r border-slate-100 pr-2 leading-none">{label}</p>
+         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] [writing-mode:vertical-rl] py-2 border-r border-slate-100 pr-2 leading-none">{label}</p>
       </div>
-      <div className="flex-1 h-36 bg-slate-900/[0.03] rounded-3xl relative border border-slate-100/50 overflow-hidden">
-        <div className="absolute inset-x-2 h-[48px] top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-100 rounded-2xl pointer-events-none z-0"></div>
+      <div className="flex-1 h-full bg-slate-900/[0.03] rounded-[2rem] relative border border-slate-100/50 overflow-hidden">
+        <div className="absolute inset-x-2 h-[64px] top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-100 rounded-2xl pointer-events-none z-0"></div>
         
         <div 
           ref={scrollRef}
           onScroll={handleScroll}
           className="relative z-10 h-full overflow-y-auto custom-scrollbar snap-y snap-mandatory"
         >
-          <div style={{ height: (144 - itemHeight) / 2 }} />
+          <div style={{ height: (scrollRef.current?.clientHeight || 200 - itemHeight) / 2 }} />
           {tripleItems.map((item, idx) => {
-            // 改进：基于名称匹配判定高亮，确保快速滑动时视觉连贯
             const isMatch = item.name === selected;
             return (
               <div 
                 key={`${item.name}-${idx}`}
-                className={`h-[48px] flex flex-row items-center justify-center gap-3 snap-center transition-all duration-200 ${isMatch ? 'opacity-100 scale-105' : 'opacity-20 scale-95'}`}
+                className={`h-[64px] flex flex-row items-center justify-center gap-4 snap-center transition-all duration-200 ${isMatch ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}
               >
-                <span className="text-xl flex-none">{item.icon}</span>
-                <div className="flex flex-row items-center gap-2 min-w-0">
-                  <span className={`text-[12px] font-black truncate ${isMatch ? 'text-slate-800' : 'text-slate-400'}`}>
+                <span className="text-3xl flex-none">{item.icon}</span>
+                <div className="flex flex-col justify-center min-w-0">
+                  <span className={`text-[15px] font-black truncate leading-tight ${isMatch ? 'text-slate-800' : 'text-slate-400'}`}>
                     {item.name}
                   </span>
-                  <span className={`text-[9px] font-bold font-mono ${isMatch ? 'text-indigo-500' : 'text-slate-300'}`}>
+                  <span className={`text-[10px] font-bold font-mono ${isMatch ? 'text-indigo-500' : 'text-slate-300'}`}>
                     Lv.{unlockedItems[item.name] || 1}
                   </span>
                 </div>
               </div>
             );
           })}
-          <div style={{ height: (144 - itemHeight) / 2 }} />
+          <div style={{ height: (scrollRef.current?.clientHeight || 200 - itemHeight) / 2 }} />
         </div>
       </div>
     </div>
@@ -587,45 +586,38 @@ export default function App() {
 
         {gameState === 'tactics' && (
           <div className="h-full flex flex-col animate-in zoom-in-95 duration-300">
-             <div className="flex justify-between items-center mb-3 flex-none">
-                <div className="flex items-center gap-4">
-                  <h3 className="text-xl font-black italic text-indigo-600 tracking-widest uppercase">战术部署</h3>
-                  <div className="flex items-center gap-2 bg-indigo-50 px-4 py-1.5 rounded-2xl border border-indigo-100">
-                    <span className="text-[11px] font-black text-indigo-400 uppercase tracking-tighter">当前战场:</span>
-                    <span className="text-[13px] font-black text-indigo-600">{field.name}</span>
+             <div className="flex items-center gap-3 mb-4 flex-none bg-slate-900/5 p-2 rounded-2xl border border-slate-200/50">
+                <div className="flex items-center gap-2 border-r border-slate-200 pr-3">
+                  <h3 className="text-lg font-black italic text-indigo-600 uppercase tracking-tighter whitespace-nowrap">战术部署</h3>
+                  <div className="flex items-center gap-1.5 bg-white px-3 py-1 rounded-xl border border-indigo-100 shadow-sm">
+                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">战场:</span>
+                    <span className="text-[12px] font-black text-indigo-600 whitespace-nowrap">{field.name}</span>
                   </div>
                 </div>
-                <button onClick={startRound} className="px-12 py-2 bg-slate-800 text-white font-black rounded-xl hover:bg-slate-700 active:scale-95 transition-all text-[15px] shadow-lg shadow-slate-200">开始出击</button>
-             </div>
-             <div className="grid grid-cols-2 gap-3 mb-4 flex-none">
-                <div className="bg-slate-50 border border-slate-100 p-3 rounded-2xl">
-                  <p className="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">环境修正</p>
-                  <p className="text-[12px] font-bold text-slate-600 leading-snug">{field.desc} <span className="text-rose-500">{field.effect}</span></p>
-                </div>
-                <div className="bg-indigo-600 border border-indigo-500 p-3 rounded-2xl shadow-inner relative overflow-hidden group h-[64px] flex flex-col justify-center">
-                  <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none"></div>
-                  <p className="text-[9px] font-black text-white/40 uppercase mb-1.5 tracking-widest relative z-10">Neural Detection / 神经探测</p>
-                  <div className="flex items-center gap-4 text-white font-black text-[11px] relative z-10">
-                    <div className="flex items-center gap-1.5 whitespace-nowrap">
-                      <span className="opacity-80">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon}</span>
+
+                <div className="flex-1 flex items-center gap-4 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">环境修正:</span>
+                    <p className="text-[11px] font-bold text-slate-600 truncate">{field.desc} <span className="text-rose-500">{field.effect}</span></p>
+                  </div>
+                  <div className="w-[1px] h-6 bg-slate-200 flex-none"></div>
+                  <div className="flex-1 flex items-center gap-3 bg-indigo-600 px-4 py-1.5 rounded-xl shadow-inner relative overflow-hidden min-w-0">
+                    <p className="text-[9px] font-black text-white/40 uppercase tracking-tighter whitespace-nowrap flex-none">探测:</p>
+                    <div className="flex items-center gap-3 text-white font-black text-[11px] truncate relative z-10">
+                      <span className="opacity-90">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon}</span>
                       <b className="text-indigo-300 font-mono text-[10px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
-                      {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && (
-                        <span className="px-1.5 py-0.5 bg-emerald-400 text-emerald-950 text-[9px] rounded-md animate-pulse">压制</span>
-                      )}
+                      <span className="w-[1px] h-3 bg-white/10"></span>
+                      <span className="opacity-90">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
+                      <span className="w-[1px] h-3 bg-white/10"></span>
+                      <span className="opacity-90">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon} {enemy.equipment.skill}</span>
                     </div>
-                    <span className="w-[1px] h-3 bg-white/10"></span>
-                    <div className="flex items-center gap-1.5 whitespace-nowrap">
-                      <span className="opacity-80">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
-                      {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && (
-                        <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-pulse">防御</span>
-                      )}
-                    </div>
-                    <span className="w-[1px] h-3 bg-white/10"></span>
-                    <span className="opacity-80 whitespace-nowrap">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon} {enemy.equipment.skill}</span>
                   </div>
                 </div>
+
+                <button onClick={startRound} className="px-10 py-3 bg-slate-800 text-white font-black rounded-xl hover:bg-slate-700 active:scale-95 transition-all text-[14px] shadow-lg shadow-slate-200 flex-none ml-2 border-b-4 border-slate-950">开始出击 ➜</button>
              </div>
-             <div className="flex-1 flex gap-4 min-h-0 h-full py-2">
+
+             <div className="flex-1 flex gap-4 min-h-0 h-full pb-2">
                 <NeuralPicker label="主武器库" items={ITEMS.weapons.filter(w => player.unlockedItems[w.name])} selected={player.equipment.weapon} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, weapon: v}}))} unlockedItems={player.unlockedItems} />
                 <NeuralPicker label="防御矩阵" items={ITEMS.armors.filter(a => player.unlockedItems[a.name])} selected={player.equipment.armor} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, armor: v}}))} unlockedItems={player.unlockedItems} />
                 <NeuralPicker label="神经技能" items={ITEMS.skills.filter(s => player.unlockedItems[s.name])} selected={player.equipment.skill} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, skill: v}}))} unlockedItems={player.unlockedItems} />
