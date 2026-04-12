@@ -249,6 +249,10 @@ export default function App() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (authView === 'register' && authForm.password !== authForm.confirmPassword) {
+      alert('接入密钥不一致，请核对。');
+      return;
+    }
     try {
       const res = await safeFetch(`${API_URL}/${authView}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
       const data = await res.json();
@@ -357,9 +361,76 @@ export default function App() {
     const bS = player.level === 1 ? 0.5 : 0.8; const eS = { strength: Math.floor(player.stats.strength * bS * dM), agility: Math.floor(player.stats.agility * 0.7 * dM), constitution: Math.floor(player.stats.constitution * 0.8 * dM) };
     const eH = Math.floor(player.maxHealth * (player.level === 1 ? 0.75 : 0.95) * (1 + (pP / 3000)) * Math.max(0.5, 1 - (player.defeatCount * 0.12)));
     const eL = Math.max(1, Math.floor(player.level / 2.2));
-    setEnemy({ level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }, defeatCount: 0 });
+    setEnemy({ level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }, defeatCount: 0, statPoints: 0 });
     setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]); addLog(`部署至: ${nF.name}`);
   };
+
+  if (!token) {
+    return (
+      <div className="h-screen w-full bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="absolute inset-0 tactical-stripes opacity-20"></div>
+        <div className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-2xl relative z-10 animate-in zoom-in-95 duration-300">
+          <div className="mb-10 text-center">
+            <h1 className="text-4xl font-black italic text-indigo-600 mb-2 uppercase tracking-tighter">神经链路 · 接入层</h1>
+            <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.3em]">Neural Interface v1.0.4</p>
+          </div>
+          
+          <form onSubmit={handleAuth} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">档案代号 / USERNAME</label>
+              <input 
+                type="text" 
+                required
+                placeholder="请输入档案代号..."
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-slate-800 font-bold focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all placeholder:text-slate-300"
+                value={authForm.username}
+                onChange={e => setAuthForm(prev => ({ ...prev, username: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">接入密钥 / PASSWORD</label>
+              <div className="relative">
+                <input 
+                  type={showPassword ? 'text' : 'password'} 
+                  required
+                  placeholder="请输入密钥..."
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-slate-800 font-bold focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all placeholder:text-slate-300"
+                  value={authForm.password}
+                  onChange={e => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-indigo-500 transition-colors text-xl">
+                  {showPassword ? '👁️' : '🕶️'}
+                </button>
+              </div>
+            </div>
+            {authView === 'register' && (
+              <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">确认密钥 / CONFIRM</label>
+                <input 
+                  type="password" 
+                  required
+                  placeholder="请再次输入以确认..."
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-slate-800 font-bold focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all placeholder:text-slate-300"
+                  value={authForm.confirmPassword}
+                  onChange={e => setAuthForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                />
+              </div>
+            )}
+            <button type="submit" className="w-full py-5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-[15px] shadow-2xl shadow-indigo-200 active:scale-[0.98] transition-all mt-4 uppercase tracking-widest border-b-4 border-indigo-800">
+              {authView === 'login' ? '建立神经连接' : '初始化新档案'}
+            </button>
+          </form>
+          
+          <div className="mt-10 pt-8 border-t border-slate-50 flex flex-col items-center gap-5">
+             <button onClick={() => setAuthView(authView === 'login' ? 'register' : 'login')} className="text-slate-400 hover:text-indigo-600 font-black text-[12px] transition-colors uppercase tracking-wider">
+               {authView === 'login' ? '还没有档案？申请新链路' : '已有授权？返回接入层'}
+             </button>
+             <p className="text-[9px] text-slate-300 font-black tracking-[0.2em] uppercase">Shadow Trace Tactics Group © 2026</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-full bg-slate-50 text-slate-800 p-4 font-sans overflow-hidden flex flex-col gap-4">
