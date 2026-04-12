@@ -619,26 +619,24 @@ export default function App() {
                     <div className="flex items-center gap-4 text-white font-black text-[13px] min-w-0 relative z-10">
                       <div className="flex items-center gap-2 flex-none">
                         <span className="text-xl">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon}</span>
-                        <div className="flex flex-col">
-                          <span className="leading-none mb-1">{enemy.equipment.weapon}</span>
-                          <b className="text-indigo-300 font-mono text-[9px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
-                        </div>
+                        <span className="whitespace-nowrap">{enemy.equipment.weapon}</span>
+                        <b className="text-indigo-300 font-mono text-[10px] whitespace-nowrap">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
                         {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && (
-                          <span className="px-1.5 py-0.5 bg-emerald-400 text-emerald-950 text-[9px] rounded-md animate-bounce ml-1">压制</span>
+                          <span className="px-1.5 py-0.5 bg-emerald-400 text-emerald-950 text-[9px] rounded-md animate-bounce">压制</span>
                         )}
                       </div>
                       <span className="w-[1px] h-4 bg-white/20"></span>
                       <div className="flex items-center gap-2 flex-none">
                         <span className="text-xl">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon}</span>
-                        <span className="">{enemy.equipment.armor}</span>
+                        <span className="whitespace-nowrap">{enemy.equipment.armor}</span>
                         {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && (
-                          <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-bounce ml-1">防御</span>
+                          <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-bounce">防御</span>
                         )}
                       </div>
                       <span className="w-[1px] h-4 bg-white/20"></span>
                       <div className="flex items-center gap-2 flex-none">
                         <span className="text-xl">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon}</span>
-                        <span className="">{enemy.equipment.skill}</span>
+                        <span className="whitespace-nowrap">{enemy.equipment.skill}</span>
                       </div>
                     </div>
                   </div>
