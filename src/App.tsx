@@ -335,6 +335,13 @@ export default function App() {
   const rendererRef = useRef<StickmanRenderer | null>(null);
   const hasLoaded = useRef(false);
 
+  // 确保渲染器尽早初始化
+  useEffect(() => {
+    if (canvasRef.current && !rendererRef.current) {
+      rendererRef.current = new StickmanRenderer(canvasRef.current.getContext('2d')!);
+    }
+  }, []);
+
   const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 20));
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -395,16 +402,28 @@ export default function App() {
   }, [player.level, player.gold, player.stats, player.unlockedItems]);
 
   useEffect(() => {
-    let frame: number; const loop = () => { if (canvasRef.current && !rendererRef.current) rendererRef.current = new StickmanRenderer(canvasRef.current.getContext('2d')!);
-      if (rendererRef.current) { 
-        rendererRef.current.advance(); // 每一帧只更新一次逻辑
-        rendererRef.current.drawBackground(field);
-        const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon); const eW = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
-        rendererRef.current.drawCharacter(240, 280, currentPose.player, false, player.stats.agility, pW?.icon); 
-        rendererRef.current.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️');
-        rendererRef.current.renderEffects(); // 统一渲染特效
-      } frame = requestAnimationFrame(loop); }; frame = requestAnimationFrame(loop); return () => cancelAnimationFrame(frame);
-  }, [token, currentPose, player.stats.agility, enemy.stats.agility, player.equipment.weapon, enemy.equipment.weapon, field]);
+    let frame: number;
+    const loop = () => {
+      if (canvasRef.current) {
+        if (!rendererRef.current) rendererRef.current = new StickmanRenderer(canvasRef.current.getContext('2d')!);
+        
+        const r = rendererRef.current;
+        r.advance(); // 更新逻辑
+        r.drawBackground(field);
+        
+        const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon);
+        const eW = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
+        
+        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility, pW?.icon); 
+        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️');
+        
+        r.renderEffects(); // 始终在最上层渲染
+      }
+      frame = requestAnimationFrame(loop);
+    };
+    frame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frame);
+  }, [field, currentPose, player.equipment.weapon, enemy.equipment.weapon, player.stats.agility, enemy.stats.agility]);
 
   const buyItem = (item: Item) => setPreviewItem(item);
   const confirmPurchase = (item: Item) => {
