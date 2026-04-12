@@ -224,15 +224,16 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
 interface BattleRoundRecord { round: number; pDmg: number; eDmg: number; pRemainingHp: number; eRemainingHp: number; }
 
 class StickmanRenderer {
-  private ctx: CanvasRenderingContext2D; private time: number = 0; private effects: any[] = []; private nextEffectId: number = 0;
+  private ctx: CanvasRenderingContext2D; private time: number = 0; public effects: any[] = []; private nextEffectId: number = 0;
   constructor(ctx: CanvasRenderingContext2D) { this.ctx = ctx; }
   addEffect(type: any, x: number, y: number, color: string = '#475569', count: number = 1) { 
+    console.log(`✨ [Renderer] 添加特效: ${type} at (${x}, ${y})`);
     for (let i = 0; i < count; i++) { 
       this.effects.push({ 
         id: this.nextEffectId++, type, x, y, 
         vx: type === 'heal' ? (Math.random() - 0.5) * 4 : (Math.random() - 0.5) * 10, 
-        vy: type === 'heal' ? -Math.random() * 4 : (Math.random() - 0.5) * 10, 
-        life: 1.0, color, size: type === 'scan' ? 800 : Math.random() * 5 + 2 
+        vy: type === 'heal' ? -Math.random() * 5 : (Math.random() - 0.5) * 10, 
+        life: 1.0, color, size: type === 'scan' ? 800 : Math.random() * 6 + 3 
       }); 
     } 
   }
@@ -240,24 +241,24 @@ class StickmanRenderer {
     this.time += 0.04;
     this.effects = this.effects.filter(e => { 
       e.x += e.vx; e.y += e.vy; 
-      // 显著降低衰减速度 (0.015 约持续 1.5 秒)
-      e.life -= (e.type === 'scan' || e.type === 'shield' ? 0.015 : 0.025); 
-      if (e.type === 'arrow') e.vx = 18; 
+      // 使用更稳定的衰减速度
+      const decay = (e.type === 'scan' || e.type === 'shield' ? 0.01 : 0.02);
+      e.life -= decay; 
+      if (e.type === 'arrow') e.vx = 20; 
       return e.life > 0; 
     }); 
   }
   drawBackground(field: Battlefield) {
-    const ctx = this.ctx; const t = this.time; ctx.save(); ctx.fillStyle = field.bgColor; ctx.fillRect(0, 0, 800, 400);
-    if (field.id === 'neutral') { ctx.strokeStyle = field.accentColor; ctx.lineWidth = 1; ctx.globalAlpha = 0.2; for(let i=0; i<800; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + Math.sin(t+i)*5, 400); ctx.stroke(); } }
+    const ctx = this.ctx; ctx.save(); ctx.fillStyle = field.bgColor; ctx.fillRect(0, 0, 800, 400);
+    if (field.id === 'neutral') { ctx.strokeStyle = field.accentColor; ctx.lineWidth = 1; ctx.globalAlpha = 0.2; for(let i=0; i<800; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + Math.sin(this.time+i)*5, 400); ctx.stroke(); } }
     else if (field.id === 'emp') { ctx.strokeStyle = '#818cf8'; ctx.lineWidth = 2; for(let i=0; i<5; i++) { if (Math.random() > 0.8) { ctx.beginPath(); ctx.moveTo(Math.random()*800, 0); ctx.lineTo(Math.random()*800, 400); ctx.globalAlpha = 0.3; ctx.stroke(); } } }
     else if (field.id === 'narrow') { ctx.fillStyle = '#27272a'; ctx.fillRect(0, 0, 800, 60); ctx.fillRect(0, 340, 800, 60); }
-    else if (field.id === 'desert') { ctx.fillStyle = '#78350f'; ctx.globalAlpha = 0.3; for(let i=0; i<3; i++) { ctx.beginPath(); ctx.moveTo(0, 300+i*20); for(let x=0; x<=800; x+=20) { ctx.lineTo(x, 300+i*20 + Math.sin(x*0.01 + t + i)*10); } ctx.lineTo(800, 400); ctx.lineTo(0, 400); ctx.fill(); } }
-    else if (field.id === 'overload') { ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 3; ctx.globalAlpha = Math.abs(Math.sin(t*2))*0.3; ctx.beginPath(); ctx.arc(400, 200, 150 + Math.sin(t)*20, 0, Math.PI * 2); ctx.stroke(); }
+    else if (field.id === 'overload') { ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 3; ctx.globalAlpha = Math.abs(Math.sin(this.time*2))*0.3; ctx.beginPath(); ctx.arc(400, 200, 150 + Math.sin(this.time)*20, 0, Math.PI * 2); ctx.stroke(); }
     ctx.restore();
   }
   drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️') {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45); ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
-    ctx.strokeStyle = pose === 'dead' ? '#cbd5e1' : '#f8fafc'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    ctx.strokeStyle = pose === 'dead' ? '#cbd5e1' : '#f8fafc'; ctx.lineWidth = 6; ctx.lineCap = 'round';
     const headSize = 18; const bodyHeight = 55; let armAngle = Math.sin(t) * 0.4; let legAngle = Math.cos(t) * 0.4;
     if (pose === 'attack') { armAngle = -1.8 + Math.sin(t * 8) * 1.2; ctx.translate(Math.sin(t * 8) * 20, 0); ctx.font = '32px serif'; ctx.fillText(weaponIcon, Math.cos(armAngle) * 40 - 15, -bodyHeight + Math.sin(armAngle) * 40); }
     else if (pose === 'hit') { ctx.strokeStyle = '#ef4444'; ctx.translate(Math.sin(this.time * 60) * 10, 0); }
@@ -271,23 +272,28 @@ class StickmanRenderer {
   renderEffects() {
     const ctx = this.ctx;
     this.effects.forEach(e => { 
-      ctx.globalAlpha = e.life; ctx.fillStyle = e.color; 
-      if (e.type === 'arrow') { ctx.fillRect(e.x, e.y, 12, 2); } 
-      else if (e.type === 'scan') { 
-        ctx.fillStyle = e.color;
-        const scanY = e.y + (1 - e.life) * 300 - 150;
-        ctx.fillRect(0, scanY, 800, 4); // 加粗扫描线
-        ctx.globalAlpha = e.life * 0.3;
-        ctx.fillRect(0, scanY - 10, 800, 24); // 增加光晕
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, e.life);
+      if (e.type === 'scan') { 
+        ctx.fillStyle = e.color || '#818cf8';
+        const scanY = e.y + (1 - e.life) * 400 - 200;
+        ctx.fillRect(0, scanY, 800, 6); // 极粗扫描线
+        ctx.globalAlpha = e.life * 0.4;
+        ctx.fillRect(0, scanY - 15, 800, 36); // 亮眼光晕
       }
       else if (e.type === 'shield') { 
-        ctx.strokeStyle = e.color; ctx.lineWidth = 4; ctx.beginPath(); 
-        ctx.arc(e.x, e.y - 40, 60, 0, Math.PI * 2); ctx.stroke(); 
-        ctx.globalAlpha = e.life * 0.15; ctx.fill();
+        ctx.strokeStyle = e.color || '#ef4444'; ctx.lineWidth = 5; 
+        ctx.beginPath(); ctx.arc(e.x, e.y - 40, 65, 0, Math.PI * 2); ctx.stroke(); 
+        ctx.globalAlpha = e.life * 0.2; ctx.fillStyle = e.color; ctx.fill();
       }
-      else { ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill(); } 
+      else if (e.type === 'heal') {
+        ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill();
+      }
+      else { 
+        ctx.fillStyle = e.color || '#f59e0b'; ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill(); 
+      }
+      ctx.restore();
     });
-    ctx.globalAlpha = 1;
   }
 }
 
@@ -504,12 +510,12 @@ export default function App() {
         if (isP) { eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg += fD; addLog(`>>打击: ${fD}`); } 
         else { pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg += fD; addLog(`<<受创: ${fD}`); }
 
-        // 反伤
-        const defSkill = isP ? eS : pS;
-        if (defSkill.name === '动能反射' && fD > 0) {
+        // 反伤 (仅在受创方有反射技能时触发)
+        const defenderSkill = isP ? eS : pS;
+        if (defenderSkill.name === '动能反射' && fD > 0) {
           const reflect = Math.floor(fD * 0.5);
-          if (isP) { pHP = Math.max(0, pHP - reflect); setPlayer(prev => ({...prev, health: pHP})); addLog(`<< [反射] -${reflect} HP`); }
-          else { eHP = Math.max(0, eHP - reflect); setEnemy(prev => ({...prev, health: eHP})); addLog(`>> [反射] -${reflect} HP`); }
+          if (isP) { pHP = Math.max(0, pHP - reflect); setPlayer(prev => ({...prev, health: pHP})); addLog(`<< [反馈] -${reflect} HP`); }
+          else { eHP = Math.max(0, eHP - reflect); setEnemy(prev => ({...prev, health: eHP})); addLog(`>> [反馈] -${reflect} HP`); }
         }
 
         // 过载
