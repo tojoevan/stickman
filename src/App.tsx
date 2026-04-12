@@ -34,6 +34,7 @@ interface Item {
   desc: string;
   cost?: number;
   rarity: Rarity;
+  levelReq?: number; // 等级需求
 }
 
 interface Character {
@@ -53,22 +54,28 @@ const ITEMS = {
     { name: '长剑', damage: 15, icon: '⚔️', desc: '新手利刃', rarity: 'common' },
     { name: '长弓', damage: 12, icon: '🏹', desc: '远程精准', rarity: 'common' },
     { name: '重锤', damage: 25, icon: '🔨', desc: '势大力沉', rarity: 'common' },
-    { name: '名刀', damage: 22, icon: '🎋', desc: '迅捷致命', cost: 150, rarity: 'novel' },
-    { name: '激光剑', damage: 35, icon: '🔦', desc: '等离子刃', cost: 400, rarity: 'epic' },
-    { name: '神龙弓', damage: 28, icon: '🐉', desc: '破空之箭', cost: 300, rarity: 'perfect' },
+    { name: '名刀', damage: 32, icon: '🎋', desc: '迅捷致命', cost: 150, rarity: 'novel', levelReq: 3 },
+    { name: '神龙弓', damage: 55, icon: '🐉', desc: '破空之箭', cost: 600, rarity: 'perfect', levelReq: 8 },
+    { name: '激光剑', damage: 85, icon: '🔦', desc: '等离子刃', cost: 1500, rarity: 'epic', levelReq: 15 },
+    { name: '雷神锤', damage: 150, icon: '⚡', desc: '众神之怒', cost: 4500, rarity: 'epic', levelReq: 25 },
+    { name: '影刃', damage: 130, icon: '🔪', desc: '虚空之遗', cost: 8500, rarity: 'epic', levelReq: 40 },
   ] as Item[],
   armors: [
     { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '轻便无负重', rarity: 'common' },
     { name: '铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '稳固防御', rarity: 'common' },
     { name: '披风', defense: 3, evasion: 20, icon: '🧥', desc: '幻影闪避', rarity: 'common' },
-    { name: '动力装甲', defense: 25, evasion: 5, icon: '🤖', desc: '外骨骼增强', cost: 250, rarity: 'novel' },
-    { name: '虚空甲', defense: 40, evasion: 10, icon: '🌌', desc: '暗物质抵挡', cost: 500, rarity: 'epic' },
+    { name: '动力装甲', defense: 45, evasion: 5, icon: '🤖', desc: '外骨骼增强', cost: 500, rarity: 'novel', levelReq: 5 },
+    { name: '虚空甲', defense: 95, evasion: 10, icon: '🌌', desc: '暗物质抵挡', cost: 2000, rarity: 'perfect', levelReq: 15 },
+    { name: '纳米蜂群', defense: 50, evasion: 60, icon: '🐝', desc: '微型机器人拦截', cost: 6500, rarity: 'epic', levelReq: 35 },
+    { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极防御屏障', cost: 15000, rarity: 'epic', levelReq: 60 },
   ] as Item[],
   skills: [
     { name: '斩击', mult: 1.2, icon: '💥', desc: '标准攻击', rarity: 'common' },
     { name: '治疗', mult: 0, icon: '✨', desc: '生物修复', rarity: 'common' },
     { name: '连击', mult: 0.8, icon: '⚡', desc: '速度幻影', rarity: 'novel' },
-    { name: '超新星', mult: 2.5, icon: '☢️', desc: '能量释放', cost: 200, rarity: 'perfect' },
+    { name: '超新星', mult: 3.5, icon: '☢️', desc: '能量释放', cost: 1000, rarity: 'perfect', levelReq: 10 },
+    { name: '黑洞', mult: 8.0, icon: '🕳️', desc: '吞噬一切', cost: 8000, rarity: 'epic', levelReq: 45 },
+    { name: '时间倒流', mult: 0, icon: '⏳', desc: '因果重塑', cost: 12000, rarity: 'epic', levelReq: 70 },
   ] as Item[]
 };
 
@@ -202,6 +209,9 @@ export default function App() {
   const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 20));
 
   const buyItem = (item: Item) => {
+    if (player.level < (item.levelReq || 0)) {
+      return alert(`神经等级不足！需要 LV.${item.levelReq} 才能购买此装备。`);
+    }
     if (player.gold >= (item.cost || 0) && !player.unlockedItems.includes(item.name)) {
       setPlayer(prev => ({ ...prev, gold: prev.gold - (item.cost || 0), unlockedItems: [...prev.unlockedItems, item.name] }));
       addLog(`成功购买: ${item.name}!`);
@@ -259,13 +269,41 @@ export default function App() {
   };
 
   const resetGame = () => {
-    const rw = ITEMS.weapons[Math.floor(Math.random() * ITEMS.weapons.length)];
-    const ra = ITEMS.armors[Math.floor(Math.random() * ITEMS.armors.length)];
-    const rs = ITEMS.skills[Math.floor(Math.random() * ITEMS.skills.length)];
+    // 自动为敌人选择符合等级的最强装备组合
+    const availableWeapons = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level);
+    const availableArmors = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level);
+    const availableSkills = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
+    
+    const rw = availableWeapons[Math.floor(Math.random() * availableWeapons.length)];
+    const ra = availableArmors[Math.floor(Math.random() * availableArmors.length)];
+    const rs = availableSkills[Math.floor(Math.random() * availableSkills.length)];
+    
     setPlayer(prev => ({...prev, health: prev.maxHealth}));
-    setEnemy({ ...INITIAL_CHAR, level: player.level, stats: { strength: 8 + player.level, agility: 8 + Math.floor(player.level/2), constitution: 8 + player.level }, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: 90 + player.level * 10, maxHealth: 90 + player.level * 10 });
-    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'});
-    addLog(`>>> 侦测到新目标。配备: ${rw.name} | ${ra.name}`);
+    
+    // 动态对手生成算法：属性与玩家当前能力按比例动态缩放
+    const enemyStats = {
+      strength: Math.floor(player.stats.strength * 0.85 + (player.level * 1.5)),
+      agility: Math.floor(player.stats.agility * 0.8 + (player.level * 1.2)),
+      constitution: Math.floor(player.stats.constitution * 0.9 + (player.level * 1.8))
+    };
+
+    const enemyMaxHp = 100 + (enemyStats.constitution * 12) + (player.level * 40);
+
+    setEnemy({ 
+      level: player.level, 
+      xp: 0,
+      gold: 0,
+      stats: enemyStats, 
+      equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, 
+      health: enemyMaxHp, 
+      maxHealth: enemyMaxHp,
+      unlockedItems: []
+    });
+    
+    setRound(1); 
+    setGameState('lobby'); 
+    setCurrentPose({player: 'idle', enemy: 'idle'});
+    addLog(`>>> 侦测到强力目标 (LV.${player.level})。配备: ${rw.name} | ${ra.name}`);
   };
 
   const getDefeatAdvice = () => {
@@ -397,13 +435,14 @@ export default function App() {
                 const rc = { common: { color: 'bg-slate-400', label: '普通' }, novel: { color: 'bg-blue-500', label: '新奇' }, perfect: { color: 'bg-emerald-500', label: '至臻' }, epic: { color: 'bg-amber-500', label: '史诗' } }[item.rarity];
                 return (
                   <div key={item.name} className="relative group">
-                    <button onClick={() => buyItem(item)} disabled={player.gold < (item.cost || 0) || player.unlockedItems.includes(item.name)} className={`w-full p-2 rounded-xl border text-left transition-all relative flex flex-col items-center ${player.unlockedItems.includes(item.name) ? 'opacity-30 border-slate-100 bg-slate-50' : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-md active:scale-95'}`}>
+                    <button onClick={() => buyItem(item)} disabled={player.gold < (item.cost || 0) || player.unlockedItems.includes(item.name) || player.level < (item.levelReq || 0)} className={`w-full p-2 rounded-xl border text-left transition-all relative flex flex-col items-center ${player.unlockedItems.includes(item.name) ? 'opacity-30 border-slate-100 bg-slate-50' : player.level < (item.levelReq || 0) ? 'bg-slate-50 border-slate-100 grayscale opacity-60' : 'bg-white border-slate-100 hover:border-slate-300 hover:shadow-md active:scale-95'}`}>
                       <span className="text-2xl mb-1">{item.icon}</span><div className="text-center w-full"><p className="font-black text-[12px] text-slate-700 truncate">{item.name}</p><p className="text-amber-600 font-black text-[11px]">₿ {item.cost}</p></div><div className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ${rc.color} ${item.rarity === 'epic' ? 'animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.8)]' : ''}`}></div>
                     </button>
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-56 p-3 bg-slate-900/95 text-white rounded-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-200 z-[200] shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-slate-700 backdrop-blur-md scale-95 group-hover:scale-100 origin-bottom">
                       <div className="flex justify-between items-center border-b border-slate-700 mb-2 pb-1.5"><span className="font-black text-[13px]">{item.name}</span><span className={`text-[10px] px-2 py-0.5 rounded ${rc.color} text-white font-bold`}>{rc.label}</span></div>
                       <p className="text-slate-400 text-[12px] leading-snug mb-3 italic">{item.desc}</p>
                       <div className="space-y-1.5 bg-black/40 p-2.5 rounded-xl border border-white/5 text-[11px]">
+                        {item.levelReq && <div className="flex justify-between border-b border-white/10 pb-1 mb-1"><span className="text-slate-500">需求等级</span><span className={`${player.level >= item.levelReq ? 'text-emerald-400' : 'text-rose-400'} font-black`}>LV.{item.levelReq}</span></div>}
                         {item.damage && <div className="flex justify-between"><span className="text-slate-500">威力</span><span className="text-rose-400 font-black">+{item.damage}</span></div>}
                         {item.defense && <div className="flex justify-between"><span className="text-slate-500">防御</span><span className="text-sky-400 font-black">+{item.defense}</span></div>}
                         {item.evasion ? <div className="flex justify-between"><span className="text-slate-500">闪避</span><span className="text-emerald-400 font-black">{item.evasion}%</span></div> : null}
