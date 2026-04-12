@@ -158,11 +158,11 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
   };
 
   return (
-    <div className="flex-1 flex flex-row items-center gap-2 min-w-0 h-full">
+    <div className="flex-1 flex flex-row items-center gap-4 min-w-0 h-full">
       <div className="flex-none flex flex-col items-center justify-center">
-         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] [writing-mode:vertical-rl] py-2 border-r border-slate-100 pr-2 leading-none">{label}</p>
+         <p className="text-[13px] font-black text-slate-400 uppercase tracking-[0.4em] [writing-mode:vertical-rl] py-4 border-r-2 border-slate-100 pr-3 leading-none italic">{label}</p>
       </div>
-      <div className="flex-1 h-full bg-slate-900/[0.03] rounded-[2rem] relative border border-slate-100/50 overflow-hidden">
+      <div className="flex-1 h-full bg-slate-900/[0.03] rounded-[2.5rem] relative border border-slate-100/50 overflow-hidden">
         {/* 中心指示器 */}
         <div className="absolute inset-x-2 h-[64px] top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-100 rounded-2xl pointer-events-none z-0"></div>
         
