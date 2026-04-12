@@ -85,7 +85,7 @@ const ITEMS = {
 };
 
 const INITIAL_CHAR: Character = {
-  username: '未知主体',
+  username: 'Unknown',
   level: 1, xp: 0, gold: 100,
   stats: { strength: 10, agility: 10, constitution: 12 },
   statPoints: 8, health: 120, maxHealth: 120,
@@ -237,16 +237,24 @@ export default function App() {
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [authForm, setAuthForm] = useState({ username: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const [player, setPlayer] = useState<Character>(() => ({ 
-    ...INITIAL_CHAR, 
-    username: localStorage.getItem('username') || INITIAL_CHAR.username 
-  }));
-  const [enemy, setEnemy] = useState<Character>(() => ({ 
-    ...INITIAL_CHAR, 
-    username: ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)], 
-    stats: { strength: 8, agility: 7, constitution: 8 }, 
-    health: 90, maxHealth: 90 
-  }));
+  const [player, setPlayer] = useState<Character>(() => {
+    const saved = localStorage.getItem('username');
+    console.log('🏗️ [Init] Player 初始加载. LocalStorage username:', saved);
+    return { 
+      ...INITIAL_CHAR, 
+      username: saved || INITIAL_CHAR.username 
+    };
+  });
+  const [enemy, setEnemy] = useState<Character>(() => {
+    const eName = ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
+    console.log('🏗️ [Init] Enemy 初始加载. Name:', eName);
+    return { 
+      ...INITIAL_CHAR, 
+      username: eName, 
+      stats: { strength: 8, agility: 7, constitution: 8 }, 
+      health: 90, maxHealth: 90 
+    };
+  });
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
   const [battleLog, setBattleLog] = useState<string[]>(['等待连接...']);
@@ -281,13 +289,29 @@ export default function App() {
   useEffect(() => {
     if (token) {
       const savedUser = localStorage.getItem('username');
-      fetch(`${API_URL}/load`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.gameData) {
-        const rawData = data.gameData; if (Array.isArray(rawData.unlockedItems)) { const m: any = {}; rawData.unlockedItems.forEach((n: any) => m[n] = 1); rawData.unlockedItems = m; }
-        setPlayer(prev => ({ ...prev, ...rawData, username: savedUser || prev.username || INITIAL_CHAR.username })); 
-        addLog('档案同步成功。');
-      } else if (savedUser) {
-        setPlayer(prev => ({ ...prev, username: savedUser }));
-      }
+      console.log('🔍 [Load] Token 存在，尝试恢复档案. SavedUser:', savedUser);
+      fetch(`${API_URL}/load`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { 
+        console.log('🔍 [Load] 后端响应:', data);
+        if (data.gameData) {
+          const rawData = data.gameData; 
+          if (Array.isArray(rawData.unlockedItems)) { 
+            const m: any = {}; rawData.unlockedItems.forEach((n: any) => m[n] = 1); rawData.unlockedItems = m; 
+          }
+          // 确保 username 放在最后，且绝不为 undefined
+          setPlayer(prev => {
+            const newUser = { 
+              ...prev, 
+              ...rawData, 
+              username: savedUser || rawData.username || prev.username || INITIAL_CHAR.username 
+            };
+            console.log('🔍 [Load] 最终 Player 状态:', newUser);
+            return newUser;
+          }); 
+          addLog('档案同步成功。');
+        } else if (savedUser) {
+          console.log('🔍 [Load] 无云端存档，使用本地缓存用户名');
+          setPlayer(prev => ({ ...prev, username: savedUser }));
+        }
       });
     }
   }, [token]);
