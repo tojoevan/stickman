@@ -490,7 +490,7 @@ export default function App() {
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [field, currentPose, player.equipment.weapon, enemy.equipment.weapon, player.stats.agility, enemy.stats.agility]);
+  }, [field, currentPose, player.equipment.weapon, enemy.equipment.weapon, player.stats.agility, enemy.stats.agility, activeSkill]);
 
   const buyItem = (item: Item) => setPreviewItem(item);
   const confirmPurchase = (item: Item) => {
