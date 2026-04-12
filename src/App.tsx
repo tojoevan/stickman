@@ -314,6 +314,7 @@ export default function App() {
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
   const [battleHistory, setBattleHistory] = useState<BattleRoundRecord[]>([]);
   const [shopTab, setShopTab] = useState<'weapons' | 'armors' | 'skills'>('weapons');
+  const [activeSkill, setActiveSkill] = useState<{name: string, icon: string, isP: boolean} | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<StickmanRenderer | null>(null);
   const hasLoaded = useRef(false);
@@ -405,6 +406,7 @@ export default function App() {
     const releaseSkill = async (isP: boolean) => {
       const s = isP ? pS : eS; const x = isP ? 240 : 560;
       if (!s) return;
+      setActiveSkill({ name: s.name, icon: s.icon, isP });
       addLog(`${isP ? '>>' : '<<'} [准备] ${isP ? player.username : enemy.username}: ${s.name}`);
       
       if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
@@ -419,7 +421,9 @@ export default function App() {
         else { eHP = Math.min(enemy.maxHealth, eHP + heal); setEnemy(prev => ({...prev, health: eHP})); }
         addLog(`${isP ? '>>' : '<<'} [修复] +${heal} HP`);
       }
-      await new Promise(r => setTimeout(r, 500)); // 缩短至 500ms
+      await new Promise(r => setTimeout(r, 800)); // 稍作延长以供观赏提示
+      setActiveSkill(null);
+      await new Promise(r => setTimeout(r, 200));
     };
 
     await releaseSkill(true);
@@ -615,6 +619,20 @@ export default function App() {
             <div className="w-64 text-right"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-slate-800 h-full transition-all duration-1000" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-slate-500 font-black uppercase">{enemy.username || 'UNIT'}: {Math.floor(enemy.health)} HP</p></div>
           </div>
           <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
+          
+          {/* 技能释放提示 */}
+          {activeSkill && (
+            <div className={`absolute bottom-16 inset-x-0 flex justify-center z-[200] animate-in slide-in-from-bottom-4 duration-300`}>
+              <div className={`px-10 py-4 rounded-[2rem] border-2 backdrop-blur-xl shadow-2xl flex items-center gap-4 ${activeSkill.isP ? 'bg-indigo-600/90 border-indigo-400 text-white' : 'bg-rose-600/90 border-rose-400 text-white'}`}>
+                <span className="text-4xl animate-bounce">{activeSkill.icon}</span>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 italic">{activeSkill.isP ? 'Neural Link Active' : 'Enemy Skill Detected'}</span>
+                  <span className="text-2xl font-black italic tracking-tighter uppercase">{activeSkill.name}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {(gameState === 'victory' || gameState === 'defeat') && (
             <div className={`absolute inset-0 z-[150] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overflow-hidden bg-slate-50`}>
               <div className="absolute inset-0 tactical-stripes opacity-100 z-0"></div>
