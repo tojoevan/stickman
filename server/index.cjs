@@ -21,7 +21,7 @@ const getData = () => JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
 const saveData = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 
 app.use(cors());
-app.options('*', cors()); // 确保所有 OPTIONS 请求都能得到正确响应
+// Express 5.x 对 '*' 路径解析有变，app.use(cors()) 已经包含了对 OPTIONS 的处理，无需手动 app.options('*')
 app.use(express.json());
 
 // 连通性测试
