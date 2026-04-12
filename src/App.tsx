@@ -313,6 +313,7 @@ export default function App() {
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
   const [battleHistory, setBattleHistory] = useState<BattleRoundRecord[]>([]);
+  const [shopTab, setShopTab] = useState<'weapons' | 'armors' | 'skills'>('weapons');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<StickmanRenderer | null>(null);
   const hasLoaded = useRef(false);
@@ -653,12 +654,69 @@ export default function App() {
 
         {gameState === 'shop' && (
           <div className="h-full flex flex-col animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex justify-between items-center mb-4 flex-none"><h3 className="text-xl font-black italic text-amber-500 tracking-widest uppercase flex-1 text-center ml-10">地下黑市 · 战术中心</h3><button onClick={() => setGameState('lobby')} className="text-[13px] font-bold text-slate-400 hover:text-slate-800 underline">返回</button></div>
-            <div className="flex-1 grid grid-cols-6 gap-3 pr-2 content-start overflow-y-auto custom-scrollbar">
-              {[...ITEMS.weapons, ...ITEMS.armors, ...ITEMS.skills].map(item => {
+            <div className="flex justify-between items-center mb-4 flex-none">
+              <h3 className="text-xl font-black italic text-amber-500 tracking-widest uppercase">地下黑市 · 战术中心</h3>
+              
+              <div className="flex bg-slate-100 p-1 rounded-2xl gap-1 border border-slate-200 shadow-inner">
+                {[
+                  { id: 'weapons', label: '主武器库', icon: '⚔️' },
+                  { id: 'armors', label: '防御矩阵', icon: '🛡️' },
+                  { id: 'skills', label: '神经技能', icon: '⚡' }
+                ].map(tab => (
+                  <button 
+                    key={tab.id}
+                    onClick={() => setShopTab(tab.id as any)}
+                    className={`px-6 py-2 rounded-xl flex items-center gap-2 transition-all font-black text-[13px] ${shopTab === tab.id ? 'bg-white text-slate-800 shadow-md scale-105' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    <span>{tab.icon}</span>
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              <button onClick={() => setGameState('lobby')} className="text-[13px] font-bold text-slate-400 hover:text-slate-800 underline flex items-center gap-1 group">
+                <span className="group-hover:-translate-x-1 transition-transform">⇠</span> 返回
+              </button>
+            </div>
+
+            <div className="flex-1 grid grid-cols-6 gap-4 pr-2 content-start overflow-y-auto custom-scrollbar pt-2">
+              {ITEMS[shopTab].map(item => {
                 const rc = { common: { color: 'bg-slate-400' }, novel: { color: 'bg-blue-500' }, perfect: { color: 'bg-emerald-500' }, epic: { color: 'bg-amber-500' } }[item.rarity];
-                const itemLvl = player.unlockedItems[item.name] || 0; const isLocked = player.level < (item.levelReq || 0); const cost = Math.floor((item.cost || 0) * Math.pow(1.6, itemLvl));
-                return ( <button key={item.name} onClick={() => buyItem(item)} className={`p-2 rounded-xl border text-left transition-all relative flex flex-col items-center ${isLocked ? 'bg-slate-50 grayscale opacity-60' : 'bg-white hover:border-indigo-300 active:scale-95'}`}><span className="text-2xl mb-1">{item.icon}</span><div className="text-center w-full"><p className="font-black text-[10px] text-slate-700 truncate">{item.name}</p>{itemLvl > 0 && <p className="text-[9px] font-black text-indigo-500 bg-indigo-50 rounded-full px-1.5 py-0.5 inline-block mb-0.5">Lv.{itemLvl}</p>}<p className="text-amber-600 font-black text-[10px]">₿ {cost}</p></div><div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${rc.color}`}></div></button> );
+                const itemLvl = player.unlockedItems[item.name] || 0; 
+                const isLocked = player.level < (item.levelReq || 0); 
+                const cost = Math.floor((item.cost || 0) * Math.pow(1.6, itemLvl));
+                
+                return ( 
+                  <button 
+                    key={item.name} 
+                    onClick={() => buyItem(item)} 
+                    className={`group p-4 rounded-[2rem] border-2 text-left transition-all relative flex flex-col items-center gap-3 ${isLocked ? 'bg-slate-50 grayscale opacity-60' : 'bg-white hover:border-indigo-300 hover:shadow-xl hover:-translate-y-1 active:scale-95'}`}
+                  >
+                    <span className="text-4xl mb-1 group-hover:scale-110 transition-transform">{item.icon}</span>
+                    <div className="text-center w-full">
+                      <p className="font-black text-[12px] text-slate-700 truncate mb-1">{item.name}</p>
+                      <div className="flex flex-col items-center gap-1.5">
+                        {itemLvl > 0 ? (
+                          <span className="text-[10px] font-black text-white bg-indigo-500 rounded-full px-2 py-0.5 shadow-sm">Lv.{itemLvl}</span>
+                        ) : (
+                          <span className="text-[10px] font-black text-slate-400 bg-slate-100 rounded-full px-2 py-0.5 italic">未获取</span>
+                        )}
+                        <p className="text-amber-600 font-black text-[13px] flex items-center gap-1">
+                          <span className="text-[10px] opacity-60 italic">₿</span> {cost}
+                        </p>
+                      </div>
+                    </div>
+                    {/* 稀有度圆点 */}
+                    <div className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full ring-4 ring-white ${rc.color}`}></div>
+                    
+                    {/* 克制提示标签 */}
+                    {item.tag && !isLocked && (
+                      <div className="absolute -bottom-2 px-3 py-0.5 bg-slate-800 text-white text-[9px] font-black rounded-full uppercase tracking-tighter shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        {item.tag}
+                      </div>
+                    )}
+                  </button> 
+                );
               })}
             </div>
             {previewItem && (
