@@ -398,12 +398,13 @@ export default function App() {
     let pHP = Math.floor(player.health); let eHP = Math.floor(enemy.health);
     let curP_Dmg = 0; let curE_Dmg = 0;
     
-    const pS = ITEMS.skills.find(i => i.name === player.equipment.skill)!;
-    const eS = ITEMS.skills.find(i => i.name === enemy.equipment.skill)!;
+    const pS = ITEMS.skills.find(i => i.name === player.equipment.skill) || ITEMS.skills[0];
+    const eS = ITEMS.skills.find(i => i.name === enemy.equipment.skill) || ITEMS.skills[0];
 
     // --- 阶段一：神经技能释放 ---
     const releaseSkill = async (isP: boolean) => {
       const s = isP ? pS : eS; const x = isP ? 240 : 560;
+      if (!s) return;
       addLog(`${isP ? '>>' : '<<'} [准备] ${isP ? player.username : enemy.username}: ${s.name}`);
       
       if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
