@@ -277,9 +277,33 @@ class StickmanRenderer {
     else if (field.id === 'overload') { ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 3; ctx.globalAlpha = Math.abs(Math.sin(this.time*2))*0.3; ctx.beginPath(); ctx.arc(400, 200, 150 + Math.sin(this.time)*20, 0, Math.PI * 2); ctx.stroke(); }
     ctx.restore();
   }
-  drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️') {
-    const ctx = this.ctx; const t = this.time * (1 + agility / 45); ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
+  drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️', hasGhost: boolean = false) {
+    const ctx = this.ctx; const t = this.time * (1 + agility / 45);
+    
+    // --- 绘制残影 (Ghost Afterimages) ---
+    if (hasGhost) {
+      for (let i = 1; i <= 3; i++) {
+        ctx.save();
+        const ghostX = x + (flip ? i * 15 : -i * 15) * Math.sin(t * 2);
+        ctx.translate(ghostX, y);
+        if (flip) ctx.scale(-1, 1);
+        ctx.globalAlpha = 0.4 / i;
+        ctx.strokeStyle = '#6366f1'; // 靛蓝残影
+        ctx.lineWidth = 4;
+        this.drawStickmanPath(pose, t - i * 0.1, weaponIcon);
+        ctx.restore();
+      }
+    }
+
+    // --- 绘制本体 ---
+    ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
     ctx.strokeStyle = pose === 'dead' ? '#cbd5e1' : '#f8fafc'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    this.drawStickmanPath(pose, t, weaponIcon);
+    ctx.restore();
+  }
+
+  private drawStickmanPath(pose: any, t: number, weaponIcon: string) {
+    const ctx = this.ctx;
     const headSize = 18; const bodyHeight = 55; let armAngle = Math.sin(t) * 0.4; let legAngle = Math.cos(t) * 0.4;
     if (pose === 'attack') { armAngle = -1.8 + Math.sin(t * 8) * 1.2; ctx.translate(Math.sin(t * 8) * 20, 0); ctx.font = '32px serif'; ctx.fillText(weaponIcon, Math.cos(armAngle) * 40 - 15, -bodyHeight + Math.sin(armAngle) * 40); }
     else if (pose === 'hit') { ctx.strokeStyle = '#ef4444'; ctx.translate(Math.sin(this.time * 60) * 10, 0); }
@@ -288,7 +312,7 @@ class StickmanRenderer {
     ctx.moveTo(0, -bodyHeight + 8); ctx.lineTo(Math.cos(armAngle) * 35, -bodyHeight + 8 + Math.sin(armAngle) * 35);
     ctx.moveTo(0, -bodyHeight + 8); ctx.lineTo(Math.cos(-armAngle) * -30, -bodyHeight + 8 + Math.sin(-armAngle) * 30);
     ctx.moveTo(0, 0); ctx.lineTo(Math.sin(legAngle) * 30, 35); ctx.moveTo(0, 0); ctx.lineTo(Math.sin(-legAngle) * 30, 35);
-    ctx.stroke(); ctx.restore();
+    ctx.stroke();
   }
   renderEffects() {
     const ctx = this.ctx;
@@ -457,8 +481,8 @@ export default function App() {
         const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon);
         const eW = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
         
-        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility, pW?.icon); 
-        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️');
+        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility, pW?.icon, activeSkill?.name === '幻影连击' && activeSkill.isP); 
+        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️', activeSkill?.name === '幻影连击' && !activeSkill.isP); 
         
         r.renderEffects(); // 始终在最上层渲染
       }
