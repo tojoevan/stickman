@@ -167,12 +167,26 @@ export default function App() {
   useEffect(() => { if (token && player !== INITIAL_CHAR) saveGame(player); }, [player.level, player.gold, player.stats, player.unlockedItems]);
 
   useEffect(() => {
-    if (canvasRef.current && !rendererRef.current) { rendererRef.current = new StickmanRenderer(canvasRef.current.getContext('2d')!); }
     let frame: number;
+    
+    const initRenderer = () => {
+      const canvas = canvasRef.current;
+      if (canvas && !rendererRef.current) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) rendererRef.current = new StickmanRenderer(ctx);
+      }
+    };
+
     const loop = () => {
+      initRenderer();
       const ctx = canvasRef.current?.getContext('2d');
       if (ctx && rendererRef.current) {
-        ctx.clearRect(0, 0, 800, 400); ctx.strokeStyle = '#f8fafc'; for(let i=0; i<800; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 400); ctx.stroke(); }
+        ctx.clearRect(0, 0, 800, 400); 
+        ctx.strokeStyle = '#f8fafc'; 
+        ctx.lineWidth = 1;
+        for(let i=0; i<800; i+=40) { 
+          ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 400); ctx.stroke(); 
+        }
         const pWeapon = ITEMS.weapons.find(w => w.name === player.equipment.weapon);
         const eWeapon = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
         rendererRef.current.draw(240, 280, currentPose.player, false, player.stats.agility, pWeapon?.icon);
@@ -180,8 +194,10 @@ export default function App() {
       }
       frame = requestAnimationFrame(loop);
     };
-    loop(); return () => cancelAnimationFrame(frame);
-  }, [currentPose, player.stats.agility, enemy.stats.agility, player.equipment.weapon, enemy.equipment.weapon]);
+    
+    frame = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(frame);
+  }, [token, currentPose, player.stats.agility, enemy.stats.agility, player.equipment.weapon, enemy.equipment.weapon]);
 
   const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 20));
 
