@@ -144,7 +144,18 @@ class StickmanRenderer {
     if (pose === 'attack') { armAngle = -1.8 + Math.sin(t * 8) * 1.2; ctx.translate(Math.sin(t * 8) * 20, 0); ctx.font = '32px serif'; ctx.fillText(weaponIcon, Math.cos(armAngle) * 40 - 15, -bodyHeight + Math.sin(armAngle) * 40); }
     else if (pose === 'hit') { ctx.strokeStyle = '#ef4444'; ctx.translate(Math.sin(this.time * 60) * 10, 0); }
     else if (pose === 'dead') { ctx.rotate(Math.PI / 2); ctx.translate(35, -15); armAngle = 0.5; legAngle = 0.2; }
-    ctx.beginPath(); ctx.arc(0, -bodyHeight - headSize, headSize, 0, Math.PI * 2); ctx.moveTo(0, -bodyHeight); ctx.lineTo(0, 0); ctx.stroke(); ctx.restore();
+    ctx.beginPath(); 
+    // 绘制头部
+    ctx.arc(0, -bodyHeight - headSize, headSize, 0, Math.PI * 2); 
+    // 绘制躯干
+    ctx.moveTo(0, -bodyHeight); ctx.lineTo(0, 0); 
+    // 绘制手臂
+    ctx.moveTo(0, -bodyHeight + 8); ctx.lineTo(Math.cos(armAngle) * 35, -bodyHeight + 8 + Math.sin(armAngle) * 35);
+    ctx.moveTo(0, -bodyHeight + 8); ctx.lineTo(Math.cos(-armAngle) * -30, -bodyHeight + 8 + Math.sin(-armAngle) * 30);
+    // 绘制腿部
+    ctx.moveTo(0, 0); ctx.lineTo(Math.sin(legAngle) * 30, 35); 
+    ctx.moveTo(0, 0); ctx.lineTo(Math.sin(-legAngle) * 30, 35);
+    ctx.stroke(); ctx.restore();
     this.effects.forEach(e => { ctx.globalAlpha = e.life; ctx.fillStyle = e.color; if (e.type === 'arrow') { ctx.fillRect(e.x, e.y, 12, 2); } else { ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill(); } });
     ctx.globalAlpha = 1; this.updateEffects(); this.time += 0.04;
   }
@@ -167,12 +178,14 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<StickmanRenderer | null>(null);
 
+  const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 20));
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const res = await safeFetch(`${API_URL}/${authView}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
       const data = await res.json();
-      if (data.token) { localStorage.setItem('token', data.token); setToken(data.token); } else setAuthView('login');
+      if (data.token) { localStorage.setItem('token', data.token); setToken(data.token); addLog('神经链路已建立。'); } else { setAuthView('login'); alert('档案已建立，请验证。'); }
     } catch (err: any) { alert(err.message); }
   };
 
@@ -180,7 +193,7 @@ export default function App() {
     if (token) {
       fetch(`${API_URL}/load`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.gameData) {
         const rawData = data.gameData; if (Array.isArray(rawData.unlockedItems)) { const m: any = {}; rawData.unlockedItems.forEach((n: any) => m[n] = 1); rawData.unlockedItems = m; }
-        setPlayer({ ...INITIAL_CHAR, ...rawData });
+        setPlayer({ ...INITIAL_CHAR, ...rawData }); addLog('神经档案同步成功。');
       }});
     }
   }, [token]);
@@ -198,13 +211,13 @@ export default function App() {
   const buyItem = (item: Item) => setPreviewItem(item);
   const confirmPurchase = (item: Item) => {
     const curLvl = player.unlockedItems[item.name] || 0; const cost = Math.floor((item.cost || 0) * Math.pow(1.6, curLvl));
-    if (player.gold >= cost) { setPlayer(prev => ({ ...prev, gold: prev.gold - cost, unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 } })); setPreviewItem(null); }
+    if (player.gold >= cost) { setPlayer(prev => ({ ...prev, gold: prev.gold - cost, unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 } })); addLog(`强化成功: ${item.name} [Lv.${curLvl+1}]`); setPreviewItem(null); } else alert("储备不足。");
   };
 
   const handleLevelUp = (stat: Stat) => { if (player.statPoints > 0) setPlayer(prev => { const nMax = stat === 'constitution' ? Math.floor(prev.maxHealth + 15) : prev.maxHealth; return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax }; }); };
 
   const startRound = async () => {
-    setGameState('battle'); 
+    setGameState('battle'); addLog(`>>> 第 ${round} 回合开始`);
     let pHP = Math.floor(player.health); let eHP = Math.floor(enemy.health);
     let currentRoundP_Dmg = 0; let currentRoundE_Dmg = 0;
 
@@ -223,10 +236,10 @@ export default function App() {
       else if (field.id === 'overload') { sMult *= 2.0; }
       let dmg = (baseDmg + atk.stats.strength * (isP ? 0.8 : 1.2)) * sMult; if (s.mult) dmg *= (1 + 0.1 * (sL - 1));
       const rawDmg = Math.floor(dmg); rendererRef.current?.addEffect('spark', isP ? 560 : 240, 250, isP ? '#f59e0b' : '#ef4444', 12);
-      if (isP) { let fD = Math.floor(field.id === 'overload' ? rawDmg * 1.3 : rawDmg); eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); currentRoundP_Dmg = fD; } else { 
+      if (isP) { let fD = Math.floor(field.id === 'overload' ? rawDmg * 1.3 : rawDmg); eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); currentRoundP_Dmg = fD; addLog(`>> 造成 ${fD} 伤害`); } else { 
         const a = ITEMS.armors.find(i => i.name === player.equipment.armor)!; const aL = player.unlockedItems[a.name] || 1;
         const minDmg = Math.floor(rawDmg * 0.15); let finalDmg = Math.max(minDmg, rawDmg - calcVal(a.defense!, aL));
-        if (field.id === 'overload') finalDmg *= 1.3; finalDmg = Math.floor(Math.max(1, finalDmg)); pHP = Math.max(0, pHP - finalDmg); setPlayer(prev => ({ ...prev, health: pHP })); currentRoundE_Dmg = finalDmg;
+        if (field.id === 'overload') finalDmg *= 1.3; finalDmg = Math.floor(Math.max(1, finalDmg)); pHP = Math.max(0, pHP - finalDmg); setPlayer(prev => ({ ...prev, health: pHP })); currentRoundE_Dmg = finalDmg; addLog(`<< 受创 ${finalDmg} 伤害`);
       }
       setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' })); await new Promise(r => setTimeout(r, 400)); setCurrentPose({player: 'idle', enemy: 'idle'});
     };
@@ -234,14 +247,14 @@ export default function App() {
     setBattleHistory(prev => [...prev, { round, pDmg: currentRoundP_Dmg, eDmg: currentRoundE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
     const finalize = (isW: boolean, isK: boolean) => {
       const gR = isW ? (60 + player.level * 25) : (20 + player.level * 10); const xR = isW ? (70 + player.level * 10) : 0;
-      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
+      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; addLog('神经等级提升！'); } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
       else { setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 })); setGameState('defeat'); }
     };
     if (pHP <= 0) finalize(false, true); else if (eHP <= 0) finalize(true, true); else if (round >= 3) finalize(pHP > eHP, false); else { setRound(prev => prev + 1); setGameState('tactics'); }
   };
 
   const resetGame = () => {
-    const oF = BATTLEFIELDS.filter(f => f.id !== field.id); setField(oF[Math.floor(Math.random() * oF.length)]);
+    const oF = BATTLEFIELDS.filter(f => f.id !== field.id); const nF = oF[Math.floor(Math.random() * oF.length)]; setField(nF);
     const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon)!; const pA = ITEMS.armors.find(a => a.name === player.equipment.armor)!;
     const wL = player.unlockedItems[pW.name] || 1; const aL = player.unlockedItems[pA.name] || 1;
     const pP = (player.stats.strength + player.stats.agility + player.stats.constitution) + calcVal(pW.damage!, wL) + calcVal(pA.defense!, aL);
@@ -253,8 +266,26 @@ export default function App() {
     const eH = Math.floor(player.maxHealth * (player.level === 1 ? 0.75 : 0.95) * (1 + (pP / 3000)) * Math.max(0.5, 1 - (player.defeatCount * 0.12)));
     const eL = Math.max(1, Math.floor(player.level / 2.2));
     setEnemy({ level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }, defeatCount: 0 });
-    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]);
+    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]); addLog(`部署至: ${nF.name}`);
   };
+
+  if (!token) {
+    return (
+      <div className="h-screen w-full bg-slate-100 flex items-center justify-center p-4 font-sans text-slate-800">
+        <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-200 w-full max-w-md animate-in zoom-in-95 duration-300">
+          <div className="text-center mb-6"><h1 className="text-4xl font-black italic text-indigo-600 tracking-tighter">影迹战术</h1><p className="text-slate-400 font-bold text-[11px] uppercase tracking-[0.2em] mt-2">IDENTITY AUTHENTICATION</p></div>
+          <form onSubmit={handleAuth} className="space-y-3">
+            <div className="space-y-1"><label className="text-[11px] font-black text-slate-400 ml-2 uppercase">用户名</label><input type="text" placeholder="档案代号" className="w-full px-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-400 font-bold text-[14px]" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} /></div>
+            <div className="space-y-1"><label className="text-[11px] font-black text-slate-400 ml-2 uppercase">密码</label><input type={showPassword ? "text" : "password"} placeholder="加密密钥" className="w-full px-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-400 font-bold text-[14px]" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} /></div>
+            {authView === 'register' && (<div className="space-y-1 animate-in slide-in-from-top-2 duration-200"><label className="text-[11px] font-black text-slate-400 ml-2 uppercase">确认密码</label><input type={showPassword ? "text" : "password"} placeholder="确认密钥" className="w-full px-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-400 font-bold text-[14px]" value={authForm.confirmPassword} onChange={e => setAuthForm({...authForm, confirmPassword: e.target.value})} /></div>)}
+            <div className="flex items-center gap-2 ml-2 py-1"><input type="checkbox" id="show-pass" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /><label htmlFor="show-pass" className="text-[12px] font-bold text-slate-500 cursor-pointer">显示原文</label></div>
+            <button type="submit" className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 hover:bg-indigo-500 transition-all mt-2 active:scale-95">{authView === 'login' ? '进入系统' : '建立档案'}</button>
+          </form>
+          <p className="mt-6 text-center text-[13px] text-slate-400 font-bold">{authView === 'login' ? '尚未分配编号?' : '已有现存档案?'} <button className="text-indigo-600 ml-2 underline hover:text-indigo-800 font-black" onClick={() => { setAuthView(authView === 'login' ? 'register' : 'login'); setAuthForm({username: '', password: '', confirmPassword: ''}); }}>{authView === 'login' ? '注册新档案' : '返回验证'}</button></p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-full bg-slate-50 text-slate-800 p-4 font-sans overflow-hidden flex flex-col gap-4">
@@ -274,23 +305,26 @@ export default function App() {
           </div>
           <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
           {(gameState === 'victory' || gameState === 'defeat') && (
-            <div className={`absolute inset-0 ${gameState === 'victory' ? 'bg-emerald-50/90' : 'bg-rose-50/95'} backdrop-blur-md flex flex-col items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto`}>
-              <h1 className={`text-5xl font-black italic uppercase mb-4 ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>{gameState === 'victory' ? 'Mission Success' : 'System Failure'}</h1>
-              <div className="w-full max-w-2xl bg-white/80 rounded-[2rem] border border-white p-6 shadow-xl mb-6">
-                <div className="grid grid-cols-2 gap-8 mb-6 border-b border-slate-100 pb-4">
-                  <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 text-center">玩家配置</p><div className="flex flex-col gap-1 text-[12px] font-bold text-slate-700"><div className="flex justify-between"><span>{player.equipment.weapon}</span><span className="text-indigo-500">Lv.{player.unlockedItems[player.equipment.weapon]}</span></div><div className="flex justify-between"><span>{player.equipment.armor}</span><span className="text-indigo-500">Lv.{player.unlockedItems[player.equipment.armor]}</span></div></div></div>
-                  <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 text-center">敌方配置</p><div className="flex flex-col gap-1 text-[12px] font-bold text-slate-700 text-right"><div className="flex justify-between"><span>Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span><span className="ml-2">{enemy.equipment.weapon}</span></div><div className="flex justify-between"><span>Lv.{enemy.unlockedItems[enemy.equipment.armor] || 1}</span><span className="ml-2">{enemy.equipment.armor}</span></div></div></div>
+            <div className={`absolute inset-0 ${gameState === 'victory' ? 'bg-emerald-950/20' : 'bg-rose-950/20'} backdrop-blur-md flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 z-[150]`}>
+              <h1 className={`text-6xl font-black italic uppercase tracking-tighter mb-4 drop-shadow-2xl ${gameState === 'victory' ? 'text-emerald-400' : 'text-rose-400'}`}>{gameState === 'victory' ? 'SUCCESS' : 'FAILURE'}</h1>
+              <div className="w-full max-w-lg bg-black/40 border border-white/10 rounded-[2rem] p-5 shadow-2xl backdrop-blur-2xl mb-6">
+                <div className="flex justify-between items-start gap-4 mb-4 border-b border-white/5 pb-4">
+                  <div className="flex-1"><p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1.5">You</p><div className="space-y-0.5 text-[12px] font-bold text-white/80"><p>{player.equipment.weapon} <span className="text-indigo-400">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p><p className="text-white/40">{player.equipment.armor} <span className="text-white/20 text-[10px]">Lv.{player.unlockedItems[player.equipment.armor]}</span></p></div></div>
+                  <div className="text-center px-4 py-1 bg-white/5 rounded-full border border-white/5"><span className="text-[10px] font-black text-white/40 uppercase">V S</span></div>
+                  <div className="flex-1 text-right"><p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1.5">Opponent</p><div className="space-y-0.5 text-[12px] font-bold text-white/80"><p><span className="text-rose-400">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-white/40"><span className="text-white/20 text-[10px]">Lv.{enemy.unlockedItems[enemy.equipment.armor] || 1}</span> {enemy.equipment.armor}</p></div></div>
                 </div>
-                <div className="space-y-3"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">三轮博弈复盘</p>{battleHistory.map((h, i) => (<div key={i} className="bg-slate-50/50 rounded-xl p-3 grid grid-cols-3 items-center border border-slate-100/50"><div className="text-center"><p className="text-[10px] text-slate-400 font-black">第 {h.round} 轮</p></div><div className="text-rose-500 font-black text-[14px] text-center">-{h.pDmg} ➜</div><div className="text-slate-800 font-black text-[14px] text-center">← -{h.eDmg}</div></div>))}</div>
+                <div className="space-y-1.5"><p className="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] text-center mb-2">Neural Combat Review</p>
+                  {battleHistory.map((h, i) => (<div key={i} className="group flex items-center justify-between px-4 py-2 hover:bg-white/5 rounded-xl transition-colors"><span className="text-[10px] font-black text-white/20">R{h.round}</span><div className="flex items-center gap-3"><span className="text-rose-400 font-black text-[14px]">-{h.pDmg}</span><div className="w-12 h-[1px] bg-gradient-to-r from-rose-500/50 to-indigo-500/50"></div><span className="text-indigo-400 font-black text-[14px]">-{h.eDmg}</span></div><span className="text-[10px] font-mono text-white/40">HP {Math.floor(h.pRemainingHp)}:{Math.floor(h.eRemainingHp)}</span></div>))}
+                </div>
               </div>
-              <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`px-12 py-4 text-white font-black rounded-full shadow-xl active:scale-95 text-[15px] ${gameState === 'victory' ? 'bg-emerald-600' : 'bg-rose-600'}`}>{gameState === 'victory' ? '下一场任务' : '重新引导系统'}</button>
+              <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-16 py-4 text-white font-black rounded-full shadow-2xl transition-all active:scale-95 text-[14px] flex items-center gap-3 ${gameState === 'victory' ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-rose-500 hover:bg-rose-400'}`}>{gameState === 'victory' ? 'PROCEED' : 'REBOOT SYSTEM'}<span className="opacity-50 group-hover:translate-x-1 transition-transform">➜</span></button>
             </div>
           )}
         </div>
         <div className="w-72 bg-white border border-slate-200 rounded-3xl p-5 flex flex-col shadow-sm">
            <h3 className="text-[13px] font-black text-slate-300 uppercase mb-4 tracking-widest border-b border-slate-50 pb-2">链路日志</h3>
            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
-              {battleLog.map((log, i) => ( <p key={i} className={`text-[13px] leading-relaxed border-l-2 pl-3 ${log.includes('造成') ? 'text-indigo-600 font-bold border-indigo-200' : log.includes('成功') ? 'text-amber-500 border-amber-200' : 'text-slate-400 border-slate-100'}`}>{log}</p> ))}
+              {battleLog.map((log, i) => ( <p key={i} className={`text-[13px] leading-relaxed border-l-2 pl-3 ${log.includes('造成') || log.includes('伤害') ? 'text-indigo-600 font-bold border-indigo-200' : log.includes('成功') || log.includes('强化') ? 'text-amber-500 border-amber-200' : 'text-slate-400 border-slate-100'}`}>{log}</p> ))}
            </div>
         </div>
       </div>
