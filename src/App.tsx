@@ -264,6 +264,7 @@ export default function App() {
   const [battleHistory, setBattleHistory] = useState<BattleRoundRecord[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<StickmanRenderer | null>(null);
+  const hasLoaded = useRef(false);
 
   const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 20));
 
@@ -282,6 +283,7 @@ export default function App() {
         setToken(data.token); 
         setPlayer(prev => ({ ...prev, username: data.username || prev.username }));
         addLog('神经链路已建立。'); 
+        hasLoaded.current = true; // 登录成功视为已加载，允许后续保存
       } else setAuthView('login');
     } catch (err: any) { alert(err.message); }
   };
@@ -297,26 +299,31 @@ export default function App() {
           if (Array.isArray(rawData.unlockedItems)) { 
             const m: any = {}; rawData.unlockedItems.forEach((n: any) => m[n] = 1); rawData.unlockedItems = m; 
           }
-          // 确保 username 放在最后，且绝不为 undefined
-          setPlayer(prev => {
-            const newUser = { 
-              ...prev, 
-              ...rawData, 
-              username: savedUser || rawData.username || prev.username || INITIAL_CHAR.username 
-            };
-            console.log('🔍 [Load] 最终 Player 状态:', newUser);
-            return newUser;
-          }); 
+          setPlayer(prev => ({ 
+            ...prev, 
+            ...rawData, 
+            username: savedUser || rawData.username || prev.username || INITIAL_CHAR.username 
+          })); 
           addLog('档案同步成功。');
         } else if (savedUser) {
-          console.log('🔍 [Load] 无云端存档，使用本地缓存用户名');
           setPlayer(prev => ({ ...prev, username: savedUser }));
         }
+        // 关键：标记为已加载，只有加载完成后才允许保存
+        setTimeout(() => { hasLoaded.current = true; }, 500);
       });
     }
   }, [token]);
 
-  useEffect(() => { if (token && player !== INITIAL_CHAR) fetch(`${API_URL}/save`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ gameData: player }) }); }, [player.level, player.gold, player.stats, player.unlockedItems]);
+  useEffect(() => { 
+    if (token && hasLoaded.current) {
+      console.log('💾 [Save] 正在同步数据至云端...', player.level);
+      fetch(`${API_URL}/save`, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+        body: JSON.stringify({ gameData: player }) 
+      }); 
+    }
+  }, [player.level, player.gold, player.stats, player.unlockedItems]);
 
   useEffect(() => {
     let frame: number; const loop = () => { if (canvasRef.current && !rendererRef.current) rendererRef.current = new StickmanRenderer(canvasRef.current.getContext('2d')!);
