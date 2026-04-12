@@ -107,7 +107,7 @@ const getDefenseCounterMult = (aTag: string, wTag: string) => {
 };
 
 // --- 神经滚轮组件 ---
-const NeuralPicker = ({ label, items, selected, onSelect }: { label: string, items: any[], selected: string, onSelect: (name: string) => void }) => {
+const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { label: string, items: any[], selected: string, onSelect: (name: string) => void, unlockedItems: Record<string, number> }) => {
   const index = items.findIndex(i => i.name === selected);
   const touchStartY = useRef(0);
 
@@ -128,29 +128,39 @@ const NeuralPicker = ({ label, items, selected, onSelect }: { label: string, ite
       <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center">{label}</p>
       <div 
         className="h-40 bg-slate-900/5 rounded-3xl relative overflow-hidden flex flex-col items-center justify-center cursor-ns-resize border border-slate-100 select-none group"
+        style={{ touchAction: 'none' }}
         onWheel={(e) => move(e.deltaY > 0 ? 1 : -1)}
         onTouchStart={(e) => touchStartY.current = e.touches[0].clientY}
+        onTouchMove={(e) => e.preventDefault()}
         onTouchEnd={(e) => {
           const delta = touchStartY.current - e.changedTouches[0].clientY;
-          if (Math.abs(delta) > 20) move(delta > 0 ? 1 : -1);
+          if (Math.abs(delta) > 30) move(delta > 0 ? 1 : -1);
         }}
       >
         <div className="absolute inset-x-2 h-12 top-1/2 -translate-y-1/2 bg-indigo-500/10 rounded-xl border border-indigo-500/20 pointer-events-none z-0"></div>
-        <div className="relative z-10 w-full">
+        <div className="relative z-10 w-full px-2">
           {displayIndices.map((idx, pos) => {
             const item = items[idx];
             if (!item) return null;
             const isCenter = pos === 1;
+            const itemLevel = unlockedItems[item.name] || 1;
             return (
               <div 
                 key={`${item.name}-${pos}`} 
                 onClick={() => !isCenter && move(pos - 1)}
-                className={`flex flex-col items-center justify-center transition-all duration-500 ease-out py-1 ${isCenter ? 'opacity-100 scale-110' : 'opacity-20 scale-90 blur-[0.5px]'}`}
+                className={`flex flex-row items-center justify-center gap-3 transition-all duration-500 ease-out py-1 ${isCenter ? 'opacity-100 scale-110' : 'opacity-20 scale-90 blur-[0.5px]'}`}
               >
-                <span className="text-2xl mb-0.5">{item.icon}</span>
-                <span className={`text-[11px] font-black truncate max-w-[80px] ${isCenter ? 'text-indigo-600' : 'text-slate-400'}`}>
-                  {item.name}
-                </span>
+                <span className="text-2xl flex-none">{item.icon}</span>
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <span className={`text-[11px] font-black truncate w-full ${isCenter ? 'text-slate-800' : 'text-slate-400'}`}>
+                    {item.name}
+                  </span>
+                  {isCenter && (
+                    <span className="text-[9px] font-bold text-indigo-500 leading-none">
+                      LV.{itemLevel}
+                    </span>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -193,6 +203,13 @@ class StickmanRenderer {
   }
 }
 
+interface Character {
+  level: number; xp: number; gold: number;
+  stats: Record<Stat, number>; statPoints: number; health: number; maxHealth: number;
+  equipment: { weapon: string; armor: string; skill: string; };
+  unlockedItems: Record<string, number>; defeatCount: number;
+}
+
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
@@ -202,7 +219,7 @@ export default function App() {
   const [enemy, setEnemy] = useState<Character>({ ...INITIAL_CHAR, stats: { strength: 8, agility: 7, constitution: 8 }, health: 90, maxHealth: 90 });
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
-  const [battleLog, setBattleLog] = useState<string[]>(['等待连接...']);
+  const [battleLog, setBattleLog] = useState<string[]>(['等待中...']);
   const [currentPose, setCurrentPose] = useState<{player: any, enemy: any}>({player: 'idle', enemy: 'idle'});
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
@@ -322,6 +339,7 @@ export default function App() {
             <div className="w-64 text-right"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-slate-800 h-full transition-all duration-1000" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-slate-500 font-black uppercase">UNIT: {Math.floor(enemy.health)} HP</p></div>
           </div>
           <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
+          
           {(gameState === 'victory' || gameState === 'defeat') && (
             <div className={`absolute inset-0 z-[150] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overflow-hidden bg-slate-50`}>
               <div className="absolute inset-0 tactical-stripes opacity-100 z-0"></div>
@@ -424,12 +442,12 @@ export default function App() {
                   <div className="flex items-center gap-4 text-white font-black text-[12px] relative z-10">
                     <div className="flex flex-col">
                       <span title="武器">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon} <b className="text-indigo-300 ml-1">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b></span>
-                      {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && <span className="text-[9px] text-emerald-400 font-black animate-bounce mt-0.5">神经优势：攻击压制</span>}
+                      {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && <span className="text-[9px] text-emerald-400 font-black animate-bounce mt-0.5">优势：压制</span>}
                     </div>
                     <span className="w-[1px] h-3 bg-white/20"></span>
                     <div className="flex flex-col">
                       <span title="防具">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
-                      {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && <span className="text-[9px] text-sky-400 font-black animate-bounce mt-0.5">神经优势：战术防御</span>}
+                      {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && <span className="text-[9px] text-sky-400 font-black animate-bounce mt-0.5">优势：防御</span>}
                     </div>
                     <span className="w-[1px] h-3 bg-white/20"></span>
                     <span title="技能">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon} {enemy.equipment.skill}</span>
@@ -437,9 +455,9 @@ export default function App() {
                 </div>
              </div>
              <div className="flex-1 flex gap-4 min-h-0 h-full py-2">
-                <NeuralPicker label="主武器库" items={ITEMS.weapons.filter(w => player.unlockedItems[w.name])} selected={player.equipment.weapon} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, weapon: v}}))} />
-                <NeuralPicker label="防御矩阵" items={ITEMS.armors.filter(a => player.unlockedItems[a.name])} selected={player.equipment.armor} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, armor: v}}))} />
-                <NeuralPicker label="神经技能" items={ITEMS.skills.filter(s => player.unlockedItems[s.name])} selected={player.equipment.skill} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, skill: v}}))} />
+                <NeuralPicker label="主武器库" items={ITEMS.weapons.filter(w => player.unlockedItems[w.name])} selected={player.equipment.weapon} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, weapon: v}}))} unlockedItems={player.unlockedItems} />
+                <NeuralPicker label="防御矩阵" items={ITEMS.armors.filter(a => player.unlockedItems[a.name])} selected={player.equipment.armor} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, armor: v}}))} unlockedItems={player.unlockedItems} />
+                <NeuralPicker label="神经技能" items={ITEMS.skills.filter(s => player.unlockedItems[s.name])} selected={player.equipment.skill} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, skill: v}}))} unlockedItems={player.unlockedItems} />
              </div>
           </div>
         )}
