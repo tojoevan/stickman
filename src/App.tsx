@@ -109,30 +109,40 @@ const getDefenseCounterMult = (aTag: string, wTag: string) => {
 // --- 神经滚轮组件 (Native Scroll 版) ---
 const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { label: string, items: any[], selected: string, onSelect: (name: string) => void, unlockedItems: Record<string, number> }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const itemHeight = 48; // 固定行高
-
-  // 使用三倍数据模拟循环滚动
+  const itemHeight = 48; 
   const tripleItems = [...items, ...items, ...items];
   const centerOffset = items.length * itemHeight;
+
+  // 记录最后一次选中的索引，用于防抖
+  const lastSelectedIndex = useRef(-1);
 
   useEffect(() => {
     if (scrollRef.current) {
       const idx = items.findIndex(i => i.name === selected);
       scrollRef.current.scrollTop = centerOffset + (idx * itemHeight);
     }
-  }, []);
+  }, [items.length]); // 只有当项目数量变化时重置
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const st = scrollRef.current.scrollTop;
     
-    // 循环重置逻辑
-    if (st < itemHeight) scrollRef.current.scrollTop = st + centerOffset;
-    else if (st > centerOffset * 2) scrollRef.current.scrollTop = st - centerOffset;
+    // 循环边界重置
+    if (st < itemHeight) {
+      scrollRef.current.scrollTop = st + centerOffset;
+      return;
+    } else if (st > centerOffset * 2 + itemHeight) {
+      scrollRef.current.scrollTop = st - centerOffset;
+      return;
+    }
 
-    const currentIdx = Math.round((scrollRef.current.scrollTop - centerOffset) / itemHeight) % items.length;
+    // 精确计算当前中心项
+    const relativeScroll = st - centerOffset;
+    const currentIdx = Math.round(relativeScroll / itemHeight);
     const safeIdx = (currentIdx + items.length) % items.length;
-    if (items[safeIdx].name !== selected) {
+
+    if (items[safeIdx] && lastSelectedIndex.current !== safeIdx) {
+      lastSelectedIndex.current = safeIdx;
       onSelect(items[safeIdx].name);
     }
   };
@@ -143,30 +153,28 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
          <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] [writing-mode:vertical-lr] rotate-180 py-2 border-r border-slate-100 pr-1.5">{label}</p>
       </div>
       <div className="flex-1 h-36 bg-slate-900/[0.03] rounded-3xl relative border border-slate-100/50 overflow-hidden">
-        {/* 中心选中高亮条 */}
         <div className="absolute inset-x-2 h-[48px] top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-100 rounded-2xl pointer-events-none z-0"></div>
         
         <div 
           ref={scrollRef}
           onScroll={handleScroll}
           className="relative z-10 h-full overflow-y-auto custom-scrollbar snap-y snap-mandatory"
-          style={{ scrollBehavior: 'smooth' }}
         >
-          {/* 上下占位，保证选中的项能居中 */}
           <div style={{ height: (144 - itemHeight) / 2 }} />
           {tripleItems.map((item, idx) => {
-            const isSelected = item.name === selected && (Math.abs(idx - items.length - items.findIndex(i=>i.name===selected)) < 1);
+            // 改进：基于名称匹配判定高亮，确保快速滑动时视觉连贯
+            const isMatch = item.name === selected;
             return (
               <div 
                 key={`${item.name}-${idx}`}
-                className={`h-[48px] flex flex-row items-center justify-center gap-3 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-105' : 'opacity-20 scale-95'}`}
+                className={`h-[48px] flex flex-row items-center justify-center gap-3 snap-center transition-all duration-200 ${isMatch ? 'opacity-100 scale-105' : 'opacity-20 scale-95'}`}
               >
                 <span className="text-xl flex-none">{item.icon}</span>
                 <div className="flex flex-row items-center gap-2 min-w-0">
-                  <span className={`text-[12px] font-black truncate ${isSelected ? 'text-slate-800' : 'text-slate-400'}`}>
+                  <span className={`text-[12px] font-black truncate ${isMatch ? 'text-slate-800' : 'text-slate-400'}`}>
                     {item.name}
                   </span>
-                  <span className={`text-[9px] font-bold font-mono ${isSelected ? 'text-indigo-500' : 'text-slate-300'}`}>
+                  <span className={`text-[9px] font-bold font-mono ${isMatch ? 'text-indigo-500' : 'text-slate-300'}`}>
                     Lv.{unlockedItems[item.name] || 1}
                   </span>
                 </div>
