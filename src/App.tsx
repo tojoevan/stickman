@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // --- 配置 ---
-const API_URL = 'http://localhost:3001/api';
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3001/api`;
 
 // --- 类型与数据定义 ---
 type Stat = 'strength' | 'agility' | 'constitution';

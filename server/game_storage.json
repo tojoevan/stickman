@@ -6,5 +6,35 @@
       "password": "$2b$10$Fw8YxuR3rQGJpUt7IIjjXO92Uyp5ep92iMJcV8yUHYzjueDwf.3Eu"
     }
   ],
-  "progress": {}
+  "progress": {
+    "1775967311727": {
+      "level": 1,
+      "xp": 0,
+      "gold": 100,
+      "stats": {
+        "strength": 10,
+        "agility": 10,
+        "constitution": 10
+      },
+      "statPoints": 8,
+      "health": 100,
+      "maxHealth": 100,
+      "equipment": {
+        "weapon": "长剑",
+        "armor": "布衣",
+        "skill": "斩击"
+      },
+      "unlockedItems": [
+        "长剑",
+        "长弓",
+        "重锤",
+        "布衣",
+        "铁盾",
+        "披风",
+        "斩击",
+        "治疗",
+        "连击"
+      ]
+    }
+  }
 }
