@@ -240,6 +240,15 @@ class StickmanRenderer {
           vy: -Math.sin(angle) * 8,
           life: 1.0, color, size: Math.random() * 4 + 2
         });
+      } else if (type === 'speed') {
+        this.effects.push({
+          id: this.nextEffectId++, type,
+          x: x + (Math.random() - 0.5) * 40,
+          y: y - 40 + (Math.random() - 0.5) * 60,
+          vx: (Math.random() > 0.5 ? 15 : -15),
+          vy: 0,
+          life: 1.0, color, size: 2
+        });
       } else {
         this.effects.push({ 
           id: this.nextEffectId++, type, x, y, 
@@ -289,17 +298,25 @@ class StickmanRenderer {
       if (e.type === 'charge') {
         ctx.strokeStyle = e.color; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(e.x, e.y);
-        ctx.lineTo(e.x + e.vx * 2, e.y + e.vy * 2); // 绘制汇聚光线
+        ctx.lineTo(e.x + e.vx * 2, e.y + e.vy * 2);
         ctx.stroke();
         ctx.fillStyle = '#fff'; ctx.beginPath();
         ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill();
       }
+      else if (e.type === 'speed') {
+        ctx.strokeStyle = e.color || '#6366f1'; ctx.lineWidth = 4;
+        ctx.shadowBlur = 15; ctx.shadowColor = e.color;
+        ctx.beginPath(); 
+        ctx.moveTo(e.x - 90, e.y);
+        ctx.lineTo(e.x + 90, e.y); // 180px 长的极速光轨
+        ctx.stroke();
+      }
       else if (e.type === 'scan') { 
         ctx.fillStyle = e.color || '#818cf8';
         const scanY = e.y + (1 - e.life) * 400 - 200;
-        ctx.fillRect(0, scanY, 800, 6); 
+        ctx.fillRect(0, scanY, 800, 6);
         ctx.globalAlpha = e.life * 0.4;
-        ctx.fillRect(0, scanY - 15, 800, 36); 
+        ctx.fillRect(0, scanY - 15, 800, 36);
       }
       else if (e.type === 'shield') { 
         ctx.strokeStyle = e.color || '#ef4444'; ctx.lineWidth = 5; 
