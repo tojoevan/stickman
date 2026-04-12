@@ -112,6 +112,7 @@ const getDefenseCounterMult = (aTag: string, wTag: string) => {
 // --- 神经滚轮组件 (Native Scroll 版) ---
 const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { label: string, items: any[], selected: string, onSelect: (name: string) => void, unlockedItems: Record<string, number> }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [spacerHeight, setSpacerHeight] = useState(0);
   const itemHeight = 64; 
   const tripleItems = [...items, ...items, ...items];
   const centerOffset = items.length * itemHeight;
@@ -119,18 +120,24 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
   // 记录最后一次选中的索引，用于防抖
   const lastSelectedIndex = useRef(-1);
 
+  // 初始化：计算居中所需的占位高度并设置初始滚动位置
   useEffect(() => {
     if (scrollRef.current) {
+      const containerHeight = scrollRef.current.clientHeight;
+      const sh = (containerHeight - itemHeight) / 2;
+      setSpacerHeight(sh);
+
       const idx = items.findIndex(i => i.name === selected);
+      // 初始滚动到中间组的对应项
       scrollRef.current.scrollTop = centerOffset + (idx * itemHeight);
     }
-  }, [items.length]); // 只有当项目数量变化时重置
+  }, [items.length]);
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const st = scrollRef.current.scrollTop;
     
-    // 循环边界重置
+    // 循环边界重置逻辑
     if (st < itemHeight) {
       scrollRef.current.scrollTop = st + centerOffset;
       return;
@@ -163,12 +170,10 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
           ref={scrollRef}
           onScroll={handleScroll}
           className="relative z-10 h-full overflow-y-auto custom-scrollbar snap-y snap-mandatory"
-          style={{ 
-            paddingTop: 'calc(50% - 32px)', 
-            paddingBottom: 'calc(50% - 32px)',
-            scrollPaddingTop: 'calc(50% - 32px)'
-          }}
         >
+          {/* 上部占位 */}
+          <div style={{ height: spacerHeight }} />
+          
           {tripleItems.map((item, idx) => {
             const isMatch = item.name === selected;
             return (
@@ -188,6 +193,9 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
               </div>
             );
           })}
+
+          {/* 下部占位 */}
+          <div style={{ height: spacerHeight }} />
         </div>
       </div>
     </div>
