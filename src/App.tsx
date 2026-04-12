@@ -227,22 +227,34 @@ class StickmanRenderer {
   private ctx: CanvasRenderingContext2D; private time: number = 0; public effects: any[] = []; private nextEffectId: number = 0;
   constructor(ctx: CanvasRenderingContext2D) { this.ctx = ctx; }
   addEffect(type: any, x: number, y: number, color: string = '#475569', count: number = 1) { 
-    console.log(`✨ [Renderer] 添加特效: ${type} at (${x}, ${y})`);
     for (let i = 0; i < count; i++) { 
-      this.effects.push({ 
-        id: this.nextEffectId++, type, x, y, 
-        vx: type === 'heal' ? (Math.random() - 0.5) * 4 : (Math.random() - 0.5) * 10, 
-        vy: type === 'heal' ? -Math.random() * 5 : (Math.random() - 0.5) * 10, 
-        life: 1.0, color, size: type === 'scan' ? 800 : Math.random() * 6 + 3 
-      }); 
+      if (type === 'charge') {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 120 + Math.random() * 80;
+        this.effects.push({
+          id: this.nextEffectId++, type,
+          tx: x, ty: y - 45, // 手部目标点
+          x: x + Math.cos(angle) * dist,
+          y: (y - 45) + Math.sin(angle) * dist,
+          vx: -Math.cos(angle) * 8, // 向中心加速
+          vy: -Math.sin(angle) * 8,
+          life: 1.0, color, size: Math.random() * 4 + 2
+        });
+      } else {
+        this.effects.push({ 
+          id: this.nextEffectId++, type, x, y, 
+          vx: type === 'heal' ? (Math.random() - 0.5) * 4 : (Math.random() - 0.5) * 10, 
+          vy: type === 'heal' ? -Math.random() * 5 : (Math.random() - 0.5) * 10, 
+          life: 1.0, color, size: type === 'scan' ? 800 : Math.random() * 6 + 3 
+        }); 
+      }
     } 
   }
   advance() { 
     this.time += 0.04;
     this.effects = this.effects.filter(e => { 
       e.x += e.vx; e.y += e.vy; 
-      // 使用更稳定的衰减速度
-      const decay = (e.type === 'scan' || e.type === 'shield' ? 0.01 : 0.02);
+      const decay = (e.type === 'scan' || e.type === 'shield' || e.type === 'charge' ? 0.012 : 0.02);
       e.life -= decay; 
       if (e.type === 'arrow') e.vx = 20; 
       return e.life > 0; 
@@ -274,12 +286,20 @@ class StickmanRenderer {
     this.effects.forEach(e => { 
       ctx.save();
       ctx.globalAlpha = Math.max(0, e.life);
-      if (e.type === 'scan') { 
+      if (e.type === 'charge') {
+        ctx.strokeStyle = e.color; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(e.x, e.y);
+        ctx.lineTo(e.x + e.vx * 2, e.y + e.vy * 2); // 绘制汇聚光线
+        ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.beginPath();
+        ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill();
+      }
+      else if (e.type === 'scan') { 
         ctx.fillStyle = e.color || '#818cf8';
         const scanY = e.y + (1 - e.life) * 400 - 200;
-        ctx.fillRect(0, scanY, 800, 6); // 极粗扫描线
+        ctx.fillRect(0, scanY, 800, 6); 
         ctx.globalAlpha = e.life * 0.4;
-        ctx.fillRect(0, scanY - 15, 800, 36); // 亮眼光晕
+        ctx.fillRect(0, scanY - 15, 800, 36); 
       }
       else if (e.type === 'shield') { 
         ctx.strokeStyle = e.color || '#ef4444'; ctx.lineWidth = 5; 
@@ -457,7 +477,7 @@ export default function App() {
       if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
       if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
       if (s.name === '系统过载') rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20);
-      if (s.name === '蓄能重击') rendererRef.current?.addEffect('spark', x, 280, '#f59e0b', 30); // 为蓄能增加聚能特效
+      if (s.name === '蓄能重击') rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40); // 切换为汇聚特效
       if (s.name === '神经修复') {
         const atk = isP ? player : enemy;
         const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
