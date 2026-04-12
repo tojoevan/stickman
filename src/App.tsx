@@ -598,45 +598,49 @@ export default function App() {
 
         {gameState === 'tactics' && (
           <div className="h-full flex flex-col animate-in zoom-in-95 duration-300">
-             <div className="flex items-center gap-3 mb-4 flex-none bg-slate-900/5 p-2 rounded-2xl border border-slate-200/50">
-                <div className="flex items-center gap-2 border-r border-slate-200 pr-3">
-                  <h3 className="text-lg font-black italic text-indigo-600 uppercase tracking-tighter whitespace-nowrap">战术部署</h3>
-                  <div className="flex items-center gap-1.5 bg-white px-3 py-1 rounded-xl border border-indigo-100 shadow-sm">
-                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">战场:</span>
-                    <span className="text-[12px] font-black text-indigo-600 whitespace-nowrap">{field.name}</span>
-                  </div>
+             <div className="flex items-center gap-4 mb-4 flex-none bg-slate-900/5 p-2 rounded-2xl border border-slate-200/50">
+                <div className="flex items-center gap-3 border-r border-slate-200 pr-4">
+                  <h3 className="text-xl font-black italic text-indigo-600 uppercase tracking-tighter whitespace-nowrap">战术部署</h3>
                 </div>
 
-                <div className="flex-1 flex items-center gap-4 min-w-0">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">环境修正:</span>
-                    <p className="text-[11px] font-bold text-slate-600 truncate">{field.desc} <span className="text-rose-500">{field.effect}</span></p>
+                <div className="flex-1 flex items-center gap-6 min-w-0">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-[12px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap bg-slate-100 px-2 py-1 rounded-lg">环境修正</span>
+                    <p className="text-[15px] font-black text-slate-700 truncate">{field.desc} <span className="text-rose-500">{field.effect}</span></p>
                   </div>
-                  <div className="w-[1px] h-6 bg-slate-200 flex-none"></div>
-                  <div className="flex-1 flex items-center gap-3 bg-indigo-600 px-4 py-1.5 rounded-xl shadow-inner relative overflow-hidden min-w-0">
-                    <p className="text-[9px] font-black text-white/40 uppercase tracking-tighter whitespace-nowrap flex-none">探测:</p>
-                    <div className="flex items-center gap-3 text-white font-black text-[11px] truncate relative z-10">
-                      <div className="flex items-center gap-1.5">
-                        <span className="opacity-90">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon}</span>
-                        <b className="text-indigo-300 font-mono text-[10px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
+                  
+                  <div className="w-[1px] h-8 bg-slate-200 flex-none"></div>
+                  
+                  <div className="flex-1 flex items-center gap-4 bg-indigo-600 px-5 py-2.5 rounded-xl shadow-inner relative overflow-hidden min-w-0">
+                    <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none"></div>
+                    <p className="text-[11px] font-black text-white/40 uppercase tracking-tighter whitespace-nowrap flex-none relative z-10">神经探测:</p>
+                    <div className="flex items-center gap-5 text-white font-black text-[13px] truncate relative z-10">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg opacity-100">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon}</span>
+                        <span className="truncate">{enemy.equipment.weapon}</span>
+                        <b className="text-indigo-300 font-mono text-[12px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
                         {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && (
-                          <span className="px-1.5 py-0.5 bg-emerald-400 text-emerald-950 text-[9px] rounded-md animate-pulse">压制</span>
+                          <span className="px-2 py-0.5 bg-emerald-400 text-emerald-950 text-[10px] rounded-md animate-bounce">压制</span>
                         )}
                       </div>
-                      <span className="w-[1px] h-3 bg-white/10"></span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="opacity-90">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
+                      <span className="w-[1px] h-4 bg-white/20"></span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg opacity-100">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon}</span>
+                        <span className="truncate">{enemy.equipment.armor}</span>
                         {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && (
-                          <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-pulse">防御</span>
+                          <span className="px-2 py-0.5 bg-sky-400 text-sky-950 text-[10px] rounded-md animate-bounce">防御</span>
                         )}
                       </div>
-                      <span className="w-[1px] h-3 bg-white/10"></span>
-                      <span className="opacity-90">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon} {enemy.equipment.skill}</span>
+                      <span className="w-[1px] h-4 bg-white/20"></span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg opacity-100">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon}</span>
+                        <span className="truncate">{enemy.equipment.skill}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <button onClick={startRound} className="px-10 py-3 bg-slate-800 text-white font-black rounded-xl hover:bg-slate-700 active:scale-95 transition-all text-[14px] shadow-lg shadow-slate-200 flex-none ml-2 border-b-4 border-slate-950">开始出击 ➜</button>
+                <button onClick={startRound} className="px-12 py-4 bg-indigo-600 text-white font-black rounded-xl hover:bg-indigo-500 active:scale-95 transition-all text-[16px] shadow-xl shadow-indigo-200 flex-none ml-2 border-b-4 border-indigo-800 uppercase tracking-widest">开始出击 ➜</button>
              </div>
 
              <div className="flex-1 flex gap-4 min-h-0 h-full pb-2">
