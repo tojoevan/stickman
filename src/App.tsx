@@ -1,7 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // --- 配置 ---
+// 自动探测：如果从公网访问，则请求公网 IP 的 5273；如果本地，则 localhost:5273
 const API_URL = `${window.location.protocol}//${window.location.hostname}:5273/api`;
+console.log('📡 神经链路初始化 - 物理目标:', API_URL);
+
+// --- 辅助：处理请求报错 ---
+const safeFetch = async (url: string, options: any) => {
+  try {
+    const res = await fetch(url, options);
+    return res;
+  } catch (err) {
+    console.error('❌ 链路传输中断，目标节点:', url);
+    console.error('❌ 错误详情:', err);
+    throw new Error('无法连接到后端服务器，请检查 5273 端口是否开放或 HTTPS 限制');
+  }
+};
 
 // --- 类型与数据定义 ---
 type Stat = 'strength' | 'agility' | 'constitution';
@@ -113,7 +127,8 @@ export default function App() {
     }
 
     try {
-      const res = await fetch(`${API_URL}/${authView}`, {
+      console.log(`🔗 尝试建立身份验证 [${authView}]:`, `${API_URL}/${authView}`);
+      const res = await safeFetch(`${API_URL}/${authView}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(authForm)

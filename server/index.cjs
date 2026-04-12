@@ -20,7 +20,8 @@ if (!fs.existsSync(DB_PATH)) {
 const getData = () => JSON.parse(fs.readFileSync(DB_PATH, 'utf8'));
 const saveData = (data) => fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 
-app.use(cors({ origin: '*', methods: ['GET', 'POST', 'OPTIONS'], allowedHeaders: ['Content-Type', 'Authorization'] }));
+app.use(cors());
+app.options('*', cors()); // 确保所有 OPTIONS 请求都能得到正确响应
 app.use(express.json());
 
 // 连通性测试
