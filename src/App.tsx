@@ -49,7 +49,7 @@ const BATTLEFIELDS: Battlefield[] = [
   { id: 'emp', name: '强磁雷暴区', desc: '强磁场使精密设备失灵。', effect: '史诗装备 -40%，普通装备 +60%。', bgColor: '#1e1b4b', accentColor: '#818cf8' },
   { id: 'narrow', name: '暗影狭廊', desc: '极度狭窄，施展不开重型武器。', effect: '重型武器 -50%，轻捷武器 +40%。', bgColor: '#18181b', accentColor: '#52525b' },
   { id: 'desert', name: '荒漠戈壁', desc: '视野开阔，风速稳定。', effect: '弓类武器 +60%，闪避率 +10%。', bgColor: '#451a03', accentColor: '#f59e0b' },
-  { id: 'overload', name: '能源核心', desc: '高能粒子充斥空间。', effect: '技能倍率 +100%，受创 +30%。', bgColor: '#4c0519', accentColor: '#f43f5e' },
+  { id: 'overload', name: '能源核心', desc: '空气中充斥着高能粒子。', effect: '技能倍率 +100%，受创 +30%。', bgColor: '#4c0519', accentColor: '#f43f5e' },
 ];
 
 interface Character {
@@ -103,71 +103,40 @@ const INITIAL_CHAR: Character = {
 
 const calcVal = (base: number, level: number) => Math.floor(base * (1 + 0.15 * (level - 1)));
 
+interface BattleRoundRecord {
+  round: number;
+  pDmg: number;
+  eDmg: number;
+  pRemainingHp: number;
+  eRemainingHp: number;
+}
+
 class StickmanRenderer {
   private ctx: CanvasRenderingContext2D;
   private time: number = 0;
   private effects: any[] = [];
   private nextEffectId: number = 0;
   constructor(ctx: CanvasRenderingContext2D) { this.ctx = ctx; }
-  
   addEffect(type: any, x: number, y: number, color: string = '#475569', count: number = 1) {
-    for (let i = 0; i < count; i++) {
-      this.effects.push({ id: this.nextEffectId++, type, x, y, vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12, life: 1.0, color, size: Math.random() * 4 + 2 });
-    }
+    for (let i = 0; i < count; i++) { this.effects.push({ id: this.nextEffectId++, type, x, y, vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12, life: 1.0, color, size: Math.random() * 4 + 2 }); }
   }
-
   drawBackground(field: Battlefield) {
-    const ctx = this.ctx;
-    const t = this.time;
-    ctx.save();
-    ctx.fillStyle = field.bgColor;
-    ctx.fillRect(0, 0, 800, 400);
-
+    const ctx = this.ctx; const t = this.time; ctx.save(); ctx.fillStyle = field.bgColor; ctx.fillRect(0, 0, 800, 400);
     if (field.id === 'neutral') {
-      ctx.strokeStyle = field.accentColor;
-      ctx.lineWidth = 1; ctx.globalAlpha = 0.2;
+      ctx.strokeStyle = field.accentColor; ctx.lineWidth = 1; ctx.globalAlpha = 0.2;
       for(let i=0; i<800; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + Math.sin(t+i)*5, 400); ctx.stroke(); }
-      for(let i=0; i<400; i+=40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(800, i + Math.cos(t+i)*5); ctx.stroke(); }
     } else if (field.id === 'emp') {
-      ctx.strokeStyle = '#818cf8'; ctx.lineWidth = 2;
-      for(let i=0; i<5; i++) {
-        if (Math.random() > 0.8) {
-          ctx.beginPath(); ctx.moveTo(Math.random()*800, 0); ctx.lineTo(Math.random()*800, 400);
-          ctx.globalAlpha = 0.3; ctx.stroke();
-        }
-      }
-      ctx.fillStyle = '#ffffff';
-      for(let i=0; i<20; i++) { if(Math.random()>0.9) ctx.fillRect(Math.random()*800, Math.random()*400, 100, 1); }
+      ctx.strokeStyle = '#818cf8'; ctx.lineWidth = 2; for(let i=0; i<5; i++) { if (Math.random() > 0.8) { ctx.beginPath(); ctx.moveTo(Math.random()*800, 0); ctx.lineTo(Math.random()*800, 400); ctx.globalAlpha = 0.3; ctx.stroke(); } }
     } else if (field.id === 'narrow') {
-      ctx.fillStyle = '#27272a';
-      ctx.fillRect(0, 0, 800, 60); ctx.fillRect(0, 340, 800, 60);
-      ctx.strokeStyle = '#3f3f46'; ctx.lineWidth = 2;
-      for(let i=0; i<800; i+=80) { ctx.strokeRect(i, 0, 80, 60); ctx.strokeRect(i, 340, 80, 60); }
+      ctx.fillStyle = '#27272a'; ctx.fillRect(0, 0, 800, 60); ctx.fillRect(0, 340, 800, 60);
     } else if (field.id === 'desert') {
-      ctx.fillStyle = '#78350f'; ctx.globalAlpha = 0.3;
-      for(let i=0; i<3; i++) {
-        ctx.beginPath(); ctx.moveTo(0, 300+i*20);
-        for(let x=0; x<=800; x+=20) { ctx.lineTo(x, 300+i*20 + Math.sin(x*0.01 + t + i)*10); }
-        ctx.lineTo(800, 400); ctx.lineTo(0, 400); ctx.fill();
-      }
-      ctx.fillStyle = '#f59e0b';
-      for(let i=0; i<15; i++) {
-        const x = (t * 200 + i * 100) % 1000 - 100;
-        ctx.globalAlpha = 0.1; ctx.fillRect(x, Math.random()*400, 50, 2);
-      }
+      ctx.fillStyle = '#78350f'; ctx.globalAlpha = 0.3; for(let i=0; i<3; i++) { ctx.beginPath(); ctx.moveTo(0, 300+i*20); for(let x=0; x<=800; x+=20) { ctx.lineTo(x, 300+i*20 + Math.sin(x*0.01 + t + i)*10); } ctx.lineTo(800, 400); ctx.lineTo(0, 400); ctx.fill(); }
     } else if (field.id === 'overload') {
-      const grad = ctx.createRadialGradient(400, 200, 50, 400, 200, 300);
-      grad.addColorStop(0, '#9f1239'); grad.addColorStop(1, '#4c0519');
-      ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 400);
-      ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 3; ctx.globalAlpha = Math.abs(Math.sin(t*2))*0.3;
-      ctx.beginPath(); ctx.arc(400, 200, 150 + Math.sin(t)*20, 0, Math.PI*2); ctx.stroke();
-      ctx.beginPath(); ctx.arc(400, 200, 100 + Math.cos(t)*10, 0, Math.PI*2); ctx.stroke();
+      ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 3; ctx.globalAlpha = Math.abs(Math.sin(t*2))*0.3; ctx.beginPath(); ctx.arc(400, 200, 150 + Math.sin(t)*20, 0, Math.PI * 2); ctx.stroke();
     }
     ctx.restore();
   }
-
   updateEffects() { this.effects = this.effects.filter(e => { e.x += e.vx; e.y += e.vy; e.life -= 0.04; if (e.type === 'arrow') e.vx = 18; return e.life > 0; }); }
-  
   draw(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️') {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45); ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
     ctx.strokeStyle = pose === 'dead' ? '#cbd5e1' : '#f8fafc'; ctx.lineWidth = 5; ctx.lineCap = 'round';
@@ -175,8 +144,7 @@ class StickmanRenderer {
     if (pose === 'attack') { armAngle = -1.8 + Math.sin(t * 8) * 1.2; ctx.translate(Math.sin(t * 8) * 20, 0); ctx.font = '32px serif'; ctx.fillText(weaponIcon, Math.cos(armAngle) * 40 - 15, -bodyHeight + Math.sin(armAngle) * 40); }
     else if (pose === 'hit') { ctx.strokeStyle = '#ef4444'; ctx.translate(Math.sin(this.time * 60) * 10, 0); }
     else if (pose === 'dead') { ctx.rotate(Math.PI / 2); ctx.translate(35, -15); armAngle = 0.5; legAngle = 0.2; }
-    ctx.beginPath(); ctx.arc(0, -bodyHeight - headSize, headSize, 0, Math.PI * 2); ctx.moveTo(0, -bodyHeight); ctx.lineTo(0, 0); ctx.moveTo(0, -bodyHeight + 8); 
-    ctx.lineTo(Math.cos(armAngle) * 35, -bodyHeight + 8 + Math.sin(armAngle) * 35); ctx.moveTo(0, 0); ctx.lineTo(Math.sin(legAngle) * 30, 35); ctx.moveTo(0, 0); ctx.lineTo(Math.sin(-legAngle) * 30, 35); ctx.stroke(); ctx.restore();
+    ctx.beginPath(); ctx.arc(0, -bodyHeight - headSize, headSize, 0, Math.PI * 2); ctx.moveTo(0, -bodyHeight); ctx.lineTo(0, 0); ctx.stroke(); ctx.restore();
     this.effects.forEach(e => { ctx.globalAlpha = e.life; ctx.fillStyle = e.color; if (e.type === 'arrow') { ctx.fillRect(e.x, e.y, 12, 2); } else { ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill(); } });
     ctx.globalAlpha = 1; this.updateEffects(); this.time += 0.04;
   }
@@ -195,94 +163,51 @@ export default function App() {
   const [currentPose, setCurrentPose] = useState<{player: any, enemy: any}>({player: 'idle', enemy: 'idle'});
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
+  const [battleHistory, setBattleHistory] = useState<BattleRoundRecord[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<StickmanRenderer | null>(null);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authForm.username || !authForm.password) return alert('请输入档案代号与密钥');
-    if (authView === 'register' && authForm.password !== authForm.confirmPassword) return alert('两次输入的访问密码不一致');
     try {
       const res = await safeFetch(`${API_URL}/${authView}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
       const data = await res.json();
-      if (data.token) { localStorage.setItem('token', data.token); setToken(data.token); alert('神经链路已建立。'); } 
-      else { alert(data.message || '操作成功'); setAuthView('login'); }
-    } catch (err: any) { alert(`[链路中断] ${err.message}`); }
-  };
-
-  const saveGame = async (currentData: Character) => {
-    if (!token) return;
-    await fetch(`${API_URL}/save`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ gameData: currentData }) });
+      if (data.token) { localStorage.setItem('token', data.token); setToken(data.token); } else setAuthView('login');
+    } catch (err: any) { alert(err.message); }
   };
 
   useEffect(() => {
     if (token) {
-      fetch(`${API_URL}/load`, { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(res => res.json())
-        .then(data => { 
-          if (data.gameData) {
-            const rawData = data.gameData;
-            if (Array.isArray(rawData.unlockedItems)) {
-              const migrated: Record<string, number> = {};
-              rawData.unlockedItems.forEach((n: string) => migrated[n] = 1);
-              rawData.unlockedItems = migrated;
-            }
-            setPlayer({ ...INITIAL_CHAR, ...rawData }); 
-          }
-          setBattleLog(['神经链路同步成功。']); 
-        });
+      fetch(`${API_URL}/load`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.gameData) {
+        const rawData = data.gameData; if (Array.isArray(rawData.unlockedItems)) { const m: any = {}; rawData.unlockedItems.forEach((n: any) => m[n] = 1); rawData.unlockedItems = m; }
+        setPlayer({ ...INITIAL_CHAR, ...rawData });
+      }});
     }
   }, [token]);
 
-  useEffect(() => { if (token && player !== INITIAL_CHAR) saveGame(player); }, [player.level, player.gold, player.stats, player.unlockedItems]);
+  useEffect(() => { if (token && player !== INITIAL_CHAR) fetch(`${API_URL}/save`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ gameData: player }) }); }, [player.level, player.gold, player.stats, player.unlockedItems]);
 
   useEffect(() => {
-    let frame: number;
-    const initRenderer = () => {
-      const canvas = canvasRef.current;
-      if (canvas && !rendererRef.current) { const ctx = canvas.getContext('2d'); if (ctx) rendererRef.current = new StickmanRenderer(ctx); }
-    };
-    const loop = () => {
-      initRenderer();
-      if (rendererRef.current) {
-        rendererRef.current.drawBackground(field);
-        const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon);
-        const eW = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
-        rendererRef.current.draw(240, 280, currentPose.player, false, player.stats.agility, pW?.icon);
-        rendererRef.current.draw(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️');
-      }
-      frame = requestAnimationFrame(loop);
-    };
-    frame = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(frame);
+    let frame: number; const loop = () => { if (canvasRef.current && !rendererRef.current) rendererRef.current = new StickmanRenderer(canvasRef.current.getContext('2d')!);
+      if (rendererRef.current) { rendererRef.current.drawBackground(field);
+        const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon); const eW = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
+        rendererRef.current.draw(240, 280, currentPose.player, false, player.stats.agility, pW?.icon); rendererRef.current.draw(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️');
+      } frame = requestAnimationFrame(loop); }; frame = requestAnimationFrame(loop); return () => cancelAnimationFrame(frame);
   }, [token, currentPose, player.stats.agility, enemy.stats.agility, player.equipment.weapon, enemy.equipment.weapon, field]);
 
-  const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 20));
   const buyItem = (item: Item) => setPreviewItem(item);
-
   const confirmPurchase = (item: Item) => {
-    if (player.level < (item.levelReq || 0)) return alert(`神经等级不足！需要 LV.${item.levelReq}`);
-    const curLvl = player.unlockedItems[item.name] || 0;
-    const cost = Math.floor((item.cost || 0) * Math.pow(1.6, curLvl));
-    if (player.gold >= cost) {
-      setPlayer(prev => ({ ...prev, gold: prev.gold - cost, unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 } }));
-      addLog(`${curLvl === 0 ? '获取' : '强化'}成功: ${item.name} [Lv.${curLvl + 1}]`);
-      setPreviewItem(null);
-    } else alert("储备不足。");
+    const curLvl = player.unlockedItems[item.name] || 0; const cost = Math.floor((item.cost || 0) * Math.pow(1.6, curLvl));
+    if (player.gold >= cost) { setPlayer(prev => ({ ...prev, gold: prev.gold - cost, unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 } })); setPreviewItem(null); }
   };
 
-  const handleLevelUp = (stat: Stat) => {
-    if (player.statPoints > 0) {
-      setPlayer(prev => {
-        const nMax = stat === 'constitution' ? prev.maxHealth + 15 : prev.maxHealth;
-        return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax };
-      });
-    }
-  };
+  const handleLevelUp = (stat: Stat) => { if (player.statPoints > 0) setPlayer(prev => { const nMax = stat === 'constitution' ? Math.floor(prev.maxHealth + 15) : prev.maxHealth; return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax }; }); };
 
   const startRound = async () => {
-    setGameState('battle'); addLog(`--- 第 ${round} 回合开始 ---`);
-    let pHP = player.health; let eHP = enemy.health;
+    setGameState('battle'); 
+    let pHP = Math.floor(player.health); let eHP = Math.floor(enemy.health);
+    let currentRoundP_Dmg = 0; let currentRoundE_Dmg = 0;
+
     const executeTurn = async (isP: boolean) => {
       const atk = isP ? player : enemy; const wN = isP ? player.equipment.weapon : enemy.equipment.weapon;
       const w = ITEMS.weapons.find(i => i.name === wN)!; const s = ITEMS.skills.find(i => i.name === (isP ? player.equipment.skill : enemy.equipment.skill))!;
@@ -291,121 +216,76 @@ export default function App() {
       setCurrentPose(prev => ({ ...prev, [isP ? 'player' : 'enemy']: 'attack' }));
       if (w.name.includes('弓')) rendererRef.current?.addEffect('arrow', isP ? 280 : 520, 230, isP ? '#6366f1' : '#94a3b8', 1);
       await new Promise(r => setTimeout(r, 600));
-      let baseDmg = calcVal(w.damage!, wL);
-      let sMult = s?.mult || 1;
+      let baseDmg = calcVal(w.damage!, wL); let sMult = s?.mult || 1;
       if (field.id === 'emp') { if (w.rarity === 'epic' || w.rarity === 'perfect') baseDmg *= 0.6; else if (w.rarity === 'common') baseDmg *= 1.6; }
       else if (field.id === 'narrow') { if (w.name.includes('锤')) baseDmg *= 0.5; else if (w.name.includes('刀') || w.name.includes('剑')) baseDmg *= 1.4; }
       else if (field.id === 'desert') { if (w.name.includes('弓')) baseDmg *= 1.6; }
       else if (field.id === 'overload') { sMult *= 2.0; }
-      let dmg = (baseDmg + atk.stats.strength * (isP ? 0.8 : 1.2)) * sMult; 
-      if (s.mult) dmg *= (1 + 0.1 * (sL - 1));
-      const rawDmg = Math.floor(dmg);
-      rendererRef.current?.addEffect('spark', isP ? 560 : 240, 250, isP ? '#f59e0b' : '#ef4444', 12);
-      if (isP) { let finalRaw = rawDmg; if (field.id === 'overload') finalRaw *= 1.3; eHP = Math.max(0, eHP - finalRaw); setEnemy(prev => ({ ...prev, health: eHP })); addLog(`>> 玩家 [Lv.${wL}] ${w.name} 造成 ${Math.floor(finalRaw)} 伤害!`); }
-      else { 
+      let dmg = (baseDmg + atk.stats.strength * (isP ? 0.8 : 1.2)) * sMult; if (s.mult) dmg *= (1 + 0.1 * (sL - 1));
+      const rawDmg = Math.floor(dmg); rendererRef.current?.addEffect('spark', isP ? 560 : 240, 250, isP ? '#f59e0b' : '#ef4444', 12);
+      if (isP) { let fD = Math.floor(field.id === 'overload' ? rawDmg * 1.3 : rawDmg); eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); currentRoundP_Dmg = fD; } else { 
         const a = ITEMS.armors.find(i => i.name === player.equipment.armor)!; const aL = player.unlockedItems[a.name] || 1;
-        const defVal = calcVal(a.defense!, aL); const minDmg = Math.floor(rawDmg * 0.15);
-        let finalDmg = Math.max(minDmg, rawDmg - defVal); if (field.id === 'overload') finalDmg *= 1.3;
-        finalDmg = Math.max(1, Math.floor(finalDmg)); pHP = Math.max(0, pHP - finalDmg); setPlayer(prev => ({ ...prev, health: pHP })); addLog(`<< 敌人 [Lv.${wL}] ${w.name} 造成 ${finalDmg} 伤害!`);
+        const minDmg = Math.floor(rawDmg * 0.15); let finalDmg = Math.max(minDmg, rawDmg - calcVal(a.defense!, aL));
+        if (field.id === 'overload') finalDmg *= 1.3; finalDmg = Math.floor(Math.max(1, finalDmg)); pHP = Math.max(0, pHP - finalDmg); setPlayer(prev => ({ ...prev, health: pHP })); currentRoundE_Dmg = finalDmg;
       }
-      setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' })); await new Promise(r => setTimeout(r, 400));
-      setCurrentPose({player: 'idle', enemy: 'idle'});
+      setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' })); await new Promise(r => setTimeout(r, 400)); setCurrentPose({player: 'idle', enemy: 'idle'});
     };
     await executeTurn(true); if (eHP > 0) await executeTurn(false);
+    setBattleHistory(prev => [...prev, { round, pDmg: currentRoundP_Dmg, eDmg: currentRoundE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
     const finalize = (isW: boolean, isK: boolean) => {
-      const gR = isW ? (60 + player.level * 25) : (20 + player.level * 10);
-      const xR = isW ? (70 + player.level * 10) : 0;
-      if (isW) {
-        setPlayer(prev => {
-          let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints;
-          if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; addLog(`>>> LV.${nL} 突破！`); }
-          return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 };
-        });
-        setGameState('victory'); if (isK) setCurrentPose(prev => ({...prev, enemy: 'dead'}));
-        addLog(`成功！获得: ₿ ${gR} | XP ${xR}`);
-      } else {
-        setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 }));
-        setGameState('defeat'); if (isK) setCurrentPose(prev => ({...prev, player: 'dead'}));
-        addLog(`失败。已弱化下次挑战。`);
-      }
+      const gR = isW ? (60 + player.level * 25) : (20 + player.level * 10); const xR = isW ? (70 + player.level * 10) : 0;
+      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
+      else { setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 })); setGameState('defeat'); }
     };
-    if (pHP <= 0) finalize(false, true); else if (eHP <= 0) finalize(true, true);
-    else if (round >= 3) finalize(pHP > eHP, false); else { setRound(prev => prev + 1); setGameState('tactics'); }
+    if (pHP <= 0) finalize(false, true); else if (eHP <= 0) finalize(true, true); else if (round >= 3) finalize(pHP > eHP, false); else { setRound(prev => prev + 1); setGameState('tactics'); }
   };
 
   const resetGame = () => {
-    // 强制切换新战场：确保新战场与当前不同
-    const otherFields = BATTLEFIELDS.filter(f => f.id !== field.id);
-    const newField = otherFields[Math.floor(Math.random() * otherFields.length)];
-    setField(newField);
-
-    const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon)!;
-    const pA = ITEMS.armors.find(a => a.name === player.equipment.armor)!;
-    const wL = player.unlockedItems[pW.name] || 1;
-    const aL = player.unlockedItems[pA.name] || 1;
+    const oF = BATTLEFIELDS.filter(f => f.id !== field.id); setField(oF[Math.floor(Math.random() * oF.length)]);
+    const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon)!; const pA = ITEMS.armors.find(a => a.name === player.equipment.armor)!;
+    const wL = player.unlockedItems[pW.name] || 1; const aL = player.unlockedItems[pA.name] || 1;
     const pP = (player.stats.strength + player.stats.agility + player.stats.constitution) + calcVal(pW.damage!, wL) + calcVal(pA.defense!, aL);
     const dM = (1 + (pP / 750)) * Math.max(0.5, 1 - (player.defeatCount * 0.12));
-    const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level);
-    const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level);
-    const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
-    const rw = aW[Math.floor(Math.random() * aW.length)];
-    const ra = aA[Math.floor(Math.random() * aA.length)];
-    const rs = aS[Math.floor(Math.random() * aS.length)];
-    
+    const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level); const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level); const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
+    const rw = aW[Math.floor(Math.random() * aW.length)]; const ra = aA[Math.floor(Math.random() * aA.length)]; const rs = aS[Math.floor(Math.random() * aS.length)];
     setPlayer(prev => ({...prev, health: prev.maxHealth}));
-    const bS = player.level === 1 ? 0.5 : 0.8;
-    const eS = { strength: Math.floor(player.stats.strength * bS * dM), agility: Math.floor(player.stats.agility * 0.7 * dM), constitution: Math.floor(player.stats.constitution * 0.8 * dM) };
+    const bS = player.level === 1 ? 0.5 : 0.8; const eS = { strength: Math.floor(player.stats.strength * bS * dM), agility: Math.floor(player.stats.agility * 0.7 * dM), constitution: Math.floor(player.stats.constitution * 0.8 * dM) };
     const eH = Math.floor(player.maxHealth * (player.level === 1 ? 0.75 : 0.95) * (1 + (pP / 3000)) * Math.max(0.5, 1 - (player.defeatCount * 0.12)));
-    const enemyEquipLvl = Math.max(1, Math.floor(player.level / 2.2));
-    setEnemy({ level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: enemyEquipLvl, [ra.name]: enemyEquipLvl, [rs.name]: enemyEquipLvl }, defeatCount: 0 });
-    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'});
-    addLog(`>>> 成功部署至: ${newField.name}。`);
+    const eL = Math.max(1, Math.floor(player.level / 2.2));
+    setEnemy({ level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }, defeatCount: 0 });
+    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]);
   };
-
-  if (!token) {
-    return (
-      <div className="h-screen w-full bg-slate-100 flex items-center justify-center p-4 font-sans text-slate-800">
-        <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-200 w-full max-w-md animate-in zoom-in-95 duration-300">
-          <div className="text-center mb-6"><h1 className="text-4xl font-black italic text-indigo-600 tracking-tighter">影迹战术</h1><p className="text-slate-400 font-bold text-[11px] uppercase tracking-[0.2em] mt-2">IDENTITY AUTHENTICATION</p></div>
-          <form onSubmit={handleAuth} className="space-y-3">
-            <div className="space-y-1"><label className="text-[11px] font-black text-slate-400 ml-2 uppercase">用户名</label><input type="text" placeholder="档案代号" className="w-full px-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-400 font-bold text-[14px]" value={authForm.username} onChange={e => setAuthForm({...authForm, username: e.target.value})} /></div>
-            <div className="space-y-1"><label className="text-[11px] font-black text-slate-400 ml-2 uppercase">密码</label><input type={showPassword ? "text" : "password"} placeholder="加密密钥" className="w-full px-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-400 font-bold text-[14px]" value={authForm.password} onChange={e => setAuthForm({...authForm, password: e.target.value})} /></div>
-            {authView === 'register' && (<div className="space-y-1 animate-in slide-in-from-top-2 duration-200"><label className="text-[11px] font-black text-slate-400 ml-2 uppercase">确认密码</label><input type={showPassword ? "text" : "password"} placeholder="确认密钥" className="w-full px-6 py-3.5 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:border-indigo-400 font-bold text-[14px]" value={authForm.confirmPassword} onChange={e => setAuthForm({...authForm, confirmPassword: e.target.value})} /></div>)}
-            <div className="flex items-center gap-2 ml-2 py-1"><input type="checkbox" id="show-pass" className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600" checked={showPassword} onChange={e => setShowPassword(e.target.checked)} /><label htmlFor="show-pass" className="text-[12px] font-bold text-slate-500 cursor-pointer">显示原文</label></div>
-            <button type="submit" className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-lg shadow-xl shadow-indigo-100 hover:bg-indigo-500 transition-all mt-2 active:scale-95">{authView === 'login' ? '进入系统' : '建立档案'}</button>
-          </form>
-          <p className="mt-6 text-center text-[13px] text-slate-400 font-bold">{authView === 'login' ? '尚未分配编号?' : '已有现存档案?'} <button className="text-indigo-600 ml-2 underline hover:text-indigo-800 font-black" onClick={() => { setAuthView(authView === 'login' ? 'register' : 'login'); setAuthForm({username: '', password: '', confirmPassword: ''}); }}>{authView === 'login' ? '注册新档案' : '返回验证'}</button></p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-screen w-full bg-slate-50 text-slate-800 p-4 font-sans overflow-hidden flex flex-col gap-4">
       <div className="flex justify-between items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-sm flex-none">
-        <div className="flex items-center gap-12">
-          <div className="flex flex-col items-center"><span className="text-[13px] text-slate-400 font-bold uppercase tracking-widest">神经等级</span><span className="text-2xl font-black text-indigo-600">LV.{player.level}</span></div>
-          <div className="space-y-2">
-            <div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div>
-            <div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold whitespace-nowrap">{player.xp} / {player.level * 100} XP</span></div>
-          </div>
+        <div className="flex items-center gap-12"><div className="flex flex-col items-center"><span className="text-[13px] text-slate-400 font-bold uppercase tracking-widest">神经等级</span><span className="text-2xl font-black text-indigo-600">LV.{player.level}</span></div>
+          <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold">{player.xp} / {player.level * 100} XP</span></div></div>
         </div>
-        <div className="flex items-center gap-8"><div className="text-right"><span className="text-[13px] text-slate-400 font-bold uppercase block">比特币储备</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div><div className="flex gap-2"><button onClick={() => setGameState('shop')} className="px-5 py-2.5 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 shadow-lg shadow-slate-200">黑市商店</button><button onClick={() => { localStorage.removeItem('token'); setToken(''); }} className="px-3 py-2.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded-xl hover:bg-slate-200">退出</button></div></div>
+        <div className="flex items-center gap-8"><div className="text-right"><span className="text-[13px] text-slate-400 font-bold uppercase block">储备</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div><div className="flex gap-2"><button onClick={() => setGameState('shop')} className="px-5 py-2.5 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 shadow-lg shadow-slate-200">黑市</button><button onClick={() => { localStorage.removeItem('token'); setToken(''); }} className="px-3 py-2.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded-xl hover:bg-slate-200">退出</button></div></div>
       </div>
 
       <div className="flex-none h-[46vh] flex gap-4 min-h-0">
         <div className="flex-1 bg-white rounded-3xl border border-slate-200 relative overflow-hidden shadow-sm">
           <canvas ref={canvasRef} width={800} height={400} className="w-full h-full object-contain" />
           <div className="absolute top-6 inset-x-10 flex justify-between pointer-events-none">
-            <div className="w-64"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-rose-500 h-full transition-all duration-1000" style={{ width: `${(player.health / player.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-rose-600 font-black uppercase">玩家系统: {player.health} HP</p></div>
-            <div className="w-64 text-right"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-slate-800 h-full transition-all duration-1000" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-slate-500 font-black uppercase">目标单位: {enemy.health} HP</p></div>
+            <div className="w-64"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-rose-500 h-full transition-all duration-1000" style={{ width: `${(player.health / player.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-rose-600 font-black uppercase">PLAYER: {Math.floor(player.health)} HP</p></div>
+            <div className="w-64 text-right"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-slate-800 h-full transition-all duration-1000" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-slate-500 font-black uppercase">UNIT: {Math.floor(enemy.health)} HP</p></div>
           </div>
-          <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10 animate-in slide-in-from-left-4 duration-500">
-            <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p>
-            <p className="text-[14px] font-black text-white">{field.name}</p>
-          </div>
-          {gameState === 'victory' && (<div className="absolute inset-0 bg-emerald-50/40 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300"><h1 className="text-7xl font-black text-emerald-500 tracking-tighter italic uppercase text-center">Mission Success</h1><button onClick={() => { setGameState('lobby'); resetGame(); }} className="mt-8 px-12 py-4 bg-emerald-600 text-white font-black rounded-full shadow-xl active:scale-95 transition-all text-[15px]">下一场任务</button></div>)}
-          {gameState === 'defeat' && (<div className="absolute inset-0 bg-rose-50/60 backdrop-blur-md flex flex-col items-center justify-center animate-in fade-in duration-300 p-10 text-center"><h1 className="text-7xl font-black text-rose-500 tracking-tighter italic uppercase text-center">Unit Destroyed</h1><div className="mt-6 max-w-md bg-white border border-rose-100 p-6 rounded-3xl shadow-xl"><p className="text-slate-700 text-[15px] font-bold">{player.defeatCount >= 2 ? "系统已介入难度调整。" : "尝试针对环境调整装备！"}</p></div><button onClick={() => { setGameState('lobby'); resetGame(); }} className="mt-8 px-12 py-4 bg-rose-600 text-white font-black rounded-full shadow-xl active:scale-95 transition-all text-[15px]">重新引导</button></div>)}
+          <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
+          {(gameState === 'victory' || gameState === 'defeat') && (
+            <div className={`absolute inset-0 ${gameState === 'victory' ? 'bg-emerald-50/90' : 'bg-rose-50/95'} backdrop-blur-md flex flex-col items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto`}>
+              <h1 className={`text-5xl font-black italic uppercase mb-4 ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>{gameState === 'victory' ? 'Mission Success' : 'System Failure'}</h1>
+              <div className="w-full max-w-2xl bg-white/80 rounded-[2rem] border border-white p-6 shadow-xl mb-6">
+                <div className="grid grid-cols-2 gap-8 mb-6 border-b border-slate-100 pb-4">
+                  <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 text-center">玩家配置</p><div className="flex flex-col gap-1 text-[12px] font-bold text-slate-700"><div className="flex justify-between"><span>{player.equipment.weapon}</span><span className="text-indigo-500">Lv.{player.unlockedItems[player.equipment.weapon]}</span></div><div className="flex justify-between"><span>{player.equipment.armor}</span><span className="text-indigo-500">Lv.{player.unlockedItems[player.equipment.armor]}</span></div></div></div>
+                  <div><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 text-center">敌方配置</p><div className="flex flex-col gap-1 text-[12px] font-bold text-slate-700 text-right"><div className="flex justify-between"><span>Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span><span className="ml-2">{enemy.equipment.weapon}</span></div><div className="flex justify-between"><span>Lv.{enemy.unlockedItems[enemy.equipment.armor] || 1}</span><span className="ml-2">{enemy.equipment.armor}</span></div></div></div>
+                </div>
+                <div className="space-y-3"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">三轮博弈复盘</p>{battleHistory.map((h, i) => (<div key={i} className="bg-slate-50/50 rounded-xl p-3 grid grid-cols-3 items-center border border-slate-100/50"><div className="text-center"><p className="text-[10px] text-slate-400 font-black">第 {h.round} 轮</p></div><div className="text-rose-500 font-black text-[14px] text-center">-{h.pDmg} ➜</div><div className="text-slate-800 font-black text-[14px] text-center">← -{h.eDmg}</div></div>))}</div>
+              </div>
+              <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`px-12 py-4 text-white font-black rounded-full shadow-xl active:scale-95 text-[15px] ${gameState === 'victory' ? 'bg-emerald-600' : 'bg-rose-600'}`}>{gameState === 'victory' ? '下一场任务' : '重新引导系统'}</button>
+            </div>
+          )}
         </div>
         <div className="w-72 bg-white border border-slate-200 rounded-3xl p-5 flex flex-col shadow-sm">
            <h3 className="text-[13px] font-black text-slate-300 uppercase mb-4 tracking-widest border-b border-slate-50 pb-2">链路日志</h3>
@@ -418,21 +298,19 @@ export default function App() {
       <div className="flex-1 bg-white rounded-3xl border border-slate-200 p-6 relative shadow-sm overflow-hidden flex flex-col">
         {gameState === 'lobby' && (
           <div className="h-full flex flex-col gap-3">
-            <div className="flex justify-between items-center"><h3 className="text-[13px] font-black text-slate-400 uppercase tracking-widest">属性强化系统</h3><span className="text-[13px] bg-indigo-50 text-indigo-600 px-4 py-0.5 rounded-full font-bold">可用潜能: {player.statPoints}</span></div>
+            <div className="flex justify-between items-center flex-none"><h3 className="text-[13px] font-black text-slate-400 uppercase tracking-widest">属性强化系统</h3><span className="text-[13px] bg-indigo-50 text-indigo-600 px-4 py-0.5 rounded-full font-bold">可用潜能: {player.statPoints}</span></div>
             <div className="grid grid-cols-3 gap-6 flex-1 min-h-0">{(['strength', 'agility', 'constitution'] as Stat[]).map(s => (<button key={s} onClick={() => handleLevelUp(s)} disabled={player.statPoints === 0} className="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col justify-center items-center hover:border-indigo-300 transition-all disabled:opacity-50 active:scale-95"><p className="text-[13px] text-slate-400 font-bold uppercase mb-2">{s === 'strength' ? '力量 STR' : s === 'agility' ? '敏捷 AGI' : '体质 CON'}</p><p className="text-5xl font-black text-slate-800 leading-none">{player.stats[s]}</p></button>))}</div>
-            <button onClick={() => setGameState('tactics')} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xl shadow-xl shadow-indigo-100 active:scale-95">进入部署阶段</button>
+            <button onClick={() => setGameState('tactics')} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xl shadow-xl active:scale-95 flex-none mt-1">进入部署阶段</button>
           </div>
         )}
 
         {gameState === 'shop' && (
           <div className="h-full flex flex-col animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex justify-between items-center mb-4"><h3 className="text-xl font-black italic text-amber-500 tracking-widest uppercase flex-1 text-center ml-10">地下黑市 · 战术中心</h3><button onClick={() => setGameState('lobby')} className="text-[13px] font-bold text-slate-400 hover:text-slate-800 underline">返回</button></div>
+            <div className="flex justify-between items-center mb-4 flex-none"><h3 className="text-xl font-black italic text-amber-500 tracking-widest uppercase flex-1 text-center ml-10">地下黑市 · 战术中心</h3><button onClick={() => setGameState('lobby')} className="text-[13px] font-bold text-slate-400 hover:text-slate-800 underline">返回</button></div>
             <div className="flex-1 grid grid-cols-6 gap-3 pr-2 content-start overflow-y-auto custom-scrollbar">
-              {[...ITEMS.weapons, ...ITEMS.armors, ...ITEMS.skills].filter(i => i.cost).map(item => {
+              {[...ITEMS.weapons, ...ITEMS.armors, ...ITEMS.skills].map(item => {
                 const rc = { common: { color: 'bg-slate-400' }, novel: { color: 'bg-blue-500' }, perfect: { color: 'bg-emerald-500' }, epic: { color: 'bg-amber-500' } }[item.rarity];
-                const itemLvl = player.unlockedItems[item.name] || 0;
-                const isLocked = player.level < (item.levelReq || 0);
-                const cost = Math.floor((item.cost || 0) * Math.pow(1.6, itemLvl));
+                const itemLvl = player.unlockedItems[item.name] || 0; const isLocked = player.level < (item.levelReq || 0); const cost = Math.floor((item.cost || 0) * Math.pow(1.6, itemLvl));
                 return ( <button key={item.name} onClick={() => buyItem(item)} className={`p-2 rounded-xl border text-left transition-all relative flex flex-col items-center ${isLocked ? 'bg-slate-50 grayscale opacity-60' : 'bg-white hover:border-indigo-300 active:scale-95'}`}><span className="text-2xl mb-1">{item.icon}</span><div className="text-center w-full"><p className="font-black text-[10px] text-slate-700 truncate">{item.name}</p>{itemLvl > 0 && <p className="text-[9px] font-black text-indigo-500 bg-indigo-50 rounded-full px-1.5 py-0.5 inline-block mb-0.5">Lv.{itemLvl}</p>}<p className="text-amber-600 font-black text-[10px]">₿ {cost}</p></div><div className={`absolute top-1 right-1 w-2 h-2 rounded-full ${rc.color}`}></div></button> );
               })}
             </div>
@@ -440,11 +318,11 @@ export default function App() {
               <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] p-4 flex items-center justify-center animate-in fade-in duration-200" onClick={() => setPreviewItem(null)}>
                 <div className="bg-white text-slate-900 p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
                   <div className="text-6xl mb-6 text-center">{previewItem.icon}</div>
-                  <h2 className="text-2xl font-black text-center mb-1 uppercase">{previewItem.name}</h2>
+                  <h2 className="text-2xl font-black text-center mb-1 uppercase tracking-tighter">{previewItem.name}</h2>
                   <p className="text-slate-400 text-center text-[13px] font-bold mb-6 italic">"{previewItem.desc}"</p>
                   <div className="space-y-2 bg-slate-50 p-5 rounded-3xl border border-slate-100 mb-8 text-[13px]">
                     <div className="flex justify-between border-b border-slate-200/50 pb-2 mb-2"><span className="text-slate-400 font-bold uppercase tracking-wider">强化阶段</span><div className="flex items-center gap-2"><span className="text-slate-400 font-black">Lv.{player.unlockedItems[previewItem.name] || 0}</span><span className="text-indigo-300">➜</span><span className="text-indigo-600 font-black">Lv.{(player.unlockedItems[previewItem.name] || 0) + 1}</span></div></div>
-                    {previewItem.levelReq && (<div className="flex justify-between items-center"><span className="text-slate-400 font-bold">等级要求</span><span className={`${player.level >= previewItem.levelReq ? 'text-emerald-400' : 'text-rose-400'} font-black`}>LV.{previewItem.levelReq}</span></div>)}
+                    {previewItem.levelReq && (<div className="flex justify-between items-center"><span className="text-slate-400 font-bold">要求等级</span><span className={`${player.level >= previewItem.levelReq ? 'text-emerald-400' : 'text-rose-400'} font-black`}>LV.{previewItem.levelReq}</span></div>)}
                     {previewItem.damage && (<div className="flex justify-between"><span className="text-slate-400 font-bold">基础威力</span><div className="flex items-center gap-2"><span className="text-slate-400">{calcVal(previewItem.damage, player.unlockedItems[previewItem.name] || 1)}</span><span className="text-rose-300">➜</span><span className="text-rose-500 font-black">+{calcVal(previewItem.damage, (player.unlockedItems[previewItem.name] || 0) + 1)}</span></div></div>)}
                     {previewItem.defense && (<div className="flex justify-between"><span className="text-slate-400 font-bold">防御力</span><div className="flex items-center gap-2"><span className="text-slate-400">{calcVal(previewItem.defense, player.unlockedItems[previewItem.name] || 1)}</span><span className="text-sky-300">➜</span><span className="text-sky-500 font-black">+{calcVal(previewItem.defense, (player.unlockedItems[previewItem.name] || 0) + 1)}</span></div></div>)}
                     {previewItem.mult ? (<div className="flex justify-between"><span className="text-slate-400 font-bold">技能倍率</span><div className="flex items-center gap-2"><span className="text-slate-400">x{(previewItem.mult * (1 + 0.1 * Math.max(0, (player.unlockedItems[previewItem.name] || 1) - 1))).toFixed(1)}</span><span className="text-indigo-300">➜</span><span className="text-indigo-600 font-black">x{(previewItem.mult * (1 + 0.1 * (player.unlockedItems[previewItem.name] || 0))).toFixed(1)}</span></div></div>) : null}
@@ -461,18 +339,11 @@ export default function App() {
              <div className="flex justify-between items-center mb-3 flex-none">
                 <div className="flex items-center gap-4">
                   <h3 className="text-xl font-black italic text-indigo-600 tracking-widest uppercase">战术部署</h3>
-                  <div className="flex items-center gap-2 bg-indigo-50 px-4 py-1.5 rounded-2xl border border-indigo-100">
-                    <span className="text-[11px] font-black text-indigo-400 uppercase tracking-tighter">当前战场:</span>
-                    <span className="text-[13px] font-black text-indigo-600">{field.name}</span>
-                  </div>
+                  <div className="flex items-center gap-2 bg-indigo-50 px-4 py-1.5 rounded-2xl border border-indigo-100"><span className="text-[11px] font-black text-indigo-400 uppercase tracking-tighter">当前战场:</span><span className="text-[13px] font-black text-indigo-600">{field.name}</span></div>
                 </div>
                 <button onClick={startRound} className="px-12 py-2 bg-slate-800 text-white font-black rounded-xl hover:bg-slate-700 active:scale-95 transition-all text-[15px]">出击</button>
              </div>
-             
-             <div className="bg-slate-50 border border-slate-100 p-3 rounded-2xl mb-3 flex-none">
-                <p className="text-[13px] font-bold text-slate-600 leading-relaxed"><b className="text-indigo-500">{field.name}：</b>{field.desc} <span className="ml-2 text-rose-500 font-black underline decoration-rose-200 underline-offset-4">{field.effect}</span></p>
-             </div>
-
+             <div className="bg-slate-50 border border-slate-100 p-3 rounded-2xl mb-3 flex-none"><p className="text-[13px] font-bold text-slate-600 leading-relaxed"><b className="text-indigo-500">{field.name}：</b>{field.desc} <span className="ml-2 text-rose-500 font-black underline decoration-rose-200 underline-offset-4">{field.effect}</span></p></div>
              <div className="flex-1 grid grid-cols-3 gap-4 min-h-0">
                 <div className="flex flex-col gap-1 min-h-0 h-full border-r border-slate-50 pr-2">
                   <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-1">主武器</p>
@@ -510,12 +381,10 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slide-in-from-bottom-4 { from { transform: translateY(0.5rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes slide-in-from-left-4 { from { transform: translateX(-1rem); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes zoom-in-95 { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .animate-in { animation-fill-mode: forwards; }
         .fade-in { animation-name: fade-in; }
-        .slide-in-from-bottom-4 { animation-name: slide-in-from-bottom-4; }
         .slide-in-from-left-4 { animation-name: slide-in-from-left-4; }
         .zoom-in-95 { animation-name: zoom-in-95; }
       `}</style>
