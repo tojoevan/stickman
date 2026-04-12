@@ -106,64 +106,74 @@ const getDefenseCounterMult = (aTag: string, wTag: string) => {
   return 1.0;
 };
 
-// --- 神经滚轮组件 ---
+// --- 神经滚轮组件 (Native Scroll 版) ---
 const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { label: string, items: any[], selected: string, onSelect: (name: string) => void, unlockedItems: Record<string, number> }) => {
-  const index = items.findIndex(i => i.name === selected);
-  const touchStartY = useRef(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const itemHeight = 48; // 固定行高
 
-  const move = (dir: number) => {
-    if (items.length === 0) return;
-    const nextIdx = (index + dir + items.length) % items.length;
-    onSelect(items[nextIdx].name);
+  // 使用三倍数据模拟循环滚动
+  const tripleItems = [...items, ...items, ...items];
+  const centerOffset = items.length * itemHeight;
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      const idx = items.findIndex(i => i.name === selected);
+      scrollRef.current.scrollTop = centerOffset + (idx * itemHeight);
+    }
+  }, []);
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const st = scrollRef.current.scrollTop;
+    
+    // 循环重置逻辑
+    if (st < itemHeight) scrollRef.current.scrollTop = st + centerOffset;
+    else if (st > centerOffset * 2) scrollRef.current.scrollTop = st - centerOffset;
+
+    const currentIdx = Math.round((scrollRef.current.scrollTop - centerOffset) / itemHeight) % items.length;
+    const safeIdx = (currentIdx + items.length) % items.length;
+    if (items[safeIdx].name !== selected) {
+      onSelect(items[safeIdx].name);
+    }
   };
 
-  const displayIndices = [
-    (index - 1 + items.length) % items.length,
-    index,
-    (index + 1) % items.length
-  ];
-
   return (
-    <div className="flex-1 flex flex-col gap-2 min-w-0">
-      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest text-center">{label}</p>
-      <div 
-        className="h-40 bg-slate-900/5 rounded-3xl relative overflow-hidden flex flex-col items-center justify-center cursor-ns-resize border border-slate-100 select-none group"
-        style={{ touchAction: 'none' }}
-        onWheel={(e) => move(e.deltaY > 0 ? 1 : -1)}
-        onTouchStart={(e) => touchStartY.current = e.touches[0].clientY}
-        onTouchMove={(e) => e.preventDefault()}
-        onTouchEnd={(e) => {
-          const delta = touchStartY.current - e.changedTouches[0].clientY;
-          if (Math.abs(delta) > 30) move(delta > 0 ? 1 : -1);
-        }}
-      >
-        <div className="absolute inset-x-2 h-12 top-1/2 -translate-y-1/2 bg-indigo-500/10 rounded-xl border border-indigo-500/20 pointer-events-none z-0"></div>
-        <div className="relative z-10 w-full px-2">
-          {displayIndices.map((idx, pos) => {
-            const item = items[idx];
-            if (!item) return null;
-            const isCenter = pos === 1;
-            const itemLevel = unlockedItems[item.name] || 1;
+    <div className="flex-1 flex flex-row items-center gap-2 min-w-0 h-full">
+      <div className="flex-none flex flex-col items-center justify-center">
+         <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] [writing-mode:vertical-lr] rotate-180 py-2 border-r border-slate-100 pr-1.5">{label}</p>
+      </div>
+      <div className="flex-1 h-36 bg-slate-900/[0.03] rounded-3xl relative border border-slate-100/50 overflow-hidden">
+        {/* 中心选中高亮条 */}
+        <div className="absolute inset-x-2 h-[48px] top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-100 rounded-2xl pointer-events-none z-0"></div>
+        
+        <div 
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="relative z-10 h-full overflow-y-auto custom-scrollbar snap-y snap-mandatory"
+          style={{ scrollBehavior: 'smooth' }}
+        >
+          {/* 上下占位，保证选中的项能居中 */}
+          <div style={{ height: (144 - itemHeight) / 2 }} />
+          {tripleItems.map((item, idx) => {
+            const isSelected = item.name === selected && (Math.abs(idx - items.length - items.findIndex(i=>i.name===selected)) < 1);
             return (
               <div 
-                key={`${item.name}-${pos}`} 
-                onClick={() => !isCenter && move(pos - 1)}
-                className={`flex flex-row items-center justify-center gap-3 transition-all duration-500 ease-out py-1 ${isCenter ? 'opacity-100 scale-110' : 'opacity-20 scale-90 blur-[0.5px]'}`}
+                key={`${item.name}-${idx}`}
+                className={`h-[48px] flex flex-row items-center justify-center gap-3 snap-center transition-all duration-300 ${isSelected ? 'opacity-100 scale-105' : 'opacity-20 scale-95'}`}
               >
-                <span className="text-2xl flex-none">{item.icon}</span>
-                <div className="flex flex-col items-start min-w-0 flex-1">
-                  <span className={`text-[11px] font-black truncate w-full ${isCenter ? 'text-slate-800' : 'text-slate-400'}`}>
+                <span className="text-xl flex-none">{item.icon}</span>
+                <div className="flex flex-row items-center gap-2 min-w-0">
+                  <span className={`text-[12px] font-black truncate ${isSelected ? 'text-slate-800' : 'text-slate-400'}`}>
                     {item.name}
                   </span>
-                  {isCenter && (
-                    <span className="text-[9px] font-bold text-indigo-500 leading-none">
-                      LV.{itemLevel}
-                    </span>
-                  )}
+                  <span className={`text-[9px] font-bold font-mono ${isSelected ? 'text-indigo-500' : 'text-slate-300'}`}>
+                    Lv.{unlockedItems[item.name] || 1}
+                  </span>
                 </div>
               </div>
             );
           })}
+          <div style={{ height: (144 - itemHeight) / 2 }} />
         </div>
       </div>
     </div>
@@ -219,7 +229,7 @@ export default function App() {
   const [enemy, setEnemy] = useState<Character>({ ...INITIAL_CHAR, stats: { strength: 8, agility: 7, constitution: 8 }, health: 90, maxHealth: 90 });
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
-  const [battleLog, setBattleLog] = useState<string[]>(['等待中...']);
+  const [battleLog, setBattleLog] = useState<string[]>(['等待连接...']);
   const [currentPose, setCurrentPose] = useState<{player: any, enemy: any}>({player: 'idle', enemy: 'idle'});
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
@@ -260,7 +270,7 @@ export default function App() {
   const buyItem = (item: Item) => setPreviewItem(item);
   const confirmPurchase = (item: Item) => {
     const curLvl = player.unlockedItems[item.name] || 0; const cost = Math.floor((item.cost || 0) * Math.pow(1.6, curLvl));
-    if (player.gold >= cost) { setPlayer(prev => ({ ...prev, gold: prev.gold - cost, unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 } })); addLog(`强化成功: ${item.name} [Lv.${curLvl+1}]`); setPreviewItem(null); }
+    if (player.gold >= cost) { setPlayer(prev => ({ ...prev, gold: prev.gold - cost, unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 } })); addLog(`强化: ${item.name} [Lv.${curLvl+1}]`); setPreviewItem(null); }
   };
 
   const handleLevelUp = (stat: Stat) => { if (player.statPoints > 0) setPlayer(prev => { const nMax = stat === 'constitution' ? Math.floor(prev.maxHealth + 15) : prev.maxHealth; return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax }; }); };
@@ -300,7 +310,7 @@ export default function App() {
     setBattleHistory(prev => [...prev, { round, pDmg: curP_Dmg, eDmg: curE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
     const finalize = (isW: boolean, isK: boolean) => {
       const gR = isW ? (60 + player.level * 25) : (20 + player.level * 10); const xR = isW ? (70 + player.level * 10) : 0;
-      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; addLog('等级提升！'); } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
+      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
       else { setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 })); setGameState('defeat'); }
     };
     if (pHP <= 0) finalize(false, true); else if (eHP <= 0) finalize(true, true); else if (round >= 3) finalize(pHP > eHP, false); else { setRound(prev => prev + 1); setGameState('tactics'); }
@@ -326,7 +336,7 @@ export default function App() {
     <div className="h-screen w-full bg-slate-50 text-slate-800 p-4 font-sans overflow-hidden flex flex-col gap-4">
       <div className="flex justify-between items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-sm flex-none">
         <div className="flex items-center gap-12"><div className="flex flex-col items-center"><span className="text-[13px] text-slate-400 font-bold uppercase tracking-widest">神经等级</span><span className="text-2xl font-black text-indigo-600">LV.{player.level}</span></div>
-          <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold whitespace-nowrap">{player.xp} / {player.level * 100} XP</span></div></div>
+          <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold">{player.xp} / {player.level * 100} XP</span></div></div>
         </div>
         <div className="flex items-center gap-8"><div className="text-right"><span className="text-[13px] text-slate-400 font-bold uppercase block">储备</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div><div className="flex gap-2"><button onClick={() => setGameState('shop')} className="px-5 py-2.5 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 shadow-lg shadow-slate-200">黑市</button><button onClick={() => { localStorage.removeItem('token'); setToken(''); }} className="px-3 py-2.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded-xl hover:bg-slate-200">退出</button></div></div>
       </div>
@@ -339,7 +349,6 @@ export default function App() {
             <div className="w-64 text-right"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-slate-800 h-full transition-all duration-1000" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-slate-500 font-black uppercase">UNIT: {Math.floor(enemy.health)} HP</p></div>
           </div>
           <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
-          
           {(gameState === 'victory' || gameState === 'defeat') && (
             <div className={`absolute inset-0 z-[150] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overflow-hidden bg-slate-50`}>
               <div className="absolute inset-0 tactical-stripes opacity-100 z-0"></div>
