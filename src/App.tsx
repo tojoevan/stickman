@@ -169,7 +169,8 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
         <div 
           ref={scrollRef}
           onScroll={handleScroll}
-          className="relative z-10 h-full overflow-y-auto custom-scrollbar snap-y snap-mandatory"
+          className="relative z-10 h-full overflow-y-auto overflow-x-hidden custom-scrollbar snap-y snap-mandatory"
+          style={{ scrollbarWidth: 'none' }}
         >
           {/* 上部占位 */}
           <div style={{ height: spacerHeight }} />
@@ -179,14 +180,14 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
             return (
               <div 
                 key={`${item.name}-${idx}`}
-                className={`h-[64px] flex flex-row items-center justify-center gap-4 snap-center transition-all duration-200 ${isMatch ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}
+                className={`h-[64px] flex flex-row items-center justify-center gap-3 snap-center transition-all duration-200 px-2 ${isMatch ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}
               >
                 <span className="text-3xl flex-none">{item.icon}</span>
                 <div className="flex flex-col justify-center min-w-0">
-                  <span className={`text-[15px] font-black truncate leading-tight ${isMatch ? 'text-slate-800' : 'text-slate-400'}`}>
+                  <span className={`text-[14px] font-black truncate leading-tight ${isMatch ? 'text-slate-800' : 'text-slate-400'}`}>
                     {item.name}
                   </span>
-                  <span className={`text-[10px] font-bold font-mono ${isMatch ? 'text-indigo-500' : 'text-slate-300'}`}>
+                  <span className={`text-[9px] font-bold font-mono ${isMatch ? 'text-indigo-500' : 'text-slate-300'}`}>
                     Lv.{unlockedItems[item.name] || 1}
                   </span>
                 </div>
