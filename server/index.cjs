@@ -128,7 +128,7 @@ app.get('/api/load', authenticateToken, async (req, res) => {
 // 5. 管理员接口：设置指定用户的等级和储备
 app.post('/api/admin/set-stats', async (req, res) => {
   try {
-    const { username, level, gold } = req.body;
+    const { username, level, gold, statPoints } = req.body;
     if (!username) return res.status(400).json({ error: '必须提供档案代号' });
 
     // 查找用户 ID
