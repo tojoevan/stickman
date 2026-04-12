@@ -277,17 +277,58 @@ export default function App() {
           </div>
           <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
           {(gameState === 'victory' || gameState === 'defeat') && (
-            <div className={`absolute inset-0 ${gameState === 'victory' ? 'bg-emerald-50/30' : 'bg-rose-50/30'} backdrop-blur-xl flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 z-[150]`}>
-              <h1 className={`text-6xl font-black italic uppercase tracking-tighter mb-4 drop-shadow-sm ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>{gameState === 'victory' ? 'MISSION SUCCESS' : 'SYSTEM FAILURE'}</h1>
-              <div className="w-full max-w-lg bg-white/70 border border-white rounded-[2.5rem] p-6 shadow-2xl backdrop-blur-3xl mb-6">
-                <div className="flex justify-between items-center gap-4 mb-5 border-b border-slate-100 pb-5">
-                  <div className="flex-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">User Unit</p><div className="space-y-0.5 text-[13px] font-black text-slate-800"><p>{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[11px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p><p className="text-slate-400 font-bold text-[11px]">{player.equipment.armor}</p></div></div>
-                  <div className="text-center px-4 py-1.5 bg-slate-50 rounded-full border border-slate-100"><span className="text-[11px] font-black text-slate-300 uppercase tracking-tighter">VERSUS</span></div>
-                  <div className="flex-1 text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Target Host</p><div className="space-y-0.5 text-[13px] font-black text-slate-800"><p><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-slate-400 font-bold text-[11px]">{enemy.equipment.armor}</p></div></div>
+            <div className={`absolute inset-0 ${gameState === 'victory' ? 'bg-emerald-50/30' : 'bg-rose-50/30'} backdrop-blur-xl flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 z-[150] overflow-hidden`}>
+              <div className="w-full max-w-lg flex flex-col items-center max-h-full">
+                <h1 className={`text-5xl font-black italic uppercase tracking-tighter mb-4 drop-shadow-sm flex-none ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                  {gameState === 'victory' ? 'SUCCESS' : 'FAILURE'}
+                </h1>
+
+                <div className="w-full bg-white/70 border border-white rounded-[2.5rem] p-5 shadow-2xl backdrop-blur-3xl mb-6 flex flex-col min-h-0 overflow-hidden">
+                  <div className="flex justify-between items-center gap-4 mb-4 border-b border-slate-100 pb-4 flex-none">
+                    <div className="flex-1">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">User Unit</p>
+                      <div className="text-[12px] font-black text-slate-800">
+                        <p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[10px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p>
+                        <p className="text-slate-400 font-bold text-[10px] truncate">{player.equipment.armor}</p>
+                      </div>
+                    </div>
+                    <div className="text-center px-3 py-1 bg-slate-50 rounded-full border border-slate-100 flex-none">
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-tighter">VS</span>
+                    </div>
+                    <div className="flex-1 text-right">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Target</p>
+                      <div className="text-[12px] font-black text-slate-800">
+                        <p className="truncate"><span className="text-rose-500 font-mono text-[10px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p>
+                        <p className="text-slate-400 font-bold text-[10px] truncate">{enemy.equipment.armor}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
+                    <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em] text-center mb-3">Tactical Data Log</p>
+                    <div className="space-y-2">
+                      {battleHistory.map((h, i) => (
+                        <div key={i} className="flex items-center justify-between px-4 py-2 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                          <span className="text-[9px] font-black text-slate-300 w-6">R{h.round}</span>
+                          <div className="flex items-center gap-3 flex-1 justify-center">
+                            <span className="text-rose-600 font-black text-[14px]">-{h.pDmg}</span>
+                            <div className="w-12 h-[1px] bg-slate-200 relative"></div>
+                            <span className="text-indigo-600 font-black text-[14px]">-{h.eDmg}</span>
+                          </div>
+                          <div className="text-right w-12 flex-none">
+                            <p className="text-[10px] font-black text-slate-500 leading-none">{Math.floor(h.pRemainingHp)}:{Math.floor(h.eRemainingHp)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2"><p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] text-center mb-3">Tactical Data Log</p>{battleHistory.map((h, i) => (<div key={i} className="flex items-center justify-between px-4 py-2.5 bg-slate-50/50 hover:bg-white/80 rounded-2xl border border-slate-100/50 transition-all"><span className="text-[10px] font-black text-slate-300 w-8">R{h.round}</span><div className="flex items-center gap-4"><span className="text-rose-600 font-black text-[15px]">-{h.pDmg}</span><div className="w-16 h-[2px] bg-slate-100 rounded-full overflow-hidden relative"><div className="absolute inset-0 bg-gradient-to-r from-rose-400 to-indigo-400 opacity-20"></div></div><span className="text-indigo-600 font-black text-[15px]">-{h.eDmg}</span></div><div className="text-right w-16"><span className="text-[10px] font-black text-slate-400 uppercase">HP</span><p className="text-[11px] font-black text-slate-600 leading-none">{Math.floor(h.pRemainingHp)}:{Math.floor(h.eRemainingHp)}</p></div></div>))}</div>
+
+                <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-16 py-4 text-white font-black rounded-full shadow-xl transition-all active:scale-95 text-[14px] flex items-center gap-3 flex-none ${gameState === 'victory' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-100' : 'bg-rose-600 hover:bg-rose-400 shadow-rose-100'}`}>
+                  {gameState === 'victory' ? 'NEXT MISSION' : 'RELOAD SYSTEM'}
+                  <span className="opacity-50 group-hover:translate-x-1 transition-transform">➜</span>
+                </button>
               </div>
-              <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-16 py-4 text-white font-black rounded-full shadow-xl transition-all active:scale-95 text-[15px] flex items-center gap-3 ${gameState === 'victory' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-rose-600 hover:bg-rose-400'}`}>{gameState === 'victory' ? 'NEXT MISSION' : 'RELOAD SYSTEM'}<span className="opacity-50 group-hover:translate-x-1 transition-transform">➜</span></button>
             </div>
           )}
         </div>
