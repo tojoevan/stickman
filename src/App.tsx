@@ -94,11 +94,20 @@ const INITIAL_CHAR: Character = {
 };
 
 const calcVal = (base: number, level: number) => Math.floor(base * (1 + 0.15 * (level - 1)));
-const getCounterMult = (wTag: string, aTag: string) => {
+
+// --- 双向克制计算 ---
+// 攻击压制：武器 -> 防具
+const getAttackCounterMult = (wTag: string, aTag: string) => {
   if (wTag === 'slashing' && aTag === 'light') return 1.35;
   if (wTag === 'crushing' && aTag === 'heavy') return 1.35;
   if (wTag === 'piercing' && aTag === 'medium') return 1.35;
   return 1.0;
+};
+// 防御抗性：防具 -> 武器
+const getDefenseCounterMult = (aTag: string, wTag: string) => {
+  if (aTag === 'heavy' && wTag === 'slashing') return 0.65; // 重甲抵挡斩击
+  if (aTag === 'medium' && wTag === 'piercing') return 0.65; // 机械甲抵挡穿透
+  return 1.0; // 轻甲通过 evasion 逻辑抗 crushing
 };
 
 interface BattleRoundRecord { round: number; pDmg: number; eDmg: number; pRemainingHp: number; eRemainingHp: number; }
@@ -134,13 +143,6 @@ class StickmanRenderer {
   }
 }
 
-interface Character {
-  level: number; xp: number; gold: number;
-  stats: Record<Stat, number>; statPoints: number; health: number; maxHealth: number;
-  equipment: { weapon: string; armor: string; skill: string; };
-  unlockedItems: Record<string, number>; defeatCount: number;
-}
-
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
@@ -150,7 +152,7 @@ export default function App() {
   const [enemy, setEnemy] = useState<Character>({ ...INITIAL_CHAR, stats: { strength: 8, agility: 7, constitution: 8 }, health: 90, maxHealth: 90 });
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
-  const [battleLog, setBattleLog] = useState<string[]>(['等待中...']);
+  const [battleLog, setBattleLog] = useState<string[]>(['等待连接...']);
   const [currentPose, setCurrentPose] = useState<{player: any, enemy: any}>({player: 'idle', enemy: 'idle'});
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
@@ -208,19 +210,37 @@ export default function App() {
       const s = ITEMS.skills.find(i => i.name === (isP ? player.equipment.skill : enemy.equipment.skill))!;
       const wL = isP ? (player.unlockedItems[w.name] || 1) : (enemy.unlockedItems[w.name] || 1);
       const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
+      
       setCurrentPose(prev => ({ ...prev, [isP ? 'player' : 'enemy']: 'attack' }));
       if (w.name.includes('弓')) rendererRef.current?.addEffect('arrow', isP ? 280 : 520, 230, isP ? '#6366f1' : '#94a3b8', 1);
       await new Promise(r => setTimeout(r, 600));
+      
       let baseDmg = calcVal(w.damage!, wL); let sMult = s?.mult || 1;
-      const counterBonus = getCounterMult(w.tag, a.tag);
+      
+      // --- 双向克制计算 ---
+      const attackBonus = getAttackCounterMult(w.tag, a.tag);
+      const defenseReduction = getDefenseCounterMult(a.tag, w.tag);
+      
+      if (attackBonus > 1) addLog(`${isP ? '>>' : '<<'} [压制] ${w.name} 穿透了 ${a.name}`);
+      if (defenseReduction < 1) addLog(`${isP ? '>>' : '<<'} [抵抗] ${a.name} 削弱了 ${w.name}`);
+
+      // 环境修正
       if (field.id === 'emp') { if (w.rarity === 'epic' || w.rarity === 'perfect') baseDmg *= 0.6; else if (w.rarity === 'common') baseDmg *= 1.6; }
       else if (field.id === 'narrow') { if (w.name.includes('锤')) baseDmg *= 0.5; else if (w.name.includes('刀') || w.name.includes('剑')) baseDmg *= 1.4; }
       else if (field.id === 'desert') { if (w.name.includes('弓')) baseDmg *= 1.6; }
       else if (field.id === 'overload') { sMult *= 2.0; }
-      let dmg = (baseDmg + atk.stats.strength * (isP ? 0.8 : 1.2)) * sMult * counterBonus; if (s.mult) dmg *= (1 + 0.1 * (sL - 1));
-      const rawDmg = Math.floor(dmg); rendererRef.current?.addEffect('spark', isP ? 560 : 240, 250, isP ? '#f59e0b' : '#ef4444', 12);
-      if (isP) { let fD = Math.floor(field.id === 'overload' ? rawDmg * 1.3 : rawDmg); eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg = fD; } 
-      else { const aL = player.unlockedItems[a.name] || 1; const minDmg = Math.floor(rawDmg * 0.15); let fD = Math.max(minDmg, rawDmg - calcVal(a.defense!, aL)); if (field.id === 'overload') fD *= 1.3; fD = Math.floor(Math.max(1, fD)); pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg = fD; }
+
+      let dmg = (baseDmg + atk.stats.strength * (isP ? 0.8 : 1.2)) * sMult * attackBonus * defenseReduction; 
+      if (s.mult) dmg *= (1 + 0.1 * (sL - 1));
+      const rawDmg = Math.floor(dmg);
+      rendererRef.current?.addEffect('spark', isP ? 560 : 240, 250, isP ? '#f59e0b' : '#ef4444', 12);
+      
+      if (isP) { let fD = Math.floor(field.id === 'overload' ? rawDmg * 1.3 : rawDmg); eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg = fD; addLog(`>> 造成 ${fD} 伤害`); } 
+      else { 
+        const aL = player.unlockedItems[a.name] || 1; const minDmg = Math.floor(rawDmg * 0.15); 
+        let fD = Math.max(minDmg, rawDmg - calcVal(a.defense!, aL));
+        if (field.id === 'overload') fD *= 1.3; fD = Math.floor(Math.max(1, fD)); pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg = fD; addLog(`<< 受创 ${fD} 伤害`);
+      }
       setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' })); await new Promise(r => setTimeout(r, 400)); setCurrentPose({player: 'idle', enemy: 'idle'});
     };
     await executeTurn(true); if (eHP > 0) await executeTurn(false);
@@ -253,7 +273,7 @@ export default function App() {
     <div className="h-screen w-full bg-slate-50 text-slate-800 p-4 font-sans overflow-hidden flex flex-col gap-4">
       <div className="flex justify-between items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-sm flex-none">
         <div className="flex items-center gap-12"><div className="flex flex-col items-center"><span className="text-[13px] text-slate-400 font-bold uppercase tracking-widest">神经等级</span><span className="text-2xl font-black text-indigo-600">LV.{player.level}</span></div>
-          <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold whitespace-nowrap">{player.xp} / {player.level * 100} XP</span></div></div>
+          <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold">{player.xp} / {player.level * 100} XP</span></div></div>
         </div>
         <div className="flex items-center gap-8"><div className="text-right"><span className="text-[13px] text-slate-400 font-bold uppercase block">储备</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div><div className="flex gap-2"><button onClick={() => setGameState('shop')} className="px-5 py-2.5 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 shadow-lg shadow-slate-200">黑市</button><button onClick={() => { localStorage.removeItem('token'); setToken(''); }} className="px-3 py-2.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded-xl hover:bg-slate-200">退出</button></div></div>
       </div>
@@ -271,59 +291,19 @@ export default function App() {
             <div className={`absolute inset-0 z-[150] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overflow-hidden bg-slate-50`}>
               <div className="absolute inset-0 tactical-stripes opacity-100 z-0"></div>
               <div className={`absolute inset-0 ${gameState === 'victory' ? 'bg-emerald-500/5' : 'bg-rose-500/5'} z-10`}></div>
-              
               <div className="w-full max-w-lg flex flex-col items-center max-h-full relative z-20">
-                <h1 className={`text-5xl font-black italic uppercase tracking-tighter mb-6 drop-shadow-sm flex-none ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {gameState === 'victory' ? 'SUCCESS' : 'FAILURE'}
-                </h1>
-                
+                <h1 className={`text-5xl font-black italic uppercase tracking-tighter mb-6 drop-shadow-sm flex-none ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>{gameState === 'victory' ? 'SUCCESS' : 'FAILURE'}</h1>
                 <div className="w-full bg-white/40 border border-slate-200/50 rounded-[2rem] p-6 shadow-xl backdrop-blur-md mb-8 flex flex-col min-h-0 overflow-hidden">
                   <div className="flex justify-between items-center gap-4 mb-5 border-b border-slate-200/30 pb-5 flex-none">
-                    <div className="flex-1">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Neural Unit</p>
-                      <div className="text-[13px] font-black text-slate-800">
-                        <p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[11px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p>
-                        <p className="text-slate-400 font-bold text-[10px] truncate">{player.equipment.armor}</p>
-                      </div>
-                    </div>
-                    <div className="px-4 py-1 bg-slate-800 text-white rounded-lg flex-none rotate-[-2deg] shadow-lg">
-                      <span className="text-[11px] font-black italic tracking-tighter">DATA REV.</span>
-                    </div>
-                    <div className="flex-1 text-right">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Host</p>
-                      <div className="text-[13px] font-black text-slate-800">
-                        <p className="truncate"><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p>
-                        <p className="text-slate-400 font-bold text-[10px] truncate">{enemy.equipment.armor}</p>
-                      </div>
-                    </div>
+                    <div className="flex-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Neural Unit</p><div className="text-[13px] font-black text-slate-800"><p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[11px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p><p className="text-slate-400 font-bold text-[10px] truncate">{player.equipment.armor}</p></div></div>
+                    <div className="px-4 py-1 bg-slate-800 text-white rounded-lg flex-none shadow-lg"><span className="text-[11px] font-black italic tracking-tighter">DATA REV.</span></div>
+                    <div className="flex-1 text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Host</p><div className="text-[13px] font-black text-slate-800"><p className="truncate"><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-slate-400 font-bold text-[10px] truncate">{enemy.equipment.armor}</p></div></div>
                   </div>
-
-                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] text-center mb-4">Round Analysis</p>
-                    <div className="space-y-2.5">
-                      {battleHistory.map((h, i) => (
-                        <div key={i} className="flex items-center justify-between px-5 py-3 bg-white/30 rounded-2xl border border-white/50 shadow-sm">
-                          <span className="text-[10px] font-black text-slate-400 w-8">#0{h.round}</span>
-                          <div className="flex items-center gap-4 flex-1 justify-center">
-                            <span className="text-rose-600 font-black text-[16px] w-12 text-right">-{h.pDmg}</span>
-                            <div className="w-16 h-[1px] bg-slate-300 relative mx-2">
-                              <div className="absolute top-[-3px] right-0 w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-                            </div>
-                            <span className="text-indigo-600 font-black text-[16px] w-12">-{h.eDmg}</span>
-                          </div>
-                          <div className="text-right w-16 flex-none">
-                            <p className="text-[11px] font-bold text-slate-500 font-mono leading-none">{Math.floor(h.pRemainingHp)} : {Math.floor(h.eRemainingHp)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] text-center mb-4">Round Analysis</p>
+                    <div className="space-y-2.5">{battleHistory.map((h, i) => (<div key={i} className="flex items-center justify-between px-5 py-3 bg-white/30 rounded-2xl border border-white/50 shadow-sm"><span className="text-[10px] font-black text-slate-400 w-8">#0{h.round}</span><div className="flex items-center gap-4 flex-1 justify-center"><span className="text-rose-600 font-black text-[16px] w-12 text-right">-{h.pDmg}</span><div className="w-16 h-[1px] bg-slate-300 relative mx-2"><div className="absolute top-[-3px] right-0 w-1.5 h-1.5 rounded-full bg-slate-400"></div></div><span className="text-indigo-600 font-black text-[16px] w-12">-{h.eDmg}</span></div><div className="text-right w-16 flex-none"><p className="text-[11px] font-bold text-slate-500 font-mono leading-none">{Math.floor(h.pRemainingHp)} : {Math.floor(h.eRemainingHp)}</p></div></div>))}</div>
                   </div>
                 </div>
-
-                <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-20 py-4 text-white font-black rounded-2xl shadow-2xl transition-all active:scale-95 text-[15px] flex items-center gap-4 flex-none border-b-4 ${gameState === 'victory' ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-rose-600 border-rose-800 hover:bg-rose-500'}`}>
-                  {gameState === 'victory' ? 'CONTINUE TASK' : 'RETRY NEURAL LINK'}
-                  <span className="group-hover:translate-x-1 transition-transform">➜</span>
-                </button>
+                <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-20 py-4 text-white font-black rounded-2xl shadow-2xl transition-all active:scale-95 text-[15px] flex items-center gap-4 flex-none border-b-4 ${gameState === 'victory' ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-rose-600 border-rose-800 hover:bg-rose-500'}`}>{gameState === 'victory' ? 'CONTINUE TASK' : 'RETRY NEURAL LINK'}<span className="group-hover:translate-x-1 transition-transform">➜</span></button>
               </div>
             </div>
           )}
@@ -331,7 +311,7 @@ export default function App() {
         <div className="w-72 bg-white border border-slate-200 rounded-3xl p-5 flex flex-col shadow-sm">
            <h3 className="text-[13px] font-black text-slate-300 uppercase mb-4 tracking-widest border-b border-slate-50 pb-2">链路日志</h3>
            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
-              {battleLog.map((log, i) => ( <p key={i} className={`text-[13px] leading-relaxed border-l-2 pl-3 ${log.includes('造成') || log.includes('受创') ? 'text-indigo-600 font-bold border-indigo-200' : log.includes('成功') || log.includes('强化') ? 'text-amber-500 border-amber-200' : 'text-slate-400 border-slate-100'}`}>{log}</p> ))}
+              {battleLog.map((log, i) => ( <p key={i} className={`text-[13px] leading-relaxed border-l-2 pl-3 ${log.includes('压制') ? 'text-rose-600 font-bold border-rose-200' : log.includes('抵抗') ? 'text-sky-600 font-bold border-sky-200' : log.includes('造成') || log.includes('受创') ? 'text-indigo-600 border-indigo-100' : 'text-slate-400 border-slate-100'}`}>{log}</p> ))}
            </div>
         </div>
       </div>
@@ -396,9 +376,15 @@ export default function App() {
                   <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none"></div>
                   <p className="text-[10px] font-black text-white/50 uppercase mb-1 tracking-widest relative z-10">神经探测：敌方单位配置</p>
                   <div className="flex items-center gap-4 text-white font-black text-[12px] relative z-10">
-                    <span title="武器">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon} <b className="text-indigo-300 ml-1">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b></span>
+                    <div className="flex flex-col">
+                      <span title="武器">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon} <b className="text-indigo-300 ml-1">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b></span>
+                      {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && <span className="text-[9px] text-emerald-400 font-black animate-bounce mt-0.5">神经优势：攻击压制</span>}
+                    </div>
                     <span className="w-[1px] h-3 bg-white/20"></span>
-                    <span title="防具">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
+                    <div className="flex flex-col">
+                      <span title="防具">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
+                      {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && <span className="text-[9px] text-sky-400 font-black animate-bounce mt-0.5">神经优势：战术防御</span>}
+                    </div>
                     <span className="w-[1px] h-3 bg-white/20"></span>
                     <span title="技能">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon} {enemy.equipment.skill}</span>
                   </div>
