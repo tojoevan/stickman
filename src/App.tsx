@@ -492,7 +492,7 @@ export default function App() {
           </div>
         </div>
       )}
-    <div className="h-screen w-full bg-slate-50 text-slate-800 p-4 font-sans overflow-hidden flex flex-col gap-4">
+
       <div className="flex justify-between items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-sm flex-none">
         <div className="flex items-center gap-12">
           <div className="flex items-center gap-4 border-r border-slate-100 pr-8">
