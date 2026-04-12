@@ -85,6 +85,7 @@ const ITEMS = {
 };
 
 const INITIAL_CHAR: Character = {
+  username: '未知主体',
   level: 1, xp: 0, gold: 100,
   stats: { strength: 10, agility: 10, constitution: 12 },
   statPoints: 8, health: 120, maxHealth: 120,
@@ -222,6 +223,7 @@ class StickmanRenderer {
 }
 
 interface Character {
+  username?: string;
   level: number; xp: number; gold: number;
   stats: Record<Stat, number>; statPoints: number; health: number; maxHealth: number;
   equipment: { weapon: string; armor: string; skill: string; };
@@ -256,7 +258,12 @@ export default function App() {
     try {
       const res = await safeFetch(`${API_URL}/${authView}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
       const data = await res.json();
-      if (data.token) { localStorage.setItem('token', data.token); setToken(data.token); addLog('神经链路已建立。'); } else setAuthView('login');
+      if (data.token) { 
+        localStorage.setItem('token', data.token); 
+        setToken(data.token); 
+        setPlayer(prev => ({ ...prev, username: data.username || prev.username }));
+        addLog('神经链路已建立。'); 
+      } else setAuthView('login');
     } catch (err: any) { alert(err.message); }
   };
 
@@ -349,6 +356,8 @@ export default function App() {
     }
   };
 
+const ENEMY_NAMES = ['Aegis-7', 'Phantom-X', 'Cerberus', 'Viper-9', 'Titan-2', 'Ghost-Protocol', 'Nova-Core', 'Shadow-Stalker', 'Cyber-Reaper', 'Iron-Wraith'];
+
   const resetGame = () => {
     const oF = BATTLEFIELDS.filter(f => f.id !== field.id); const nF = oF[Math.floor(Math.random() * oF.length)]; setField(nF);
     const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon)!; const pA = ITEMS.armors.find(a => a.name === player.equipment.armor)!;
@@ -361,8 +370,9 @@ export default function App() {
     const bS = player.level === 1 ? 0.5 : 0.8; const eS = { strength: Math.floor(player.stats.strength * bS * dM), agility: Math.floor(player.stats.agility * 0.7 * dM), constitution: Math.floor(player.stats.constitution * 0.8 * dM) };
     const eH = Math.floor(player.maxHealth * (player.level === 1 ? 0.75 : 0.95) * (1 + (pP / 3000)) * Math.max(0.5, 1 - (player.defeatCount * 0.12)));
     const eL = Math.max(1, Math.floor(player.level / 2.2));
-    setEnemy({ level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }, defeatCount: 0, statPoints: 0 });
-    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]); addLog(`部署至: ${nF.name}`);
+    const eName = ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
+    setEnemy({ username: eName, level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }, defeatCount: 0, statPoints: 0 });
+    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]); addLog(`部署至: ${nF.name} | 对手: ${eName}`);
   };
 
   if (!token) {
@@ -435,7 +445,17 @@ export default function App() {
   return (
     <div className="h-screen w-full bg-slate-50 text-slate-800 p-4 font-sans overflow-hidden flex flex-col gap-4">
       <div className="flex justify-between items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-sm flex-none">
-        <div className="flex items-center gap-12"><div className="flex flex-col items-center"><span className="text-[13px] text-slate-400 font-bold uppercase tracking-widest">神经等级</span><span className="text-2xl font-black text-indigo-600">LV.{player.level}</span></div>
+        <div className="flex items-center gap-12">
+          <div className="flex items-center gap-4 border-r border-slate-100 pr-8">
+            <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-black text-lg shadow-lg shadow-indigo-100 italic">
+              {player.username?.[0]?.toUpperCase() || 'U'}
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Neural Profile</p>
+              <p className="text-[16px] font-black text-slate-800 leading-none">{player.username}</p>
+            </div>
+          </div>
+          <div className="flex flex-col items-center"><span className="text-[13px] text-slate-400 font-bold uppercase tracking-widest">神经等级</span><span className="text-2xl font-black text-indigo-600">LV.{player.level}</span></div>
           <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold">{player.xp} / {player.level * 100} XP</span></div></div>
         </div>
         <div className="flex items-center gap-8"><div className="text-right"><span className="text-[13px] text-slate-400 font-bold uppercase block">储备</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div><div className="flex gap-2"><button onClick={() => setGameState('shop')} className="px-5 py-2.5 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 shadow-lg shadow-slate-200">黑市</button><button onClick={() => { localStorage.removeItem('token'); setToken(''); }} className="px-3 py-2.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded-xl hover:bg-slate-200">退出</button></div></div>
@@ -445,8 +465,8 @@ export default function App() {
         <div className="flex-1 bg-white rounded-3xl border border-slate-200 relative overflow-hidden shadow-sm">
           <canvas ref={canvasRef} width={800} height={400} className="w-full h-full object-contain" />
           <div className="absolute top-6 inset-x-10 flex justify-between pointer-events-none">
-            <div className="w-64"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-rose-500 h-full transition-all duration-1000" style={{ width: `${(player.health / player.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-rose-600 font-black uppercase">PLAYER: {Math.floor(player.health)} HP</p></div>
-            <div className="w-64 text-right"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-slate-800 h-full transition-all duration-1000" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-slate-500 font-black uppercase">UNIT: {Math.floor(enemy.health)} HP</p></div>
+            <div className="w-64"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-rose-500 h-full transition-all duration-1000" style={{ width: `${(player.health / player.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-rose-600 font-black uppercase">{player.username}: {Math.floor(player.health)} HP</p></div>
+            <div className="w-64 text-right"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-slate-800 h-full transition-all duration-1000" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-slate-500 font-black uppercase">{enemy.username || 'UNIT'}: {Math.floor(enemy.health)} HP</p></div>
           </div>
           <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
           {(gameState === 'victory' || gameState === 'defeat') && (
