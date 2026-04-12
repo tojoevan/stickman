@@ -282,15 +282,16 @@ class StickmanRenderer {
     
     // --- 绘制残影 (Ghost Afterimages) ---
     if (hasGhost) {
-      for (let i = 1; i <= 3; i++) {
+      for (let i = 1; i <= 5; i++) {
         ctx.save();
-        const ghostX = x + (flip ? i * 15 : -i * 15) * Math.sin(t * 2);
+        // 扩大摆动幅度到 40px，使用更快的正弦频率
+        const ghostX = x + (flip ? i * 40 : -i * 40) * Math.sin(t * 3);
         ctx.translate(ghostX, y);
         if (flip) ctx.scale(-1, 1);
-        ctx.globalAlpha = 0.4 / i;
-        ctx.strokeStyle = '#6366f1'; // 靛蓝残影
-        ctx.lineWidth = 4;
-        this.drawStickmanPath(pose, t - i * 0.1, weaponIcon);
+        ctx.globalAlpha = 0.5 / i;
+        ctx.strokeStyle = '#6366f1'; 
+        ctx.lineWidth = 3;
+        this.drawStickmanPath(pose, t - i * 0.12, weaponIcon);
         ctx.restore();
       }
     }
@@ -529,7 +530,7 @@ export default function App() {
         else { eHP = Math.min(enemy.maxHealth, eHP + heal); setEnemy(prev => ({...prev, health: eHP})); }
         addLog(`${isP ? '>>' : '<<'} [修复] +${heal} HP`);
       }
-      await new Promise(r => setTimeout(r, 800)); // 稍作延长以供观赏提示
+      await new Promise(r => setTimeout(r, 1200)); // 延长至 1200ms
       setActiveSkill(null);
       await new Promise(r => setTimeout(r, 200));
     };
