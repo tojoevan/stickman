@@ -299,14 +299,26 @@ export default function App() {
                     <div className="px-4 py-1 bg-slate-800 text-white rounded-lg flex-none shadow-lg"><span className="text-[11px] font-black italic tracking-tighter">DATA REV.</span></div>
                     <div className="flex-1 text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Host</p><div className="text-[13px] font-black text-slate-800"><p className="truncate"><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-slate-400 font-bold text-[10px] truncate">{enemy.equipment.armor}</p></div></div>
                   </div>
-                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] text-center mb-4">Round Analysis</p>
-                    <div className="space-y-2.5">{battleHistory.map((h, i) => (<div key={i} className="flex items-center justify-between px-5 py-3 bg-white/30 rounded-2xl border border-white/50 shadow-sm"><span className="text-[10px] font-black text-slate-400 w-8">#0{h.round}</span><div className="flex items-center gap-4 flex-1 justify-center"><span className="text-rose-600 font-black text-[16px] w-12 text-right">-{h.pDmg}</span><div className="w-16 h-[1px] bg-slate-300 relative mx-2"><div className="absolute top-[-3px] right-0 w-1.5 h-1.5 rounded-full bg-slate-400"></div></div><span className="text-indigo-600 font-black text-[16px] w-12">-{h.eDmg}</span></div><div className="text-right w-16 flex-none"><p className="text-[11px] font-bold text-slate-500 font-mono leading-none">{Math.floor(h.pRemainingHp)} : {Math.floor(h.eRemainingHp)}</p></div></div>))}</div>
+                  <div className="flex gap-2">
+                    {battleHistory.map((h, i) => (
+                      <div key={i} className="flex-1 bg-white/30 rounded-xl py-2 px-3 border border-white/50 text-center shadow-sm">
+                        <p className="text-[9px] font-black text-slate-400 mb-1">ROUND {h.round}</p>
+                        <div className="flex items-center justify-center gap-1 font-mono text-[14px] font-black">
+                          <span className="text-rose-600">-{h.pDmg}</span>
+                          <span className="text-slate-300">/</span>
+                          <span className="text-indigo-600">-{h.eDmg}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-                <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-20 py-4 text-white font-black rounded-2xl shadow-2xl transition-all active:scale-95 text-[15px] flex items-center gap-4 flex-none border-b-4 ${gameState === 'victory' ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-rose-600 border-rose-800 hover:bg-rose-500'}`}>{gameState === 'victory' ? 'CONTINUE TASK' : 'RETRY NEURAL LINK'}<span className="group-hover:translate-x-1 transition-transform">➜</span></button>
-              </div>
-            </div>
-          )}
+                  </div>
+                  <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-20 py-4 text-white font-black rounded-2xl shadow-2xl transition-all active:scale-95 text-[15px] flex items-center gap-4 flex-none border-b-4 ${gameState === 'victory' ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-rose-600 border-rose-800 hover:bg-rose-500'}`}>
+                  {gameState === 'victory' ? 'CONTINUE TASK' : 'RETRY NEURAL LINK'}
+                  <span className="group-hover:translate-x-1 transition-transform">➜</span>
+                  </button>
+                  </div>
+                  </div>
+                  )}
         </div>
         <div className="w-72 bg-white border border-slate-200 rounded-3xl p-5 flex flex-col shadow-sm">
            <h3 className="text-[13px] font-black text-slate-300 uppercase mb-4 tracking-widest border-b border-slate-50 pb-2">链路日志</h3>
