@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = 3001;
+const PORT = 5273;
 const SECRET_KEY = 'shadow_trace_secret_2026';
 
 // 采用最稳健的 JSON 文件存储，确保在任何 Linux/Docker/Mac 环境下无需编译即可运行
