@@ -629,6 +629,7 @@ export default function App() {
                       <div className="flex items-center gap-2 flex-none">
                         <span className="text-xl">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon}</span>
                         <span className="whitespace-nowrap">{enemy.equipment.armor}</span>
+                        <b className="text-indigo-300 font-mono text-[10px] whitespace-nowrap">Lv.{enemy.unlockedItems[enemy.equipment.armor] || 1}</b>
                         {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && (
                           <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-bounce">防御</span>
                         )}
@@ -637,6 +638,7 @@ export default function App() {
                       <div className="flex items-center gap-2 flex-none">
                         <span className="text-xl">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon}</span>
                         <span className="whitespace-nowrap">{enemy.equipment.skill}</span>
+                        <b className="text-indigo-300 font-mono text-[10px] whitespace-nowrap">Lv.{enemy.unlockedItems[enemy.equipment.skill] || 1}</b>
                       </div>
                     </div>
                   </div>
