@@ -415,18 +415,6 @@ export default function App() {
     const bS = player.level === 1 ? 0.5 : 0.8; const eS = { strength: Math.floor(player.stats.strength * bS * dM), agility: Math.floor(player.stats.agility * 0.7 * dM), constitution: Math.floor(player.stats.constitution * 0.8 * dM) };
     const eH = Math.floor(player.maxHealth * (player.level === 1 ? 0.75 : 0.95) * (1 + (pP / 3000)) * Math.max(0.5, 1 - (player.defeatCount * 0.12)));
     const eL = Math.max(1, Math.floor(player.level / 2.2));
-  const resetGame = () => {
-    const oF = BATTLEFIELDS.filter(f => f.id !== field.id); const nF = oF[Math.floor(Math.random() * oF.length)]; setField(nF);
-    const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon)!; const pA = ITEMS.armors.find(a => a.name === player.equipment.armor)!;
-    const wL = player.unlockedItems[pW.name] || 1; const aL = player.unlockedItems[pA.name] || 1;
-    const pP = (player.stats.strength + player.stats.agility + player.stats.constitution) + calcVal(pW.damage!, wL) + calcVal(pA.defense!, aL);
-    const dM = (1 + (pP / 750)) * Math.max(0.5, 1 - (player.defeatCount * 0.12));
-    const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level); const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level); const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
-    const rw = aW[Math.floor(Math.random() * aW.length)]; const ra = aA[Math.floor(Math.random() * aA.length)]; const rs = aS[Math.floor(Math.random() * aS.length)];
-    setPlayer(prev => ({...prev, health: prev.maxHealth}));
-    const bS = player.level === 1 ? 0.5 : 0.8; const eS = { strength: Math.floor(player.stats.strength * bS * dM), agility: Math.floor(player.stats.agility * 0.7 * dM), constitution: Math.floor(player.stats.constitution * 0.8 * dM) };
-    const eH = Math.floor(player.maxHealth * (player.level === 1 ? 0.75 : 0.95) * (1 + (pP / 3000)) * Math.max(0.5, 1 - (player.defeatCount * 0.12)));
-    const eL = Math.max(1, Math.floor(player.level / 2.2));
     const eName = ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
     setEnemy({ username: eName, level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }, defeatCount: 0, statPoints: 0 });
     setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]); addLog(`部署至: ${nF.name} | 对手: ${eName}`);
