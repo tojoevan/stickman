@@ -394,92 +394,115 @@ export default function App() {
   const handleLevelUp = (stat: Stat) => { if (player.statPoints > 0) setPlayer(prev => { const nMax = stat === 'constitution' ? Math.floor(prev.maxHealth + 15) : prev.maxHealth; return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax }; }); };
 
   const startRound = async () => {
-    setGameState('battle'); addLog(`>>> 回合开始`);
+    setGameState('battle'); addLog(`>>> 神经链路第 ${round} 轮同步`);
     let pHP = Math.floor(player.health); let eHP = Math.floor(enemy.health);
-    let curP_Dmg = 0; let curE_Dmg = 0;
+    
+    // 存储本轮技能状态
+    let pSkillActive = false; let eSkillActive = false;
+    const pS = ITEMS.skills.find(i => i.name === player.equipment.skill)!;
+    const eS = ITEMS.skills.find(i => i.name === enemy.equipment.skill)!;
 
+    // --- 阶段一：神经技能释放 ---
+    const releaseSkill = async (isP: boolean) => {
+      const s = isP ? pS : eS; const x = isP ? 240 : 560;
+      addLog(`${isP ? '>>' : '<<'} [准备] ${isP ? player.username : enemy.username} 正在释放: ${s.name}`);
+      
+      if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
+      if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
+      if (s.name === '系统过载') rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20);
+      if (s.name === '神经修复') {
+        const atk = isP ? player : enemy;
+        const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
+        const heal = Math.floor((atk.maxHealth - (isP ? pHP : eHP)) * 0.25 + atk.stats.constitution * 0.5 * sL);
+        rendererRef.current?.addEffect('heal', x, 280, '#10b981', 12);
+        if (isP) { pHP = Math.min(player.maxHealth, pHP + heal); setPlayer(prev => ({...prev, health: pHP})); }
+        else { eHP = Math.min(enemy.maxHealth, eHP + heal); setEnemy(prev => ({...prev, health: eHP})); }
+        addLog(`${isP ? '>>' : '<<'} [修复] ${s.name} 恢复了 ${heal} 点生命值`);
+      }
+      if (isP) pSkillActive = true; else eSkillActive = true;
+      await new Promise(r => setTimeout(r, 1000)); // 观赏性延迟
+    };
+
+    await releaseSkill(true);
+    await releaseSkill(false);
+
+    // --- 阶段二：战术交火 ---
     const executeTurn = async (isP: boolean) => {
+      if ((isP && pHP <= 0) || (!isP && eHP <= 0)) return;
+
       const atk = isP ? player : enemy; const def = isP ? enemy : player;
       const wN = isP ? player.equipment.weapon : enemy.equipment.weapon; const aN = isP ? enemy.equipment.armor : player.equipment.armor;
       const w = ITEMS.weapons.find(i => i.name === wN)!; const a = ITEMS.armors.find(i => i.name === aN)!;
-      const s = ITEMS.skills.find(i => i.name === (isP ? player.equipment.skill : enemy.equipment.skill))!;
+      const s = isP ? pS : eS;
       const wL = isP ? (player.unlockedItems[w.name] || 1) : (enemy.unlockedItems[w.name] || 1);
       const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
       
       const x = isP ? 240 : 560; const tx = isP ? 560 : 240;
-
-      // 技能前置触发：扫描、护盾、修复
-      if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
-      if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
-      if (s.name === '神经修复') {
-        const heal = Math.floor((atk.maxHealth - atk.health) * 0.25 + atk.stats.constitution * 0.5 * sL);
-        rendererRef.current?.addEffect('heal', x, 280, '#10b981', 12);
-        if (isP) { pHP = Math.min(player.maxHealth, pHP + heal); setPlayer(prev => ({...prev, health: pHP})); }
-        else { eHP = Math.min(enemy.maxHealth, eHP + heal); setEnemy(prev => ({...prev, health: eHP})); }
-        addLog(`${isP ? '>>' : '<<'} [技能] ${s.name} 修复了 ${heal} 神经损伤`);
-        await new Promise(r => setTimeout(r, 600));
-        return; // 修复技能不进行攻击
-      }
-
       const numHits = s.name === '幻影连击' ? 2 : 1;
+
       for (let h = 0; h < numHits; h++) {
         setCurrentPose(prev => ({ ...prev, [isP ? 'player' : 'enemy']: 'attack' }));
         if (w.name.includes('弓')) rendererRef.current?.addEffect('arrow', isP ? 280 : 520, 230, isP ? '#6366f1' : '#94a3b8', 1);
-        await new Promise(r => setTimeout(r, 600));
+        await new Promise(r => setTimeout(r, 800));
 
-        let baseDmg = calcVal(w.damage!, wL);
         let attackBonus = getAttackCounterMult(w.tag, a.tag);
         let defenseReduction = getDefenseCounterMult(a.tag, w.tag);
 
-        // 技能逻辑干预
-        if (s.name === '弱点扫描' && defenseReduction < 1) { defenseReduction = 1.0; addLog(`${isP ? '>>' : '<<'} [穿透] 弱点已锁定，抗性失效`); }
+        // 技能效果应用
+        if (s.name === '弱点扫描') { defenseReduction = 1.0; addLog(`${isP ? '>>' : '<<'} [效果] 扫描数据已注入，抗性失效`); }
         
-        let dmg = (baseDmg + atk.stats.strength * (isP ? 1.0 : 1.5)) * attackBonus * defenseReduction;
+        let dmg = (calcVal(w.damage!, wL) + atk.stats.strength * (isP ? 1.0 : 1.5)) * attackBonus * defenseReduction;
         if (s.mult) {
           let sMult = s.mult * (1 + 0.1 * (sL - 1));
-          if (s.name === '蓄能重击') dmg += atk.stats.strength * 1.2 * sL;
-          if (s.name === '系统过载') { rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20); }
+          if (s.name === '蓄能重击') dmg += atk.stats.strength * 1.5 * sL;
           dmg *= sMult;
         }
 
         const fD = Math.floor(field.id === 'overload' ? dmg * 1.3 : dmg);
-        rendererRef.current?.addEffect('spark', tx, 250, isP ? '#f59e0b' : '#ef4444', 12);
+        rendererRef.current?.addEffect('spark', tx, 250, isP ? '#f59e0b' : '#ef4444', 15);
         
-        if (isP) { eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg += fD; addLog(`>> 第 ${h+1} 次打击: ${fD} 伤害`); } 
-        else { eHP = Math.max(0, eHP - fD); pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg += fD; addLog(`<< 承受打击: ${fD} 伤害`); }
+        if (isP) { eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); addLog(`>>打击: ${fD} 伤害`); } 
+        else { pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); addLog(`<<受创: ${fD} 伤害`); }
 
-        // 反伤逻辑
-        const defSkill = isP ? ITEMS.skills.find(i=>i.name===enemy.equipment.skill) : s;
-        if (defSkill?.name === '动能反射' && fD > 0) {
+        // 反伤与自残逻辑（在打击后触发）
+        const defSkill = isP ? eS : pS;
+        if (defSkill.name === '动能反射' && fD > 0) {
           const reflect = Math.floor(fD * 0.5);
-          if (isP) { pHP = Math.max(0, pHP - reflect); setPlayer(prev => ({...prev, health: pHP})); addLog(`<< [反弹] 受到 ${reflect} 动能反馈`); }
-          else { eHP = Math.max(0, eHP - reflect); setEnemy(prev => ({...prev, health: eHP})); addLog(`>> [反弹] 目标承受 ${reflect} 动能反馈`); }
+          if (isP) { pHP = Math.max(0, pHP - reflect); setPlayer(prev => ({...prev, health: pHP})); addLog(`<< [反馈] 受到 ${reflect} 动能反弹`); }
+          else { eHP = Math.max(0, eHP - reflect); setEnemy(prev => ({...prev, health: eHP})); addLog(`>> [反馈] 目标承受 ${reflect} 动能反弹`); }
         }
 
-        // 自残逻辑 (系统过载)
         if (s.name === '系统过载') {
-          const backlash = Math.floor(atk.maxHealth * 0.15);
+          const backlash = Math.floor(atk.maxHealth * 0.12);
           if (isP) { pHP = Math.max(0, pHP - backlash); setPlayer(prev => ({...prev, health: pHP})); }
           else { eHP = Math.max(0, eHP - backlash); setEnemy(prev => ({...prev, health: eHP})); }
-          addLog(`${isP ? '>>' : '<<'} [警告] 系统过载导致 ${backlash} 核心损伤`);
+          addLog(`${isP ? '>>' : '<<'} [警告] 过载损伤: ${backlash}`);
         }
 
         setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' }));
-        if (isP && numHits > 1) await new Promise(r => setTimeout(r, 200)); // 连击间隔
+        await new Promise(r => setTimeout(r, 500));
       }
-      await new Promise(r => setTimeout(r, 400)); setCurrentPose({player: 'idle', enemy: 'idle'});
+      setCurrentPose({player: 'idle', enemy: 'idle'});
+      await new Promise(r => setTimeout(r, 600));
     };
-    await executeTurn(true); if (eHP > 0) await executeTurn(false);
+
+    await executeTurn(true);
+    await executeTurn(false);
+
+    // 结算逻辑
+    let curP_Dmg = player.health - pHP; let curE_Dmg = enemy.health - eHP;
     setBattleHistory(prev => [...prev, { round, pDmg: curP_Dmg, eDmg: curE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
-    const finalize = (isW: boolean, isK: boolean) => {
+    
+    const finalize = (isW: boolean) => {
       const gR = isW ? (60 + player.level * 25) : (20 + player.level * 10); const xR = isW ? (70 + player.level * 10) : 0;
       if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
       else { setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 })); setGameState('defeat'); }
     };
-    if (pHP <= 0) finalize(false, true); else if (eHP <= 0) finalize(true, true); 
-    else if (round >= 3) finalize(pHP > eHP, false); 
+
+    if (pHP <= 0) finalize(false); else if (eHP <= 0) finalize(true); 
+    else if (round >= 3) finalize(pHP > eHP); 
     else { 
-      // --- 对手每轮动态调整装备逻辑 ---
+      // 敌方战术重校
       const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level);
       const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level);
       const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
@@ -487,16 +510,9 @@ export default function App() {
       const ra = aA[Math.floor(Math.random() * aA.length)];
       const rs = aS[Math.floor(Math.random() * aS.length)];
       const eL = Math.max(1, Math.floor(player.level / 2.2));
-      
-      setEnemy(prev => ({
-        ...prev,
-        equipment: { weapon: rw.name, armor: ra.name, skill: rs.name },
-        unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }
-      }));
-      
-      addLog(`>>> 侦测到目标单位正在重新校准战术单元...`);
-      setRound(prev => prev + 1); 
-      setGameState('tactics'); 
+      setEnemy(prev => ({ ...prev, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL } }));
+      addLog(`>>> 目标正在重新校准战术单元...`);
+      setRound(prev => prev + 1); setGameState('tactics'); 
     }
   };
 
