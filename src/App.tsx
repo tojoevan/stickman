@@ -362,21 +362,34 @@ export default function App() {
               })}
             </div>
             {previewItem && (
-              <div className="absolute inset-0 bg-white/95 backdrop-blur-sm z-[100] p-8 flex flex-col items-center justify-center animate-in zoom-in-95 duration-200">
-                <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm relative overflow-hidden">
-                  <div className="text-6xl mb-6 text-center">{previewItem.icon}</div>
-                  <h2 className="text-2xl font-black text-center mb-2">{previewItem.name}</h2>
-                  <p className="text-slate-400 text-center text-[13px] italic mb-6 leading-relaxed">{previewItem.desc}</p>
-                  <div className="space-y-2.5 bg-white/5 p-5 rounded-2xl border border-white/10 mb-8 text-[13px]">
-                    {previewItem.levelReq && <div className="flex justify-between"><span className="text-slate-500">神经等级要求</span><span className={`${player.level >= previewItem.levelReq ? 'text-emerald-400' : 'text-rose-400'} font-black`}>LV.{previewItem.levelReq}</span></div>}
-                    {previewItem.damage && <div className="flex justify-between"><span className="text-slate-500">攻击力</span><span className="text-rose-400 font-black">+{previewItem.damage}</span></div>}
-                    {previewItem.defense && <div className="flex justify-between"><span className="text-slate-500">防御力</span><span className="text-sky-400 font-black">+{previewItem.defense}</span></div>}
-                    {previewItem.evasion && <div className="flex justify-between"><span className="text-slate-500">闪避率</span><span className="text-emerald-400 font-black">+{previewItem.evasion}%</span></div>}
-                    {previewItem.mult ? <div className="flex justify-between"><span className="text-slate-500">伤害倍率</span><span className="text-indigo-400 font-black">x{previewItem.mult}</span></div> : null}
+              <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] p-4 flex items-center justify-center animate-in fade-in duration-200" onClick={() => setPreviewItem(null)}>
+                <div className="bg-white text-slate-900 p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm relative overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+                  <div className="text-6xl mb-6 text-center drop-shadow-lg">{previewItem.icon}</div>
+                  <h2 className="text-2xl font-black text-center mb-1 uppercase tracking-tighter">{previewItem.name}</h2>
+                  <p className="text-slate-400 text-center text-[13px] font-bold mb-6 leading-relaxed italic">"{previewItem.desc}"</p>
+                  
+                  <div className="space-y-2 bg-slate-50 p-5 rounded-3xl border border-slate-100 mb-8 text-[13px]">
+                    {previewItem.levelReq && (
+                      <div className="flex justify-between items-center border-b border-slate-200/50 pb-2 mb-2">
+                        <span className="text-slate-400 font-bold uppercase tracking-wider">要求等级</span>
+                        <span className={`${player.level >= previewItem.levelReq ? 'text-emerald-500' : 'text-rose-500'} font-black`}>LV.{previewItem.levelReq}</span>
+                      </div>
+                    )}
+                    {previewItem.damage && <div className="flex justify-between"><span className="text-slate-400 font-bold">攻击力</span><span className="text-rose-500 font-black">+{previewItem.damage}</span></div>}
+                    {previewItem.defense && <div className="flex justify-between"><span className="text-slate-400 font-bold">防御力</span><span className="text-sky-500 font-black">+{previewItem.defense}</span></div>}
+                    {previewItem.evasion && <div className="flex justify-between"><span className="text-slate-400 font-bold">闪避率</span><span className="text-emerald-500 font-black">{previewItem.evasion}%</span></div>}
+                    {previewItem.mult ? <div className="flex justify-between"><span className="text-slate-400 font-bold">伤害倍率</span><span className="text-indigo-600 font-black">x{previewItem.mult}</span></div> : null}
                   </div>
+
                   <div className="flex gap-3">
-                    <button onClick={() => setPreviewItem(null)} className="flex-1 py-4 bg-slate-800 text-slate-400 font-bold rounded-2xl hover:text-white transition-colors">取消</button>
-                    <button onClick={() => confirmPurchase(previewItem)} className="flex-[2] py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-900/40 hover:bg-indigo-500 transition-all active:scale-95">支付 ₿ {previewItem.cost}</button>
+                    <button onClick={() => setPreviewItem(null)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-2xl hover:bg-slate-200 transition-all">取消</button>
+                    <button 
+                      onClick={() => confirmPurchase(previewItem)} 
+                      disabled={player.level < (previewItem.levelReq || 0) || player.gold < (previewItem.cost || 0)}
+                      className="flex-[2] py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-500 transition-all active:scale-95 disabled:opacity-30"
+                    >
+                      支付 ₿ {previewItem.cost}
+                    </button>
                   </div>
                 </div>
               </div>
