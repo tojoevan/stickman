@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // --- 配置 ---
-// 自动探测：如果从公网访问，则请求公网 IP 的 5273；如果本地，则 localhost:5273
-const API_URL = `${window.location.protocol}//${window.location.hostname}:5273/api`;
-console.log('📡 神经链路初始化 - 物理目标:', API_URL);
+// 生产环境通过 Nginx 将 /api 转发到 5273 端口，彻底解决 HTTPS/跨域问题
+const API_URL = '/api';
+console.log('📡 神经链路初始化 - 生产节点:', API_URL);
 
 // --- 辅助：处理请求报错 ---
 const safeFetch = async (url: string, options: any) => {
   try {
     const res = await fetch(url, options);
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || `服务器响应异常: ${res.status}`);
+    }
     return res;
-  } catch (err) {
-    console.error('❌ 链路传输中断，目标节点:', url);
-    console.error('❌ 错误详情:', err);
-    throw new Error('无法连接到后端服务器，请检查 5273 端口是否开放或 HTTPS 限制');
+  } catch (err: any) {
+    console.error('❌ 链路传输中断:', err.message);
+    throw err;
   }
 };
 
