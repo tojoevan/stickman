@@ -230,11 +230,21 @@ class StickmanRenderer {
     for (let i = 0; i < count; i++) { 
       this.effects.push({ 
         id: this.nextEffectId++, type, x, y, 
-        vx: type === 'heal' ? (Math.random() - 0.5) * 4 : (Math.random() - 0.5) * 12, 
-        vy: type === 'heal' ? -Math.random() * 5 : (Math.random() - 0.5) * 12, 
-        life: 1.0, color, size: type === 'scan' ? 800 : Math.random() * 4 + 2 
+        vx: type === 'heal' ? (Math.random() - 0.5) * 4 : (Math.random() - 0.5) * 10, 
+        vy: type === 'heal' ? -Math.random() * 4 : (Math.random() - 0.5) * 10, 
+        life: 1.0, color, size: type === 'scan' ? 800 : Math.random() * 5 + 2 
       }); 
     } 
+  }
+  advance() { 
+    this.time += 0.04;
+    this.effects = this.effects.filter(e => { 
+      e.x += e.vx; e.y += e.vy; 
+      // 显著降低衰减速度 (0.015 约持续 1.5 秒)
+      e.life -= (e.type === 'scan' || e.type === 'shield' ? 0.015 : 0.025); 
+      if (e.type === 'arrow') e.vx = 18; 
+      return e.life > 0; 
+    }); 
   }
   drawBackground(field: Battlefield) {
     const ctx = this.ctx; const t = this.time; ctx.save(); ctx.fillStyle = field.bgColor; ctx.fillRect(0, 0, 800, 400);
@@ -245,14 +255,7 @@ class StickmanRenderer {
     else if (field.id === 'overload') { ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 3; ctx.globalAlpha = Math.abs(Math.sin(t*2))*0.3; ctx.beginPath(); ctx.arc(400, 200, 150 + Math.sin(t)*20, 0, Math.PI * 2); ctx.stroke(); }
     ctx.restore();
   }
-  updateEffects() { 
-    this.effects = this.effects.filter(e => { 
-      e.x += e.vx; e.y += e.vy; e.life -= (e.type === 'scan' || e.type === 'shield' ? 0.08 : 0.04); 
-      if (e.type === 'arrow') e.vx = 18; 
-      return e.life > 0; 
-    }); 
-  }
-  draw(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️') {
+  drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️') {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45); ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
     ctx.strokeStyle = pose === 'dead' ? '#cbd5e1' : '#f8fafc'; ctx.lineWidth = 5; ctx.lineCap = 'round';
     const headSize = 18; const bodyHeight = 55; let armAngle = Math.sin(t) * 0.4; let legAngle = Math.cos(t) * 0.4;
@@ -264,14 +267,27 @@ class StickmanRenderer {
     ctx.moveTo(0, -bodyHeight + 8); ctx.lineTo(Math.cos(-armAngle) * -30, -bodyHeight + 8 + Math.sin(-armAngle) * 30);
     ctx.moveTo(0, 0); ctx.lineTo(Math.sin(legAngle) * 30, 35); ctx.moveTo(0, 0); ctx.lineTo(Math.sin(-legAngle) * 30, 35);
     ctx.stroke(); ctx.restore();
+  }
+  renderEffects() {
+    const ctx = this.ctx;
     this.effects.forEach(e => { 
       ctx.globalAlpha = e.life; ctx.fillStyle = e.color; 
       if (e.type === 'arrow') { ctx.fillRect(e.x, e.y, 12, 2); } 
-      else if (e.type === 'scan') { ctx.fillRect(0, e.y - (1-e.life)*400, 800, 2); }
-      else if (e.type === 'shield') { ctx.strokeStyle = e.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y - 40, 50, 0, Math.PI * 2); ctx.stroke(); }
+      else if (e.type === 'scan') { 
+        ctx.fillStyle = e.color;
+        const scanY = e.y + (1 - e.life) * 300 - 150;
+        ctx.fillRect(0, scanY, 800, 4); // 加粗扫描线
+        ctx.globalAlpha = e.life * 0.3;
+        ctx.fillRect(0, scanY - 10, 800, 24); // 增加光晕
+      }
+      else if (e.type === 'shield') { 
+        ctx.strokeStyle = e.color; ctx.lineWidth = 4; ctx.beginPath(); 
+        ctx.arc(e.x, e.y - 40, 60, 0, Math.PI * 2); ctx.stroke(); 
+        ctx.globalAlpha = e.life * 0.15; ctx.fill();
+      }
       else { ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill(); } 
     });
-    ctx.globalAlpha = 1; this.updateEffects(); this.time += 0.04;
+    ctx.globalAlpha = 1;
   }
 }
 
@@ -380,9 +396,13 @@ export default function App() {
 
   useEffect(() => {
     let frame: number; const loop = () => { if (canvasRef.current && !rendererRef.current) rendererRef.current = new StickmanRenderer(canvasRef.current.getContext('2d')!);
-      if (rendererRef.current) { rendererRef.current.drawBackground(field);
+      if (rendererRef.current) { 
+        rendererRef.current.advance(); // 每一帧只更新一次逻辑
+        rendererRef.current.drawBackground(field);
         const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon); const eW = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
-        rendererRef.current.draw(240, 280, currentPose.player, false, player.stats.agility, pW?.icon); rendererRef.current.draw(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️');
+        rendererRef.current.drawCharacter(240, 280, currentPose.player, false, player.stats.agility, pW?.icon); 
+        rendererRef.current.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️');
+        rendererRef.current.renderEffects(); // 统一渲染特效
       } frame = requestAnimationFrame(loop); }; frame = requestAnimationFrame(loop); return () => cancelAnimationFrame(frame);
   }, [token, currentPose, player.stats.agility, enemy.stats.agility, player.equipment.weapon, enemy.equipment.weapon, field]);
 
