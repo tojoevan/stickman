@@ -34,7 +34,7 @@ interface Item {
   cost?: number;
   rarity: Rarity;
   levelReq?: number;
-  tag: ItemTag; // 新增属性：用于计算克制
+  tag: ItemTag;
 }
 
 interface Battlefield {
@@ -51,7 +51,7 @@ const BATTLEFIELDS: Battlefield[] = [
   { id: 'emp', name: '强磁雷暴区', desc: '强磁场使精密设备失灵。', effect: '史诗装备 -40%，普通装备 +60%。', bgColor: '#1e1b4b', accentColor: '#818cf8' },
   { id: 'narrow', name: '暗影狭廊', desc: '极度狭窄，施展不开重型武器。', effect: '重型武器 -50%，轻捷武器 +40%。', bgColor: '#18181b', accentColor: '#52525b' },
   { id: 'desert', name: '荒漠戈壁', desc: '视野开阔，风速稳定。', effect: '弓类武器 +60%，闪避率 +10%。', bgColor: '#451a03', accentColor: '#f59e0b' },
-  { id: 'overload', name: '能源核心', desc: '高能粒子充斥空间。', effect: '技能倍率 +100%，受创 +30%。', bgColor: '#4c0519', accentColor: '#f43f5e' },
+  { id: 'overload', name: '能源核心', desc: '空气中充斥着高能粒子。', effect: '技能倍率 +100%，受创 +30%。', bgColor: '#4c0519', accentColor: '#f43f5e' },
 ];
 
 const ITEMS = {
@@ -94,12 +94,10 @@ const INITIAL_CHAR: Character = {
 };
 
 const calcVal = (base: number, level: number) => Math.floor(base * (1 + 0.15 * (level - 1)));
-
-// 克制计算函数
 const getCounterMult = (wTag: string, aTag: string) => {
-  if (wTag === 'slashing' && aTag === 'light') return 1.35; // 刀剑克轻甲
-  if (wTag === 'crushing' && aTag === 'heavy') return 1.35; // 重锤克盾
-  if (wTag === 'piercing' && aTag === 'medium') return 1.35; // 弓箭克机械甲
+  if (wTag === 'slashing' && aTag === 'light') return 1.35;
+  if (wTag === 'crushing' && aTag === 'heavy') return 1.35;
+  if (wTag === 'piercing' && aTag === 'medium') return 1.35;
   return 1.0;
 };
 
@@ -160,7 +158,7 @@ export default function App() {
     try {
       const res = await safeFetch(`${API_URL}/${authView}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
       const data = await res.json();
-      if (data.token) { localStorage.setItem('token', data.token); setToken(data.token); addLog('神经链路已建立。'); } else { setAuthView('login'); alert('档案已建立。'); }
+      if (data.token) { localStorage.setItem('token', data.token); setToken(data.token); addLog('神经链路已建立。'); } else setAuthView('login');
     } catch (err: any) { alert(err.message); }
   };
 
@@ -168,7 +166,7 @@ export default function App() {
     if (token) {
       fetch(`${API_URL}/load`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.gameData) {
         const rawData = data.gameData; if (Array.isArray(rawData.unlockedItems)) { const m: any = {}; rawData.unlockedItems.forEach((n: any) => m[n] = 1); rawData.unlockedItems = m; }
-        setPlayer({ ...INITIAL_CHAR, ...rawData }); addLog('神经档案同步。');
+        setPlayer({ ...INITIAL_CHAR, ...rawData }); addLog('档案同步成功。');
       }});
     }
   }, [token]);
@@ -186,7 +184,7 @@ export default function App() {
   const buyItem = (item: Item) => setPreviewItem(item);
   const confirmPurchase = (item: Item) => {
     const curLvl = player.unlockedItems[item.name] || 0; const cost = Math.floor((item.cost || 0) * Math.pow(1.6, curLvl));
-    if (player.gold >= cost) { setPlayer(prev => ({ ...prev, gold: prev.gold - cost, unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 } })); addLog(`强化: ${item.name} [Lv.${curLvl+1}]`); setPreviewItem(null); }
+    if (player.gold >= cost) { setPlayer(prev => ({ ...prev, gold: prev.gold - cost, unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 } })); addLog(`强化成功: ${item.name} [Lv.${curLvl+1}]`); setPreviewItem(null); }
   };
 
   const handleLevelUp = (stat: Stat) => { if (player.statPoints > 0) setPlayer(prev => { const nMax = stat === 'constitution' ? Math.floor(prev.maxHealth + 15) : prev.maxHealth; return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax }; }); };
@@ -203,41 +201,26 @@ export default function App() {
       const s = ITEMS.skills.find(i => i.name === (isP ? player.equipment.skill : enemy.equipment.skill))!;
       const wL = isP ? (player.unlockedItems[w.name] || 1) : (enemy.unlockedItems[w.name] || 1);
       const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
-      
       setCurrentPose(prev => ({ ...prev, [isP ? 'player' : 'enemy']: 'attack' }));
       if (w.name.includes('弓')) rendererRef.current?.addEffect('arrow', isP ? 280 : 520, 230, isP ? '#6366f1' : '#94a3b8', 1);
       await new Promise(r => setTimeout(r, 600));
-      
       let baseDmg = calcVal(w.damage!, wL); let sMult = s?.mult || 1;
-      
-      // --- 克制逻辑计算 ---
       const counterBonus = getCounterMult(w.tag, a.tag);
-      if (counterBonus > 1) addLog(`[神经优势] ${w.name} 对 ${a.name} 造成额外穿透!`);
-
-      // 环境修正
       if (field.id === 'emp') { if (w.rarity === 'epic' || w.rarity === 'perfect') baseDmg *= 0.6; else if (w.rarity === 'common') baseDmg *= 1.6; }
       else if (field.id === 'narrow') { if (w.name.includes('锤')) baseDmg *= 0.5; else if (w.name.includes('刀') || w.name.includes('剑')) baseDmg *= 1.4; }
       else if (field.id === 'desert') { if (w.name.includes('弓')) baseDmg *= 1.6; }
       else if (field.id === 'overload') { sMult *= 2.0; }
-
-      let dmg = (baseDmg + atk.stats.strength * (isP ? 0.8 : 1.2)) * sMult * counterBonus; 
-      if (s.mult) dmg *= (1 + 0.1 * (sL - 1));
-      const rawDmg = Math.floor(dmg);
-      rendererRef.current?.addEffect('spark', isP ? 560 : 240, 250, isP ? '#f59e0b' : '#ef4444', 12);
-      
+      let dmg = (baseDmg + atk.stats.strength * (isP ? 0.8 : 1.2)) * sMult * counterBonus; if (s.mult) dmg *= (1 + 0.1 * (sL - 1));
+      const rawDmg = Math.floor(dmg); rendererRef.current?.addEffect('spark', isP ? 560 : 240, 250, isP ? '#f59e0b' : '#ef4444', 12);
       if (isP) { let fD = Math.floor(field.id === 'overload' ? rawDmg * 1.3 : rawDmg); eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg = fD; } 
-      else { 
-        const aL = player.unlockedItems[a.name] || 1; const minDmg = Math.floor(rawDmg * 0.15); 
-        let fD = Math.max(minDmg, rawDmg - calcVal(a.defense!, aL));
-        if (field.id === 'overload') fD *= 1.3; fD = Math.floor(Math.max(1, fD)); pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg = fD;
-      }
+      else { const aL = player.unlockedItems[a.name] || 1; const minDmg = Math.floor(rawDmg * 0.15); let fD = Math.max(minDmg, rawDmg - calcVal(a.defense!, aL)); if (field.id === 'overload') fD *= 1.3; fD = Math.floor(Math.max(1, fD)); pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg = fD; }
       setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' })); await new Promise(r => setTimeout(r, 400)); setCurrentPose({player: 'idle', enemy: 'idle'});
     };
     await executeTurn(true); if (eHP > 0) await executeTurn(false);
     setBattleHistory(prev => [...prev, { round, pDmg: curP_Dmg, eDmg: curE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
     const finalize = (isW: boolean, isK: boolean) => {
       const gR = isW ? (60 + player.level * 25) : (20 + player.level * 10); const xR = isW ? (70 + player.level * 10) : 0;
-      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
+      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; addLog('等级提升！'); } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
       else { setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 })); setGameState('defeat'); }
     };
     if (pHP <= 0) finalize(false, true); else if (eHP <= 0) finalize(true, true); else if (round >= 3) finalize(pHP > eHP, false); else { setRound(prev => prev + 1); setGameState('tactics'); }
@@ -277,57 +260,29 @@ export default function App() {
           </div>
           <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
           {(gameState === 'victory' || gameState === 'defeat') && (
-            <div className={`absolute inset-0 ${gameState === 'victory' ? 'bg-emerald-50/30' : 'bg-rose-50/30'} backdrop-blur-xl flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 z-[150] overflow-hidden`}>
-              <div className="w-full max-w-lg flex flex-col items-center max-h-full">
-                <h1 className={`text-5xl font-black italic uppercase tracking-tighter mb-4 drop-shadow-sm flex-none ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                  {gameState === 'victory' ? 'SUCCESS' : 'FAILURE'}
-                </h1>
-
-                <div className="w-full bg-white/70 border border-white rounded-[2.5rem] p-5 shadow-2xl backdrop-blur-3xl mb-6 flex flex-col min-h-0 overflow-hidden">
-                  <div className="flex justify-between items-center gap-4 mb-4 border-b border-slate-100 pb-4 flex-none">
-                    <div className="flex-1">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">User Unit</p>
-                      <div className="text-[12px] font-black text-slate-800">
-                        <p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[10px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p>
-                        <p className="text-slate-400 font-bold text-[10px] truncate">{player.equipment.armor}</p>
-                      </div>
-                    </div>
-                    <div className="text-center px-3 py-1 bg-slate-50 rounded-full border border-slate-100 flex-none">
-                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-tighter">VS</span>
-                    </div>
-                    <div className="flex-1 text-right">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Target</p>
-                      <div className="text-[12px] font-black text-slate-800">
-                        <p className="truncate"><span className="text-rose-500 font-mono text-[10px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p>
-                        <p className="text-slate-400 font-bold text-[10px] truncate">{enemy.equipment.armor}</p>
-                      </div>
-                    </div>
+            <div className={`absolute inset-0 z-[150] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overflow-hidden`}>
+              <div className={`absolute inset-0 tactical-stripes ${gameState === 'victory' ? 'opacity-[0.08] bg-emerald-500' : 'opacity-[0.08] bg-rose-500'}`}></div>
+              <div className="w-full max-w-lg flex flex-col items-center max-h-full relative z-10">
+                <h1 className={`text-5xl font-black italic uppercase tracking-tighter mb-6 drop-shadow-sm flex-none ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>{gameState === 'victory' ? 'SUCCESS' : 'FAILURE'}</h1>
+                <div className="w-full bg-white/40 border border-slate-200/50 rounded-[2rem] p-6 shadow-xl backdrop-blur-md mb-8 flex flex-col min-h-0 overflow-hidden">
+                  <div className="flex justify-between items-center gap-4 mb-5 border-b border-slate-200/30 pb-5 flex-none">
+                    <div className="flex-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Neural Unit</p><div className="text-[13px] font-black text-slate-800"><p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[11px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p><p className="text-slate-400 font-bold text-[11px] truncate">{player.equipment.armor}</p></div></div>
+                    <div className="px-4 py-1 bg-slate-800 text-white rounded-lg flex-none rotate-[-2deg] shadow-lg"><span className="text-[11px] font-black italic tracking-tighter">DATA REV.</span></div>
+                    <div className="flex-1 text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Host</p><div className="text-[13px] font-black text-slate-800"><p className="truncate"><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-slate-400 font-bold text-[11px] truncate">{enemy.equipment.armor}</p></div></div>
                   </div>
-
-                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-                    <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em] text-center mb-3">Tactical Data Log</p>
-                    <div className="space-y-2">
+                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] text-center mb-4">Round Analysis</p>
+                    <div className="space-y-2.5">
                       {battleHistory.map((h, i) => (
-                        <div key={i} className="flex items-center justify-between px-4 py-2 bg-slate-50/50 rounded-2xl border border-slate-100/50">
-                          <span className="text-[9px] font-black text-slate-300 w-6">R{h.round}</span>
-                          <div className="flex items-center gap-3 flex-1 justify-center">
-                            <span className="text-rose-600 font-black text-[14px]">-{h.pDmg}</span>
-                            <div className="w-12 h-[1px] bg-slate-200 relative"></div>
-                            <span className="text-indigo-600 font-black text-[14px]">-{h.eDmg}</span>
-                          </div>
-                          <div className="text-right w-12 flex-none">
-                            <p className="text-[10px] font-black text-slate-500 leading-none">{Math.floor(h.pRemainingHp)}:{Math.floor(h.eRemainingHp)}</p>
-                          </div>
+                        <div key={i} className="flex items-center justify-between px-5 py-3 bg-white/30 rounded-2xl border border-white/50 shadow-sm">
+                          <span className="text-[10px] font-black text-slate-400 w-8">#0{h.round}</span>
+                          <div className="flex items-center gap-4 flex-1 justify-center"><span className="text-rose-600 font-black text-[16px] w-12 text-right">-{h.pDmg}</span><div className="w-16 h-[1px] bg-slate-300 relative mx-2"><div className="absolute top-[-3px] right-0 w-1.5 h-1.5 rounded-full bg-slate-400"></div></div><span className="text-indigo-600 font-black text-[16px] w-12">-{h.eDmg}</span></div>
+                          <div className="text-right w-16 flex-none"><p className="text-[11px] font-bold text-slate-500 font-mono leading-none">{Math.floor(h.pRemainingHp)} : {Math.floor(h.eRemainingHp)}</p></div>
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
-
-                <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-16 py-4 text-white font-black rounded-full shadow-xl transition-all active:scale-95 text-[14px] flex items-center gap-3 flex-none ${gameState === 'victory' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-100' : 'bg-rose-600 hover:bg-rose-400 shadow-rose-100'}`}>
-                  {gameState === 'victory' ? 'NEXT MISSION' : 'RELOAD SYSTEM'}
-                  <span className="opacity-50 group-hover:translate-x-1 transition-transform">➜</span>
-                </button>
+                <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-20 py-4 text-white font-black rounded-2xl shadow-2xl transition-all active:scale-95 text-[15px] flex items-center gap-4 flex-none border-b-4 ${gameState === 'victory' ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-rose-600 border-rose-800 hover:bg-rose-500'}`}>{gameState === 'victory' ? 'CONTINUE TASK' : 'RETRY NEURAL LINK'}<span className="group-hover:translate-x-1 transition-transform">➜</span></button>
               </div>
             </div>
           )}
@@ -440,6 +395,11 @@ export default function App() {
       </div>
 
       <style>{`
+        .tactical-stripes {
+          background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(0,0,0,0.1) 20px, rgba(0,0,0,0.1) 40px);
+          animation: slide-stripes 20s linear infinite;
+        }
+        @keyframes slide-stripes { from { background-position: 0 0; } to { background-position: 1000px 0; } }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
