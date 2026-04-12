@@ -453,21 +453,26 @@ export default function App() {
                   <p className="text-[10px] font-black text-slate-400 uppercase mb-1 tracking-widest">环境修正</p>
                   <p className="text-[12px] font-bold text-slate-600 leading-snug">{field.desc} <span className="text-rose-500">{field.effect}</span></p>
                 </div>
-                <div className="bg-indigo-600 border border-indigo-500 p-3 rounded-2xl shadow-inner relative overflow-hidden group">
+                <div className="bg-indigo-600 border border-indigo-500 p-3 rounded-2xl shadow-inner relative overflow-hidden group h-[64px] flex flex-col justify-center">
                   <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none"></div>
-                  <p className="text-[10px] font-black text-white/50 uppercase mb-1 tracking-widest relative z-10">神经探测：敌方单位配置</p>
-                  <div className="flex items-center gap-4 text-white font-black text-[12px] relative z-10">
-                    <div className="flex flex-col">
-                      <span title="武器">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon} <b className="text-indigo-300 ml-1">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b></span>
-                      {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && <span className="text-[9px] text-emerald-400 font-black animate-bounce mt-0.5">优势：压制</span>}
+                  <p className="text-[9px] font-black text-white/40 uppercase mb-1.5 tracking-widest relative z-10">Neural Detection / 神经探测</p>
+                  <div className="flex items-center gap-4 text-white font-black text-[11px] relative z-10">
+                    <div className="flex items-center gap-1.5 whitespace-nowrap">
+                      <span className="opacity-80">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon}</span>
+                      <b className="text-indigo-300 font-mono text-[10px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
+                      {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && (
+                        <span className="px-1.5 py-0.5 bg-emerald-400 text-emerald-950 text-[9px] rounded-md animate-pulse">压制</span>
+                      )}
                     </div>
-                    <span className="w-[1px] h-3 bg-white/20"></span>
-                    <div className="flex flex-col">
-                      <span title="防具">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
-                      {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && <span className="text-[9px] text-sky-400 font-black animate-bounce mt-0.5">优势：防御</span>}
+                    <span className="w-[1px] h-3 bg-white/10"></span>
+                    <div className="flex items-center gap-1.5 whitespace-nowrap">
+                      <span className="opacity-80">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
+                      {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && (
+                        <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-pulse">防御</span>
+                      )}
                     </div>
-                    <span className="w-[1px] h-3 bg-white/20"></span>
-                    <span title="技能">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon} {enemy.equipment.skill}</span>
+                    <span className="w-[1px] h-3 bg-white/10"></span>
+                    <span className="opacity-80 whitespace-nowrap">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon} {enemy.equipment.skill}</span>
                   </div>
                 </div>
              </div>
