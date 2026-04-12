@@ -321,7 +321,28 @@ export default function App() {
       if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
       else { setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 })); setGameState('defeat'); }
     };
-    if (pHP <= 0) finalize(false, true); else if (eHP <= 0) finalize(true, true); else if (round >= 3) finalize(pHP > eHP, false); else { setRound(prev => prev + 1); setGameState('tactics'); }
+    if (pHP <= 0) finalize(false, true); else if (eHP <= 0) finalize(true, true); 
+    else if (round >= 3) finalize(pHP > eHP, false); 
+    else { 
+      // --- 对手每轮动态调整装备逻辑 ---
+      const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level);
+      const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level);
+      const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
+      const rw = aW[Math.floor(Math.random() * aW.length)];
+      const ra = aA[Math.floor(Math.random() * aA.length)];
+      const rs = aS[Math.floor(Math.random() * aS.length)];
+      const eL = Math.max(1, Math.floor(player.level / 2.2));
+      
+      setEnemy(prev => ({
+        ...prev,
+        equipment: { weapon: rw.name, armor: ra.name, skill: rs.name },
+        unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }
+      }));
+      
+      addLog(`>>> 侦测到目标单位正在重新校准战术单元...`);
+      setRound(prev => prev + 1); 
+      setGameState('tactics'); 
+    }
   };
 
   const resetGame = () => {
