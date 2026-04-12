@@ -125,6 +125,46 @@ app.get('/api/load', authenticateToken, async (req, res) => {
   }
 });
 
+// 5. 管理员接口：设置指定用户的等级和储备
+app.post('/api/admin/set-stats', async (req, res) => {
+  try {
+    const { username, level, gold } = req.body;
+    if (!username) return res.status(400).json({ error: '必须提供档案代号' });
+
+    // 查找用户 ID
+    const user = await db.users.findOne({ username });
+    if (!user) return res.status(404).json({ error: '未找到该档案' });
+
+    // 获取现有进度或创建新进度
+    let progress = await db.progress.findOne({ userId: user.id });
+    let gameData = progress ? progress.gameData : { 
+      level: 1, xp: 0, gold: 100, 
+      stats: { strength: 10, agility: 10, constitution: 12 }, 
+      statPoints: 8, health: 120, maxHealth: 120,
+      equipment: { weapon: '长剑', armor: '布衣', skill: '斩击' },
+      unlockedItems: { '长剑': 1, '长弓': 1, '重锤': 1, '布衣': 1, '铁盾': 1, '披风': 1, '斩击': 1, '治疗': 1, '连击': 1 },
+      defeatCount: 0
+    };
+
+    // 更新数值
+    if (level !== undefined) gameData.level = Number(level);
+    if (gold !== undefined) gameData.gold = Number(gold);
+    if (statPoints !== undefined) gameData.statPoints = Number(statPoints);
+
+    await db.progress.update(
+      { userId: user.id },
+      { userId: user.id, gameData },
+      { upsert: true }
+    );
+
+    console.log(`🛠️ 管理员操作: 已更新用户 ${username} 的状态 -> Level: ${gameData.level}, Gold: ${gameData.gold}, StatPoints: ${gameData.statPoints}`);
+    res.json({ message: '参数校准完成', currentStats: { level: gameData.level, gold: gameData.gold, statPoints: gameData.statPoints } });
+  } catch (e) {
+    console.error('❌ 管理员操作失败:', e);
+    res.status(500).json({ error: '系统内部故障' });
+  }
+});
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend Active: http://0.0.0.0:${PORT}`);
 });
