@@ -334,6 +334,11 @@ export default function App() {
   };
 
   const resetGame = () => {
+    // 强制切换新战场：确保新战场与当前不同
+    const otherFields = BATTLEFIELDS.filter(f => f.id !== field.id);
+    const newField = otherFields[Math.floor(Math.random() * otherFields.length)];
+    setField(newField);
+
     const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon)!;
     const pA = ITEMS.armors.find(a => a.name === player.equipment.armor)!;
     const wL = player.unlockedItems[pW.name] || 1;
@@ -346,8 +351,7 @@ export default function App() {
     const rw = aW[Math.floor(Math.random() * aW.length)];
     const ra = aA[Math.floor(Math.random() * aA.length)];
     const rs = aS[Math.floor(Math.random() * aS.length)];
-    const newField = BATTLEFIELDS[Math.floor(Math.random() * BATTLEFIELDS.length)];
-    setField(newField);
+    
     setPlayer(prev => ({...prev, health: prev.maxHealth}));
     const bS = player.level === 1 ? 0.5 : 0.8;
     const eS = { strength: Math.floor(player.stats.strength * bS * dM), agility: Math.floor(player.stats.agility * 0.7 * dM), constitution: Math.floor(player.stats.constitution * 0.8 * dM) };
@@ -355,7 +359,7 @@ export default function App() {
     const enemyEquipLvl = Math.max(1, Math.floor(player.level / 2.2));
     setEnemy({ level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: enemyEquipLvl, [ra.name]: enemyEquipLvl, [rs.name]: enemyEquipLvl }, defeatCount: 0 });
     setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'});
-    addLog(`>>> 部署至: ${newField.name}`);
+    addLog(`>>> 成功部署至: ${newField.name}。`);
   };
 
   if (!token) {
