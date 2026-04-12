@@ -237,8 +237,16 @@ export default function App() {
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [authForm, setAuthForm] = useState({ username: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const [player, setPlayer] = useState<Character>(INITIAL_CHAR);
-  const [enemy, setEnemy] = useState<Character>({ ...INITIAL_CHAR, username: ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)], stats: { strength: 8, agility: 7, constitution: 8 }, health: 90, maxHealth: 90 });
+  const [player, setPlayer] = useState<Character>(() => ({ 
+    ...INITIAL_CHAR, 
+    username: localStorage.getItem('username') || INITIAL_CHAR.username 
+  }));
+  const [enemy, setEnemy] = useState<Character>(() => ({ 
+    ...INITIAL_CHAR, 
+    username: ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)], 
+    stats: { strength: 8, agility: 7, constitution: 8 }, 
+    health: 90, maxHealth: 90 
+  }));
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
   const [battleLog, setBattleLog] = useState<string[]>(['等待连接...']);
@@ -275,7 +283,7 @@ export default function App() {
       const savedUser = localStorage.getItem('username');
       fetch(`${API_URL}/load`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.gameData) {
         const rawData = data.gameData; if (Array.isArray(rawData.unlockedItems)) { const m: any = {}; rawData.unlockedItems.forEach((n: any) => m[n] = 1); rawData.unlockedItems = m; }
-        setPlayer({ ...INITIAL_CHAR, username: savedUser || INITIAL_CHAR.username, ...rawData }); 
+        setPlayer(prev => ({ ...prev, ...rawData, username: savedUser || prev.username || INITIAL_CHAR.username })); 
         addLog('档案同步成功。');
       } else if (savedUser) {
         setPlayer(prev => ({ ...prev, username: savedUser }));
@@ -464,7 +472,7 @@ export default function App() {
           <div className="flex flex-col items-center"><span className="text-[13px] text-slate-400 font-bold uppercase tracking-widest">神经等级</span><span className="text-2xl font-black text-indigo-600">LV.{player.level}</span></div>
           <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold">{player.xp} / {player.level * 100} XP</span></div></div>
         </div>
-        <div className="flex items-center gap-8"><div className="text-right"><span className="text-[13px] text-slate-400 font-bold uppercase block">储备</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div><div className="flex gap-2"><button onClick={() => setGameState('shop')} className="px-5 py-2.5 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 shadow-lg shadow-slate-200">黑市</button><button onClick={() => { localStorage.removeItem('token'); setToken(''); }} className="px-3 py-2.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded-xl hover:bg-slate-200">退出</button></div></div>
+        <div className="flex items-center gap-8"><div className="text-right"><span className="text-[13px] text-slate-400 font-bold uppercase block">储备</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div><div className="flex gap-2"><button onClick={() => setGameState('shop')} className="px-5 py-2.5 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 shadow-lg shadow-slate-200">黑市</button><button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('username'); setToken(''); }} className="px-3 py-2.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded-xl hover:bg-slate-200">退出</button></div></div>
       </div>
 
       <div className="flex-none h-[46vh] flex gap-4 min-h-0">
