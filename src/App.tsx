@@ -94,6 +94,8 @@ const INITIAL_CHAR: Character = {
   defeatCount: 0
 };
 
+const ENEMY_NAMES = ['Aegis-7', 'Phantom-X', 'Cerberus', 'Viper-9', 'Titan-2', 'Ghost-Protocol', 'Nova-Core', 'Shadow-Stalker', 'Cyber-Reaper', 'Iron-Wraith'];
+
 const calcVal = (base: number, level: number) => Math.floor(base * (1 + 0.15 * (level - 1)));
 const getAttackCounterMult = (wTag: string, aTag: string) => {
   if (wTag === 'slashing' && aTag === 'light') return 1.35;
@@ -236,7 +238,7 @@ export default function App() {
   const [authForm, setAuthForm] = useState({ username: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [player, setPlayer] = useState<Character>(INITIAL_CHAR);
-  const [enemy, setEnemy] = useState<Character>({ ...INITIAL_CHAR, stats: { strength: 8, agility: 7, constitution: 8 }, health: 90, maxHealth: 90 });
+  const [enemy, setEnemy] = useState<Character>({ ...INITIAL_CHAR, username: ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)], stats: { strength: 8, agility: 7, constitution: 8 }, health: 90, maxHealth: 90 });
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
   const [battleLog, setBattleLog] = useState<string[]>(['等待连接...']);
@@ -260,6 +262,7 @@ export default function App() {
       const data = await res.json();
       if (data.token) { 
         localStorage.setItem('token', data.token); 
+        localStorage.setItem('username', data.username);
         setToken(data.token); 
         setPlayer(prev => ({ ...prev, username: data.username || prev.username }));
         addLog('神经链路已建立。'); 
@@ -269,10 +272,15 @@ export default function App() {
 
   useEffect(() => {
     if (token) {
+      const savedUser = localStorage.getItem('username');
       fetch(`${API_URL}/load`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { if (data.gameData) {
         const rawData = data.gameData; if (Array.isArray(rawData.unlockedItems)) { const m: any = {}; rawData.unlockedItems.forEach((n: any) => m[n] = 1); rawData.unlockedItems = m; }
-        setPlayer({ ...INITIAL_CHAR, ...rawData }); addLog('档案同步成功。');
-      }});
+        setPlayer({ ...INITIAL_CHAR, username: savedUser || INITIAL_CHAR.username, ...rawData }); 
+        addLog('档案同步成功。');
+      } else if (savedUser) {
+        setPlayer(prev => ({ ...prev, username: savedUser }));
+      }
+      });
     }
   }, [token]);
 
@@ -355,8 +363,6 @@ export default function App() {
       setGameState('tactics'); 
     }
   };
-
-const ENEMY_NAMES = ['Aegis-7', 'Phantom-X', 'Cerberus', 'Viper-9', 'Titan-2', 'Ghost-Protocol', 'Nova-Core', 'Shadow-Stalker', 'Cyber-Reaper', 'Iron-Wraith'];
 
   const resetGame = () => {
     const oF = BATTLEFIELDS.filter(f => f.id !== field.id); const nF = oF[Math.floor(Math.random() * oF.length)]; setField(nF);
