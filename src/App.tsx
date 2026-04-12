@@ -90,12 +90,12 @@ const ITEMS = {
     { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极防御屏障', cost: 15000, rarity: 'epic', levelReq: 60, tag: 'field' },
   ] as Item[],
   skills: [
-    { name: '斩击', mult: 1.2, icon: '💥', desc: '标准攻击', cost: 40, rarity: 'common', tag: 'slashing' },
-    { name: '治疗', mult: 0, icon: '✨', desc: '生物修复', cost: 50, rarity: 'common', tag: 'light' },
-    { name: '连击', mult: 0.8, icon: '⚡', desc: '速度幻影', cost: 80, rarity: 'novel', tag: 'slashing' },
-    { name: '超新星', mult: 3.5, icon: '☢️', desc: '能量释放', cost: 1000, rarity: 'perfect', levelReq: 10, tag: 'energy' },
-    { name: '黑洞', mult: 8.0, icon: '🕟', desc: '吞噬一切', cost: 8000, rarity: 'epic', levelReq: 45, tag: 'energy' },
-    { name: '时间倒流', mult: 0, icon: '⏳', desc: '因果重塑', cost: 12000, rarity: 'epic', levelReq: 70, tag: 'energy' },
+    { name: '蓄能重击', mult: 1.8, icon: '💥', desc: '牺牲攻速换取爆发，附加100%力量伤害', cost: 100, rarity: 'common', tag: 'crushing' },
+    { name: '幻影连击', mult: 0.8, icon: '⚡', desc: '极速二次打击，敏捷大幅增幅伤害', cost: 300, rarity: 'novel', levelReq: 5, tag: 'slashing' },
+    { name: '弱点扫描', mult: 1.2, icon: '🔍', desc: '解析对手防御，强制无视抗性修正', cost: 800, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
+    { name: '神经修复', mult: 0, icon: '✨', desc: '生物纳米修复，基于体质大量回血', cost: 500, rarity: 'novel', levelReq: 8, tag: 'light' },
+    { name: '动能反射', mult: 0.5, icon: '🛡️', desc: '构建反击护盾，反弹受到的50%伤害', cost: 2000, rarity: 'perfect', levelReq: 20, tag: 'heavy' },
+    { name: '系统过载', mult: 3.5, icon: '☢️', desc: '极限超频，极高伤害但会反噬自身', cost: 10000, rarity: 'epic', levelReq: 45, tag: 'energy' },
   ] as Item[]
 };
 
@@ -226,7 +226,16 @@ interface BattleRoundRecord { round: number; pDmg: number; eDmg: number; pRemain
 class StickmanRenderer {
   private ctx: CanvasRenderingContext2D; private time: number = 0; private effects: any[] = []; private nextEffectId: number = 0;
   constructor(ctx: CanvasRenderingContext2D) { this.ctx = ctx; }
-  addEffect(type: any, x: number, y: number, color: string = '#475569', count: number = 1) { for (let i = 0; i < count; i++) { this.effects.push({ id: this.nextEffectId++, type, x, y, vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12, life: 1.0, color, size: Math.random() * 4 + 2 }); } }
+  addEffect(type: any, x: number, y: number, color: string = '#475569', count: number = 1) { 
+    for (let i = 0; i < count; i++) { 
+      this.effects.push({ 
+        id: this.nextEffectId++, type, x, y, 
+        vx: type === 'heal' ? (Math.random() - 0.5) * 4 : (Math.random() - 0.5) * 12, 
+        vy: type === 'heal' ? -Math.random() * 5 : (Math.random() - 0.5) * 12, 
+        life: 1.0, color, size: type === 'scan' ? 800 : Math.random() * 4 + 2 
+      }); 
+    } 
+  }
   drawBackground(field: Battlefield) {
     const ctx = this.ctx; const t = this.time; ctx.save(); ctx.fillStyle = field.bgColor; ctx.fillRect(0, 0, 800, 400);
     if (field.id === 'neutral') { ctx.strokeStyle = field.accentColor; ctx.lineWidth = 1; ctx.globalAlpha = 0.2; for(let i=0; i<800; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + Math.sin(t+i)*5, 400); ctx.stroke(); } }
@@ -236,7 +245,13 @@ class StickmanRenderer {
     else if (field.id === 'overload') { ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 3; ctx.globalAlpha = Math.abs(Math.sin(t*2))*0.3; ctx.beginPath(); ctx.arc(400, 200, 150 + Math.sin(t)*20, 0, Math.PI * 2); ctx.stroke(); }
     ctx.restore();
   }
-  updateEffects() { this.effects = this.effects.filter(e => { e.x += e.vx; e.y += e.vy; e.life -= 0.04; if (e.type === 'arrow') e.vx = 18; return e.life > 0; }); }
+  updateEffects() { 
+    this.effects = this.effects.filter(e => { 
+      e.x += e.vx; e.y += e.vy; e.life -= (e.type === 'scan' || e.type === 'shield' ? 0.08 : 0.04); 
+      if (e.type === 'arrow') e.vx = 18; 
+      return e.life > 0; 
+    }); 
+  }
   draw(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️') {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45); ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
     ctx.strokeStyle = pose === 'dead' ? '#cbd5e1' : '#f8fafc'; ctx.lineWidth = 5; ctx.lineCap = 'round';
@@ -249,7 +264,13 @@ class StickmanRenderer {
     ctx.moveTo(0, -bodyHeight + 8); ctx.lineTo(Math.cos(-armAngle) * -30, -bodyHeight + 8 + Math.sin(-armAngle) * 30);
     ctx.moveTo(0, 0); ctx.lineTo(Math.sin(legAngle) * 30, 35); ctx.moveTo(0, 0); ctx.lineTo(Math.sin(-legAngle) * 30, 35);
     ctx.stroke(); ctx.restore();
-    this.effects.forEach(e => { ctx.globalAlpha = e.life; ctx.fillStyle = e.color; if (e.type === 'arrow') { ctx.fillRect(e.x, e.y, 12, 2); } else { ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill(); } });
+    this.effects.forEach(e => { 
+      ctx.globalAlpha = e.life; ctx.fillStyle = e.color; 
+      if (e.type === 'arrow') { ctx.fillRect(e.x, e.y, 12, 2); } 
+      else if (e.type === 'scan') { ctx.fillRect(0, e.y - (1-e.life)*400, 800, 2); }
+      else if (e.type === 'shield') { ctx.strokeStyle = e.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(e.x, e.y - 40, 50, 0, Math.PI * 2); ctx.stroke(); }
+      else { ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill(); } 
+    });
     ctx.globalAlpha = 1; this.updateEffects(); this.time += 0.04;
   }
 }
@@ -383,24 +404,69 @@ export default function App() {
       const s = ITEMS.skills.find(i => i.name === (isP ? player.equipment.skill : enemy.equipment.skill))!;
       const wL = isP ? (player.unlockedItems[w.name] || 1) : (enemy.unlockedItems[w.name] || 1);
       const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
-      setCurrentPose(prev => ({ ...prev, [isP ? 'player' : 'enemy']: 'attack' }));
-      if (w.name.includes('弓')) rendererRef.current?.addEffect('arrow', isP ? 280 : 520, 230, isP ? '#6366f1' : '#94a3b8', 1);
-      await new Promise(r => setTimeout(r, 600));
-      let baseDmg = calcVal(w.damage!, wL); let sMult = s?.mult || 1;
-      const attackBonus = getAttackCounterMult(w.tag, a.tag);
-      const defenseReduction = getDefenseCounterMult(a.tag, w.tag);
-      if (attackBonus > 1) addLog(`${isP ? '>>' : '<<'} [压制] ${w.name} 穿透了 ${a.name}`);
-      if (defenseReduction < 1) addLog(`${isP ? '>>' : '<<'} [抵抗] ${a.name} 削弱了 ${w.name}`);
-      if (field.id === 'emp') { if (w.rarity === 'epic' || w.rarity === 'perfect') baseDmg *= 0.6; else if (w.rarity === 'common') baseDmg *= 1.6; }
-      else if (field.id === 'narrow') { if (w.name.includes('锤')) baseDmg *= 0.5; else if (w.name.includes('刀') || w.name.includes('剑')) baseDmg *= 1.4; }
-      else if (field.id === 'desert') { if (w.name.includes('弓')) baseDmg *= 1.6; }
-      else if (field.id === 'overload') { sMult *= 2.0; }
-      let dmg = (baseDmg + atk.stats.strength * (isP ? 0.8 : 1.2)) * sMult * attackBonus * defenseReduction; 
-      if (s.mult) dmg *= (1 + 0.1 * (sL - 1));
-      const rawDmg = Math.floor(dmg); rendererRef.current?.addEffect('spark', isP ? 560 : 240, 250, isP ? '#f59e0b' : '#ef4444', 12);
-      if (isP) { let fD = Math.floor(field.id === 'overload' ? rawDmg * 1.3 : rawDmg); eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg = fD; addLog(`>> 造成 ${fD} 伤害`); } 
-      else { const aL = player.unlockedItems[a.name] || 1; const minDmg = Math.floor(rawDmg * 0.15); let fD = Math.max(minDmg, rawDmg - calcVal(a.defense!, aL)); if (field.id === 'overload') fD *= 1.3; fD = Math.floor(Math.max(1, fD)); pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg = fD; addLog(`<< 受创 ${fD} 伤害`); }
-      setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' })); await new Promise(r => setTimeout(r, 400)); setCurrentPose({player: 'idle', enemy: 'idle'});
+      
+      const x = isP ? 240 : 560; const tx = isP ? 560 : 240;
+
+      // 技能前置触发：扫描、护盾、修复
+      if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
+      if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
+      if (s.name === '神经修复') {
+        const heal = Math.floor((atk.maxHealth - atk.health) * 0.25 + atk.stats.constitution * 0.5 * sL);
+        rendererRef.current?.addEffect('heal', x, 280, '#10b981', 12);
+        if (isP) { pHP = Math.min(player.maxHealth, pHP + heal); setPlayer(prev => ({...prev, health: pHP})); }
+        else { eHP = Math.min(enemy.maxHealth, eHP + heal); setEnemy(prev => ({...prev, health: eHP})); }
+        addLog(`${isP ? '>>' : '<<'} [技能] ${s.name} 修复了 ${heal} 神经损伤`);
+        await new Promise(r => setTimeout(r, 600));
+        return; // 修复技能不进行攻击
+      }
+
+      const numHits = s.name === '幻影连击' ? 2 : 1;
+      for (let h = 0; h < numHits; h++) {
+        setCurrentPose(prev => ({ ...prev, [isP ? 'player' : 'enemy']: 'attack' }));
+        if (w.name.includes('弓')) rendererRef.current?.addEffect('arrow', isP ? 280 : 520, 230, isP ? '#6366f1' : '#94a3b8', 1);
+        await new Promise(r => setTimeout(r, 600));
+
+        let baseDmg = calcVal(w.damage!, wL);
+        let attackBonus = getAttackCounterMult(w.tag, a.tag);
+        let defenseReduction = getDefenseCounterMult(a.tag, w.tag);
+
+        // 技能逻辑干预
+        if (s.name === '弱点扫描' && defenseReduction < 1) { defenseReduction = 1.0; addLog(`${isP ? '>>' : '<<'} [穿透] 弱点已锁定，抗性失效`); }
+        
+        let dmg = (baseDmg + atk.stats.strength * (isP ? 1.0 : 1.5)) * attackBonus * defenseReduction;
+        if (s.mult) {
+          let sMult = s.mult * (1 + 0.1 * (sL - 1));
+          if (s.name === '蓄能重击') dmg += atk.stats.strength * 1.2 * sL;
+          if (s.name === '系统过载') { rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20); }
+          dmg *= sMult;
+        }
+
+        const fD = Math.floor(field.id === 'overload' ? dmg * 1.3 : dmg);
+        rendererRef.current?.addEffect('spark', tx, 250, isP ? '#f59e0b' : '#ef4444', 12);
+        
+        if (isP) { eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg += fD; addLog(`>> 第 ${h+1} 次打击: ${fD} 伤害`); } 
+        else { eHP = Math.max(0, eHP - fD); pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg += fD; addLog(`<< 承受打击: ${fD} 伤害`); }
+
+        // 反伤逻辑
+        const defSkill = isP ? ITEMS.skills.find(i=>i.name===enemy.equipment.skill) : s;
+        if (defSkill?.name === '动能反射' && fD > 0) {
+          const reflect = Math.floor(fD * 0.5);
+          if (isP) { pHP = Math.max(0, pHP - reflect); setPlayer(prev => ({...prev, health: pHP})); addLog(`<< [反弹] 受到 ${reflect} 动能反馈`); }
+          else { eHP = Math.max(0, eHP - reflect); setEnemy(prev => ({...prev, health: eHP})); addLog(`>> [反弹] 目标承受 ${reflect} 动能反馈`); }
+        }
+
+        // 自残逻辑 (系统过载)
+        if (s.name === '系统过载') {
+          const backlash = Math.floor(atk.maxHealth * 0.15);
+          if (isP) { pHP = Math.max(0, pHP - backlash); setPlayer(prev => ({...prev, health: pHP})); }
+          else { eHP = Math.max(0, eHP - backlash); setEnemy(prev => ({...prev, health: eHP})); }
+          addLog(`${isP ? '>>' : '<<'} [警告] 系统过载导致 ${backlash} 核心损伤`);
+        }
+
+        setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' }));
+        if (isP && numHits > 1) await new Promise(r => setTimeout(r, 200)); // 连击间隔
+      }
+      await new Promise(r => setTimeout(r, 400)); setCurrentPose({player: 'idle', enemy: 'idle'});
     };
     await executeTurn(true); if (eHP > 0) await executeTurn(false);
     setBattleHistory(prev => [...prev, { round, pDmg: curP_Dmg, eDmg: curE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
