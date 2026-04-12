@@ -146,19 +146,24 @@ app.post('/api/admin/set-stats', async (req, res) => {
       defeatCount: 0
     };
 
-    // 更新数值
-    if (level !== undefined) gameData.level = Number(level);
-    if (gold !== undefined) gameData.gold = Number(gold);
-    if (statPoints !== undefined) gameData.statPoints = Number(statPoints);
+    // 深度克隆并更新数值，确保不会因为引用问题导致更新失败
+    const updatedGameData = JSON.parse(JSON.stringify(gameData));
+    if (level !== undefined) updatedGameData.level = Number(level);
+    if (gold !== undefined) updatedGameData.gold = Number(gold);
+    if (statPoints !== undefined) updatedGameData.statPoints = Number(statPoints);
+
+    // 针对可能存在的旧版存档，确保基础属性存在
+    if (!updatedGameData.stats) updatedGameData.stats = { strength: 10, agility: 10, constitution: 12 };
+    if (updatedGameData.statPoints === undefined) updatedGameData.statPoints = 8;
 
     await db.progress.update(
       { userId: user.id },
-      { userId: user.id, gameData },
+      { $set: { gameData: updatedGameData } },
       { upsert: true }
     );
 
-    console.log(`🛠️ 管理员操作: 已更新用户 ${username} 的状态 -> Level: ${gameData.level}, Gold: ${gameData.gold}, StatPoints: ${gameData.statPoints}`);
-    res.json({ message: '参数校准完成', currentStats: { level: gameData.level, gold: gameData.gold, statPoints: gameData.statPoints } });
+    console.log(`🛠️ 管理员操作: 已更新用户 ${username} (ID: ${user.id}) 的状态 -> Level: ${updatedGameData.level}, Gold: ${updatedGameData.gold}, StatPoints: ${updatedGameData.statPoints}`);
+    res.json({ message: '参数校准完成', currentStats: { level: updatedGameData.level, gold: updatedGameData.gold, statPoints: updatedGameData.statPoints } });
   } catch (e) {
     console.error('❌ 管理员操作失败:', e);
     res.status(500).json({ error: '系统内部故障' });
