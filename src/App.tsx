@@ -57,22 +57,37 @@ const BATTLEFIELDS: Battlefield[] = [
 const ITEMS = {
   weapons: [
     { name: '长剑', damage: 15, icon: '⚔️', desc: '新手利刃', cost: 50, rarity: 'common', tag: 'slashing' },
-    { name: '长弓', damage: 12, icon: '🏹', desc: '远程精准', cost: 50, rarity: 'common', tag: 'piercing' },
-    { name: '重锤', damage: 25, icon: '🔨', desc: '势大力沉', cost: 60, rarity: 'common', tag: 'crushing' },
     { name: '名刀', damage: 32, icon: '🎋', desc: '迅捷致命', cost: 150, rarity: 'novel', levelReq: 3, tag: 'slashing' },
-    { name: '神龙弓', damage: 55, icon: '🐉', desc: '破空之箭', cost: 600, rarity: 'perfect', levelReq: 8, tag: 'piercing' },
-    { name: '激光剑', damage: 85, icon: '🔦', desc: '等离子刃', cost: 1500, rarity: 'epic', levelReq: 15, tag: 'energy' },
-    { name: '雷神锤', damage: 150, icon: '⚡', desc: '众神之怒', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing' },
     { name: '影刃', damage: 130, icon: '🔪', desc: '虚空之遗', cost: 8500, rarity: 'epic', levelReq: 40, tag: 'slashing' },
+    
+    { name: '长弓', damage: 12, icon: '🏹', desc: '远程精准', cost: 50, rarity: 'common', tag: 'piercing' },
+    { name: '战术弩', damage: 28, icon: '🎯', desc: '半自动连发', cost: 200, rarity: 'novel', levelReq: 5, tag: 'piercing' },
+    { name: '神龙弓', damage: 55, icon: '🐉', desc: '破空之箭', cost: 600, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
+    
+    { name: '重锤', damage: 25, icon: '🔨', desc: '势大力沉', cost: 60, rarity: 'common', tag: 'crushing' },
+    { name: '动力锤', damage: 48, icon: '🚜', desc: '工业级粉碎', cost: 450, rarity: 'novel', levelReq: 8, tag: 'crushing' },
+    { name: '雷神锤', damage: 150, icon: '⚡', desc: '众神之怒', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing' },
+    
+    { name: '热能刀', damage: 18, icon: '🔥', desc: '分子切割', cost: 80, rarity: 'common', tag: 'energy' },
+    { name: '等离子炮', damage: 75, icon: '🎇', desc: '高能聚合', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy' },
+    { name: '激光剑', damage: 180, icon: '🔦', desc: '等离子刃', cost: 12000, rarity: 'epic', levelReq: 30, tag: 'energy' },
   ] as Item[],
   armors: [
     { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '轻便无负重', cost: 40, rarity: 'common', tag: 'light' },
-    { name: '铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '稳固防御', cost: 60, rarity: 'common', tag: 'heavy' },
     { name: '披风', defense: 3, evasion: 20, icon: '🧥', desc: '幻影闪避', cost: 60, rarity: 'common', tag: 'light' },
+    { name: '潜行特工服', defense: 15, evasion: 45, icon: '🕴️', desc: '光学迷彩', cost: 800, rarity: 'novel', levelReq: 4, tag: 'light' },
+    
+    { name: '凯夫拉', defense: 8, evasion: 0, icon: '🥋', desc: '防弹纤维', cost: 50, rarity: 'common', tag: 'medium' },
     { name: '动力装甲', defense: 45, evasion: 5, icon: '🤖', desc: '外骨骼增强', cost: 500, rarity: 'novel', levelReq: 5, tag: 'medium' },
     { name: '虚空甲', defense: 95, evasion: 10, icon: '🌌', desc: '暗物质抵挡', cost: 2000, rarity: 'perfect', levelReq: 15, tag: 'medium' },
-    { name: '纳米蜂群', defense: 50, evasion: 60, icon: '🐝', desc: '微型机器人拦截', cost: 6500, rarity: 'epic', levelReq: 35, tag: 'light' },
-    { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极防御屏障', cost: 15000, rarity: 'epic', levelReq: 60, tag: 'heavy' },
+    
+    { name: '铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '稳固防御', cost: 60, rarity: 'common', tag: 'heavy' },
+    { name: '合金护板', defense: 35, evasion: -10, icon: '⛓️', desc: '强化钢材', cost: 400, rarity: 'novel', levelReq: 7, tag: 'heavy' },
+    { name: '复合重装', defense: 220, evasion: -20, icon: '🚜', desc: '移动堡垒', cost: 8000, rarity: 'perfect', levelReq: 22, tag: 'heavy' },
+    
+    { name: '干扰烟幕', defense: 5, evasion: 15, icon: '💨', desc: '电子波干扰', cost: 70, rarity: 'common', tag: 'field' },
+    { name: '纳米蜂群', defense: 50, evasion: 60, icon: '🐝', desc: '微型机器人拦截', cost: 6500, rarity: 'epic', levelReq: 35, tag: 'field' },
+    { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极防御屏障', cost: 15000, rarity: 'epic', levelReq: 60, tag: 'field' },
   ] as Item[],
   skills: [
     { name: '斩击', mult: 1.2, icon: '💥', desc: '标准攻击', cost: 40, rarity: 'common', tag: 'slashing' },
@@ -90,7 +105,7 @@ const INITIAL_CHAR: Character = {
   stats: { strength: 10, agility: 10, constitution: 12 },
   statPoints: 8, health: 120, maxHealth: 120,
   equipment: { weapon: '长剑', armor: '布衣', skill: '斩击' },
-  unlockedItems: { '长剑': 1, '长弓': 1, '重锤': 1, '布衣': 1, '铁盾': 1, '披风': 1, '斩击': 1, '治疗': 1, '连击': 1 },
+  unlockedItems: { '长剑': 1, '长弓': 1, '重锤': 1, '热能刀': 1, '布衣': 1, '铁盾': 1, '披风': 1, '凯夫拉': 1, '干扰烟幕': 1, '斩击': 1, '治疗': 1, '连击': 1 },
   defeatCount: 0
 };
 
@@ -99,13 +114,16 @@ const ENEMY_NAMES = ['Aegis-7', 'Phantom-X', 'Cerberus', 'Viper-9', 'Titan-2', '
 const calcVal = (base: number, level: number) => Math.floor(base * (1 + 0.15 * (level - 1)));
 const getAttackCounterMult = (wTag: string, aTag: string) => {
   if (wTag === 'slashing' && aTag === 'light') return 1.35;
-  if (wTag === 'crushing' && aTag === 'heavy') return 1.35;
   if (wTag === 'piercing' && aTag === 'medium') return 1.35;
+  if (wTag === 'energy' && aTag === 'heavy') return 1.35;
+  if (wTag === 'crushing' && aTag === 'field') return 1.35;
   return 1.0;
 };
 const getDefenseCounterMult = (aTag: string, wTag: string) => {
-  if (aTag === 'heavy' && wTag === 'slashing') return 0.65;
-  if (aTag === 'medium' && wTag === 'piercing') return 0.65;
+  if (aTag === 'light' && wTag === 'crushing') return 0.65;
+  if (aTag === 'medium' && wTag === 'slashing') return 0.65;
+  if (aTag === 'heavy' && wTag === 'piercing') return 0.65;
+  if (aTag === 'field' && wTag === 'energy') return 0.65;
   return 1.0;
 };
 
