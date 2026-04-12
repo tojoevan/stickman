@@ -396,16 +396,15 @@ export default function App() {
   const startRound = async () => {
     setGameState('battle'); addLog(`>>> 神经链路第 ${round} 轮同步`);
     let pHP = Math.floor(player.health); let eHP = Math.floor(enemy.health);
+    let curP_Dmg = 0; let curE_Dmg = 0;
     
-    // 存储本轮技能状态
-    let pSkillActive = false; let eSkillActive = false;
     const pS = ITEMS.skills.find(i => i.name === player.equipment.skill)!;
     const eS = ITEMS.skills.find(i => i.name === enemy.equipment.skill)!;
 
     // --- 阶段一：神经技能释放 ---
     const releaseSkill = async (isP: boolean) => {
       const s = isP ? pS : eS; const x = isP ? 240 : 560;
-      addLog(`${isP ? '>>' : '<<'} [准备] ${isP ? player.username : enemy.username} 正在释放: ${s.name}`);
+      addLog(`${isP ? '>>' : '<<'} [准备] ${isP ? player.username : enemy.username}: ${s.name}`);
       
       if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
       if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
@@ -417,10 +416,9 @@ export default function App() {
         rendererRef.current?.addEffect('heal', x, 280, '#10b981', 12);
         if (isP) { pHP = Math.min(player.maxHealth, pHP + heal); setPlayer(prev => ({...prev, health: pHP})); }
         else { eHP = Math.min(enemy.maxHealth, eHP + heal); setEnemy(prev => ({...prev, health: eHP})); }
-        addLog(`${isP ? '>>' : '<<'} [修复] ${s.name} 恢复了 ${heal} 点生命值`);
+        addLog(`${isP ? '>>' : '<<'} [修复] +${heal} HP`);
       }
-      if (isP) pSkillActive = true; else eSkillActive = true;
-      await new Promise(r => setTimeout(r, 1000)); // 观赏性延迟
+      await new Promise(r => setTimeout(r, 500)); // 缩短至 500ms
     };
 
     await releaseSkill(true);
@@ -443,13 +441,11 @@ export default function App() {
       for (let h = 0; h < numHits; h++) {
         setCurrentPose(prev => ({ ...prev, [isP ? 'player' : 'enemy']: 'attack' }));
         if (w.name.includes('弓')) rendererRef.current?.addEffect('arrow', isP ? 280 : 520, 230, isP ? '#6366f1' : '#94a3b8', 1);
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 400)); // 缩短至 400ms
 
         let attackBonus = getAttackCounterMult(w.tag, a.tag);
         let defenseReduction = getDefenseCounterMult(a.tag, w.tag);
-
-        // 技能效果应用
-        if (s.name === '弱点扫描') { defenseReduction = 1.0; addLog(`${isP ? '>>' : '<<'} [效果] 扫描数据已注入，抗性失效`); }
+        if (s.name === '弱点扫描') { defenseReduction = 1.0; }
         
         let dmg = (calcVal(w.damage!, wL) + atk.stats.strength * (isP ? 1.0 : 1.5)) * attackBonus * defenseReduction;
         if (s.mult) {
@@ -461,36 +457,36 @@ export default function App() {
         const fD = Math.floor(field.id === 'overload' ? dmg * 1.3 : dmg);
         rendererRef.current?.addEffect('spark', tx, 250, isP ? '#f59e0b' : '#ef4444', 15);
         
-        if (isP) { eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); addLog(`>>打击: ${fD} 伤害`); } 
-        else { pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); addLog(`<<受创: ${fD} 伤害`); }
+        if (isP) { eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg += fD; addLog(`>>打击: ${fD}`); } 
+        else { pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg += fD; addLog(`<<受创: ${fD}`); }
 
-        // 反伤与自残逻辑（在打击后触发）
+        // 反伤
         const defSkill = isP ? eS : pS;
         if (defSkill.name === '动能反射' && fD > 0) {
           const reflect = Math.floor(fD * 0.5);
-          if (isP) { pHP = Math.max(0, pHP - reflect); setPlayer(prev => ({...prev, health: pHP})); addLog(`<< [反馈] 受到 ${reflect} 动能反弹`); }
-          else { eHP = Math.max(0, eHP - reflect); setEnemy(prev => ({...prev, health: eHP})); addLog(`>> [反馈] 目标承受 ${reflect} 动能反弹`); }
+          if (isP) { pHP = Math.max(0, pHP - reflect); setPlayer(prev => ({...prev, health: pHP})); addLog(`<< [反射] -${reflect} HP`); }
+          else { eHP = Math.max(0, eHP - reflect); setEnemy(prev => ({...prev, health: eHP})); addLog(`>> [反射] -${reflect} HP`); }
         }
 
+        // 过载
         if (s.name === '系统过载') {
-          const backlash = Math.floor(atk.maxHealth * 0.12);
+          const backlash = Math.floor(atk.maxHealth * 0.1);
           if (isP) { pHP = Math.max(0, pHP - backlash); setPlayer(prev => ({...prev, health: pHP})); }
           else { eHP = Math.max(0, eHP - backlash); setEnemy(prev => ({...prev, health: eHP})); }
-          addLog(`${isP ? '>>' : '<<'} [警告] 过载损伤: ${backlash}`);
+          addLog(`!! [过载] -${backlash} HP`);
         }
 
         setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' }));
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 200)); // 缩短至 200ms
       }
       setCurrentPose({player: 'idle', enemy: 'idle'});
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 300));
     };
 
     await executeTurn(true);
     await executeTurn(false);
 
     // 结算逻辑
-    let curP_Dmg = player.health - pHP; let curE_Dmg = enemy.health - eHP;
     setBattleHistory(prev => [...prev, { round, pDmg: curP_Dmg, eDmg: curE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
     
     const finalize = (isW: boolean) => {
@@ -502,7 +498,6 @@ export default function App() {
     if (pHP <= 0) finalize(false); else if (eHP <= 0) finalize(true); 
     else if (round >= 3) finalize(pHP > eHP); 
     else { 
-      // 敌方战术重校
       const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level);
       const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level);
       const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
