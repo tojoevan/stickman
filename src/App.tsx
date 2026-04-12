@@ -156,14 +156,19 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] [writing-mode:vertical-rl] py-2 border-r border-slate-100 pr-2 leading-none">{label}</p>
       </div>
       <div className="flex-1 h-full bg-slate-900/[0.03] rounded-[2rem] relative border border-slate-100/50 overflow-hidden">
+        {/* 中心指示器 */}
         <div className="absolute inset-x-2 h-[64px] top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-100 rounded-2xl pointer-events-none z-0"></div>
         
         <div 
           ref={scrollRef}
           onScroll={handleScroll}
           className="relative z-10 h-full overflow-y-auto custom-scrollbar snap-y snap-mandatory"
+          style={{ 
+            paddingTop: 'calc(50% - 32px)', 
+            paddingBottom: 'calc(50% - 32px)',
+            scrollPaddingTop: 'calc(50% - 32px)'
+          }}
         >
-          <div style={{ height: (scrollRef.current?.clientHeight || 200 - itemHeight) / 2 }} />
           {tripleItems.map((item, idx) => {
             const isMatch = item.name === selected;
             return (
@@ -183,7 +188,6 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
               </div>
             );
           })}
-          <div style={{ height: (scrollRef.current?.clientHeight || 200 - itemHeight) / 2 }} />
         </div>
       </div>
     </div>
@@ -604,10 +608,20 @@ export default function App() {
                   <div className="flex-1 flex items-center gap-3 bg-indigo-600 px-4 py-1.5 rounded-xl shadow-inner relative overflow-hidden min-w-0">
                     <p className="text-[9px] font-black text-white/40 uppercase tracking-tighter whitespace-nowrap flex-none">探测:</p>
                     <div className="flex items-center gap-3 text-white font-black text-[11px] truncate relative z-10">
-                      <span className="opacity-90">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon}</span>
-                      <b className="text-indigo-300 font-mono text-[10px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
+                      <div className="flex items-center gap-1.5">
+                        <span className="opacity-90">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon} {enemy.equipment.weapon}</span>
+                        <b className="text-indigo-300 font-mono text-[10px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
+                        {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && (
+                          <span className="px-1.5 py-0.5 bg-emerald-400 text-emerald-950 text-[9px] rounded-md animate-pulse">压制</span>
+                        )}
+                      </div>
                       <span className="w-[1px] h-3 bg-white/10"></span>
-                      <span className="opacity-90">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="opacity-90">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon} {enemy.equipment.armor}</span>
+                        {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && (
+                          <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-pulse">防御</span>
+                        )}
+                      </div>
                       <span className="w-[1px] h-3 bg-white/10"></span>
                       <span className="opacity-90">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon} {enemy.equipment.skill}</span>
                     </div>
