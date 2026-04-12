@@ -457,6 +457,7 @@ export default function App() {
       if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
       if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
       if (s.name === '系统过载') rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20);
+      if (s.name === '蓄能重击') rendererRef.current?.addEffect('spark', x, 280, '#f59e0b', 30); // 为蓄能增加聚能特效
       if (s.name === '神经修复') {
         const atk = isP ? player : enemy;
         const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
