@@ -26,3 +26,4 @@ dist-ssr
 # SQLite databases
 *.db
 server/game_storage.json
+game.db
