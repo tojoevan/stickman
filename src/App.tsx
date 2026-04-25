@@ -277,19 +277,34 @@ class StickmanRenderer {
     else if (field.id === 'overload') { ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 3; ctx.globalAlpha = Math.abs(Math.sin(this.time*2))*0.3; ctx.beginPath(); ctx.arc(400, 200, 150 + Math.sin(this.time)*20, 0, Math.PI * 2); ctx.stroke(); }
     ctx.restore();
   }
-  drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️', hasGhost: boolean = false) {
+  drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️', hasGhost: boolean = false, isElite: boolean = false) {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45);
     
+    // --- 精英特效：呼吸光晕 ---
+    if (isElite && pose !== 'dead') {
+      ctx.save();
+      ctx.translate(x, y);
+      if (flip) ctx.scale(-1, 1);
+      ctx.globalAlpha = 0.15 + Math.abs(Math.sin(this.time * 3)) * 0.25;
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = 20;
+      ctx.lineCap = 'round';
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#f43f5e';
+      this.drawStickmanPath(pose, t, '');
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // --- 绘制残影 (Ghost Afterimages) ---
     if (hasGhost) {
       for (let i = 1; i <= 5; i++) {
         ctx.save();
-        // 扩大摆动幅度到 40px，使用更快的正弦频率
         const ghostX = x + (flip ? i * 40 : -i * 40) * Math.sin(t * 3);
         ctx.translate(ghostX, y);
         if (flip) ctx.scale(-1, 1);
         ctx.globalAlpha = 0.5 / i;
-        ctx.strokeStyle = '#6366f1'; 
+        ctx.strokeStyle = isElite ? '#fb7185' : '#6366f1'; 
         ctx.lineWidth = 3;
         this.drawStickmanPath(pose, t - i * 0.12, weaponIcon);
         ctx.restore();
@@ -298,7 +313,12 @@ class StickmanRenderer {
 
     // --- 绘制本体 ---
     ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
-    ctx.strokeStyle = pose === 'dead' ? '#cbd5e1' : '#f8fafc'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    ctx.strokeStyle = pose === 'dead' ? '#cbd5e1' : (isElite ? '#f43f5e' : '#f8fafc'); 
+    ctx.lineWidth = 6; ctx.lineCap = 'round';
+    if (isElite && pose !== 'dead') {
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#f43f5e';
+    }
     this.drawStickmanPath(pose, t, weaponIcon);
     ctx.restore();
   }
@@ -482,8 +502,9 @@ export default function App() {
         const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon);
         const eW = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
         
+        const isE = enemy.username?.includes('[精英]');
         r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility, pW?.icon, activeSkill?.name === '幻影连击' && activeSkill.isP); 
-        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️', activeSkill?.name === '幻影连击' && !activeSkill.isP); 
+        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️', activeSkill?.name === '幻影连击' && !activeSkill.isP, isE); 
         
         r.renderEffects(); // 始终在最上层渲染
       }
@@ -618,7 +639,8 @@ export default function App() {
       const rw = aW[Math.floor(Math.random() * aW.length)];
       const ra = aA[Math.floor(Math.random() * aA.length)];
       const rs = aS[Math.floor(Math.random() * aS.length)];
-      const eL = Math.max(1, Math.floor(player.level / 2.2));
+      const isElite = enemy.username?.includes('[精英]');
+      const eL = Math.max(1, Math.floor(player.level / 2.2 * (isElite ? 1.5 : 1)));
       setEnemy(prev => ({ ...prev, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL } }));
       addLog(`>>> 目标正在重新校准战术单元...`);
       setRound(prev => prev + 1); setGameState('tactics'); 
@@ -630,16 +652,22 @@ export default function App() {
     const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon)!; const pA = ITEMS.armors.find(a => a.name === player.equipment.armor)!;
     const wL = player.unlockedItems[pW.name] || 1; const aL = player.unlockedItems[pA.name] || 1;
     const pP = (player.stats.strength + player.stats.agility + player.stats.constitution) + calcVal(pW.damage!, wL) + calcVal(pA.defense!, aL);
-    const dM = (1 + (pP / 750)) * Math.max(0.5, 1 - (player.defeatCount * 0.12));
+    const isElite = Math.random() < 0.12;
+    let dM = (1 + (pP / 750)) * Math.max(0.5, 1 - (player.defeatCount * 0.12));
+    if (isElite) dM *= 1.6;
+
     const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level); const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level); const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
     const rw = aW[Math.floor(Math.random() * aW.length)]; const ra = aA[Math.floor(Math.random() * aA.length)]; const rs = aS[Math.floor(Math.random() * aS.length)];
     setPlayer(prev => ({...prev, health: prev.maxHealth}));
     const bS = player.level === 1 ? 0.5 : 0.8; const eS = { strength: Math.floor(player.stats.strength * bS * dM), agility: Math.floor(player.stats.agility * 0.7 * dM), constitution: Math.floor(player.stats.constitution * 0.8 * dM) };
     const eH = Math.floor(player.maxHealth * (player.level === 1 ? 0.75 : 0.95) * (1 + (pP / 3000)) * Math.max(0.5, 1 - (player.defeatCount * 0.12)));
-    const eL = Math.max(1, Math.floor(player.level / 2.2));
-    const eName = ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
+    const eL = Math.max(1, Math.floor(player.level / 2.2 * (isElite ? 1.5 : 1)));
+    const eNameBase = ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
+    const eName = isElite ? `${eNameBase} [精英]` : eNameBase;
     setEnemy({ username: eName, level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }, defeatCount: 0, statPoints: 0 });
-    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]); addLog(`部署至: ${nF.name} | 对手: ${eName}`);
+    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]); 
+    addLog(`部署至: ${nF.name} | 对手: ${eName}`);
+    if (isElite) addLog(`⚠️ 警告: 检测到高能神经信号! ${eName} 已接入!`);
   };
 
   return (
@@ -903,8 +931,8 @@ export default function App() {
                         <span className="text-xl">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon}</span>
                         <span className="whitespace-nowrap">{enemy.equipment.weapon}</span>
                         <b className="text-indigo-300 font-mono text-[10px] whitespace-nowrap">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
-                        {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && (
-                          <span className="px-1.5 py-0.5 bg-emerald-400 text-emerald-950 text-[9px] rounded-md animate-bounce">压制</span>
+                        {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && (
+                          <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-bounce">防御</span>
                         )}
                       </div>
                       <span className="w-[1px] h-4 bg-white/20"></span>
@@ -912,8 +940,8 @@ export default function App() {
                         <span className="text-xl">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon}</span>
                         <span className="whitespace-nowrap">{enemy.equipment.armor}</span>
                         <b className="text-indigo-300 font-mono text-[10px] whitespace-nowrap">Lv.{enemy.unlockedItems[enemy.equipment.armor] || 1}</b>
-                        {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && (
-                          <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-bounce">防御</span>
+                        {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && (
+                          <span className="px-1.5 py-0.5 bg-emerald-400 text-emerald-950 text-[9px] rounded-md animate-bounce">压制</span>
                         )}
                       </div>
                       <span className="w-[1px] h-4 bg-white/20"></span>
