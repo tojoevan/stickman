@@ -624,7 +624,12 @@ export default function App() {
   const [isDeployed, setIsDeployed] = useState(false);
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
-  const [battleLog, setBattleLog] = useState<string[]>(['等待连接...']);
+  const [battleLog, setBattleLog] = useState<string[]>([
+    '>> 系统启动中...',
+    '>> 核心逻辑模块载入完毕',
+    '>> 正在扫描神经链路...',
+    '等待连接...'
+  ]);
   const [currentPose, setCurrentPose] = useState<{ player: any, enemy: any }>({ player: 'idle', enemy: 'idle' });
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
@@ -676,7 +681,9 @@ export default function App() {
     localStorage.setItem('username', authForm.username);
     setToken(mockToken);
     setPlayer(prev => ({ ...prev, username: authForm.username }));
-    addLog('神经链路已在本地建立。');
+    addLog('>> 神经链路建立成功');
+    addLog('>> 权限验证通过: ' + authForm.username);
+    addLog('>> 系统已就绪，欢迎回来。');
     hasLoaded.current = true;
   };
 
@@ -1021,23 +1028,24 @@ export default function App() {
                   <span className="opacity-30">|</span>
                   <span className="text-indigo-400">{player.equipment.skill}</span>
                 </div>
-                <div className="flex gap-2 w-[400px]">
+                <div className="flex gap-2 w-[480px]">
                   <div className="flex-1 pixel-bar-container !mb-0">
                     <div className="pixel-bar-fill bg-emerald-500" style={{ width: `${(player.health / player.maxHealth) * 100}%` }} />
                     <span className="bar-label cn-text">HP {player.health}/{player.maxHealth}</span>
                   </div>
-                  <div className="w-[120px] pixel-bar-container !mb-0">
-                    <div className="pixel-bar-fill bg-indigo-500" style={{ width: '100%' }} />
-                    <span className="bar-label cn-text">EP 100%</span>
+                  <div className="w-[200px] pixel-bar-container !mb-0">
+                    <div className="pixel-bar-fill bg-indigo-500 shadow-[0_0_15px_#6366f1]" style={{ width: '100%' }} />
+                    <span className="bar-label cn-text">EP 能量 100%</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="hud-info-center">
-              <div className="round-text cn-text">回合进度 / ROUND {round}</div>
-              <div className="mini-log animate-pulse text-sm font-bold cn-text">
-                {!isDeployed ? '等待战术确认 / WAITING FOR READY' : (battleLog[0] || '系统就绪 / SYSTEM READY')}
+            <div className="hud-info-center flex items-center justify-center gap-6 py-1 px-8">
+              <div className="round-text cn-text !border-0 !pb-0 !mb-0 whitespace-nowrap text-base">回合进度 / ROUND {round}</div>
+              <div className="w-[2px] h-5 bg-slate-800 skew-x-[-20deg]"></div>
+              <div className="mini-log animate-pulse text-sm font-black cn-text text-indigo-400 whitespace-nowrap">
+                {!isDeployed ? '等待战术确认 / WAITING FOR TACTICS' : (battleLog[0] || '系统就绪 / SYSTEM READY')}
               </div>
             </div>
 
@@ -1053,14 +1061,14 @@ export default function App() {
                   <span className="opacity-30">|</span>
                   <span className="text-rose-400">{enemy.equipment.skill}</span>
                 </div>
-                <div className="flex flex-row-reverse gap-2 w-[400px]">
+                <div className="flex flex-row-reverse gap-2 w-[480px]">
                   <div className="flex-1 pixel-bar-container !mb-0">
                     <div className="pixel-bar-fill bg-rose-600" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} />
                     <span className="bar-label left-2 right-auto cn-text">HP {enemy.health}/{enemy.maxHealth}</span>
                   </div>
-                  <div className="w-[120px] pixel-bar-container !mb-0">
-                    <div className="pixel-bar-fill bg-sky-500" style={{ width: '100%' }} />
-                    <span className="bar-label left-2 right-auto cn-text">盾 100%</span>
+                  <div className="w-[200px] pixel-bar-container !mb-0">
+                    <div className="pixel-bar-fill bg-sky-500 shadow-[0_0_15px_#0ea5e9]" style={{ width: '100%' }} />
+                    <span className="bar-label left-2 right-auto cn-text">盾 状态条 100%</span>
                   </div>
                 </div>
               </div>
