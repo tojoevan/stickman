@@ -419,6 +419,7 @@ export default function App() {
   const [battleHistory, setBattleHistory] = useState<BattleRoundRecord[]>([]);
   const [shopTab, setShopTab] = useState<'weapons' | 'armors' | 'skills'>('weapons');
   const [activeSkill, setActiveSkill] = useState<{name: string, icon: string, isP: boolean} | null>(null);
+  const [coinToss, setCoinToss] = useState<{ active: boolean, result: 'player' | 'enemy' | null }>({ active: false, result: null });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<StickmanRenderer | null>(null);
   const hasLoaded = useRef(false);
@@ -478,7 +479,7 @@ export default function App() {
     }
   }, [token]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (token && hasLoaded.current) {
       console.log('💾 [Save] 正在同步数据至云端...', player.level);
       fetch(`${API_URL}/save`, { 
@@ -488,6 +489,27 @@ export default function App() {
       }); 
     }
   }, [player.level, player.gold, player.stats, player.unlockedItems]);
+
+  // 新增：空格键快捷操作
+  useEffect(() => {
+    const handleSpace = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        if (gameState === 'victory' || gameState === 'defeat') {
+          e.preventDefault();
+          setGameState('lobby');
+          resetGame();
+        } else if (gameState === 'tactics') {
+          e.preventDefault();
+          startRound();
+        } else if (gameState === 'lobby') {
+          e.preventDefault();
+          setGameState('tactics');
+        }
+      }
+    };
+    window.addEventListener('keydown', handleSpace);
+    return () => window.removeEventListener('keydown', handleSpace);
+  }, [gameState]);
 
   useEffect(() => {
     let frame: number;
@@ -523,7 +545,19 @@ export default function App() {
   const handleLevelUp = (stat: Stat) => { if (player.statPoints > 0) setPlayer(prev => { const nMax = stat === 'constitution' ? Math.floor(prev.maxHealth + 15) : prev.maxHealth; return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax }; }); };
 
   const startRound = async () => {
+    // --- 掷币决定先手 ---
+    const playerFirst = Math.random() > 0.5;
+    const resultStr = playerFirst ? 'player' : 'enemy';
+    
+    setCoinToss({ active: true, result: null });
+    await new Promise(r => setTimeout(r, 1000)); // 旋转时间
+    setCoinToss({ active: true, result: resultStr });
+    await new Promise(r => setTimeout(r, 1500)); // 展示结果时间
+    setCoinToss({ active: false, result: null });
+
     setGameState('battle'); addLog(`>>> 神经链路第 ${round} 轮同步`);
+    addLog(`[掷币] 结果: ${playerFirst ? '你' : '目标'} 获得优先行动权`);
+
     let pHP = Math.floor(player.health); let eHP = Math.floor(enemy.health);
     let curP_Dmg = 0; let curE_Dmg = 0;
     
@@ -541,7 +575,7 @@ export default function App() {
       if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
       if (s.name === '系统过载') rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20);
       if (s.name === '蓄能重击') rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40); 
-      if (s.name === '幻影连击') rendererRef.current?.addEffect('speed', x, 280, '#6366f1', 15); // 切换为极速光轨特效
+      if (s.name === '幻影连击') rendererRef.current?.addEffect('speed', x, 280, '#6366f1', 15);
       if (s.name === '神经修复') {
         const atk = isP ? player : enemy;
         const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
@@ -551,13 +585,18 @@ export default function App() {
         else { eHP = Math.min(enemy.maxHealth, eHP + heal); setEnemy(prev => ({...prev, health: eHP})); }
         addLog(`${isP ? '>>' : '<<'} [修复] +${heal} HP`);
       }
-      await new Promise(r => setTimeout(r, 1200)); // 延长至 1200ms
+      await new Promise(r => setTimeout(r, 1200));
       setActiveSkill(null);
       await new Promise(r => setTimeout(r, 200));
     };
 
-    await releaseSkill(true);
-    await releaseSkill(false);
+    if (playerFirst) {
+      await releaseSkill(true);
+      await releaseSkill(false);
+    } else {
+      await releaseSkill(false);
+      await releaseSkill(true);
+    }
 
     // --- 阶段二：战术交火 ---
     const executeTurn = async (isP: boolean) => {
@@ -618,8 +657,13 @@ export default function App() {
       await new Promise(r => setTimeout(r, 300));
     };
 
-    await executeTurn(true);
-    await executeTurn(false);
+    if (playerFirst) {
+      await executeTurn(true);
+      await executeTurn(false);
+    } else {
+      await executeTurn(false);
+      await executeTurn(true);
+    }
 
     // 结算逻辑
     setBattleHistory(prev => [...prev, { round, pDmg: curP_Dmg, eDmg: curE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
@@ -770,34 +814,54 @@ export default function App() {
             </div>
           )}
 
+          {/* 掷币动画层 */}
+          {coinToss.active && (
+            <div className="absolute inset-0 z-[300] bg-slate-950/60 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
+              <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-4xl shadow-2xl transition-all duration-700 ${!coinToss.result ? 'animate-spin border-slate-400 bg-slate-800' : coinToss.result === 'player' ? 'border-emerald-500 bg-emerald-600 scale-125' : 'border-rose-500 bg-rose-600 scale-125'}`}>
+                {!coinToss.result ? '🪙' : coinToss.result === 'player' ? 'YOU' : 'HOST'}
+              </div>
+              <div className="mt-10 text-center animate-bounce">
+                <p className={`text-4xl font-black italic uppercase tracking-tighter drop-shadow-xl ${!coinToss.result ? 'text-white' : coinToss.result === 'player' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {!coinToss.result ? (
+                    <>正在判定行动顺序...<br/><span className="text-[16px] opacity-40 font-bold tracking-[0.2em] block mt-1">DECIDING INITIATIVE</span></>
+                  ) : coinToss.result === 'player' ? (
+                    <>神经链路优先：你先手<br/><span className="text-[16px] opacity-80 font-bold tracking-[0.2em] block mt-1">NEURAL LINK PRIORITY</span></>
+                  ) : (
+                    <>敌方信号拦截：对方先手<br/><span className="text-[16px] opacity-80 font-bold tracking-[0.2em] block mt-1">ENEMY SIGNAL FIRST</span></>
+                  )}
+                </p>
+                {coinToss.result && <p className="text-white/20 text-[10px] font-black uppercase mt-4 tracking-[0.5em]">行动序列已锁定 / ACTION SEQUENCE LOCKED</p>}
+              </div>
+            </div>
+          )}
+
           {(gameState === 'victory' || gameState === 'defeat') && (
             <div className={`absolute inset-0 z-[150] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overflow-hidden bg-slate-50`}>
               <div className="absolute inset-0 tactical-stripes opacity-100 z-0"></div>
               <div className={`absolute inset-0 ${gameState === 'victory' ? 'bg-emerald-500/5' : 'bg-rose-500/5'} z-10`}></div>
               <div className="w-full max-w-lg flex flex-col items-center max-h-full relative z-20">
-                <h1 className={`text-5xl font-black italic uppercase tracking-tighter mb-6 drop-shadow-sm flex-none ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>{gameState === 'victory' ? 'SUCCESS' : 'FAILURE'}</h1>
-                <div className="w-full bg-white/40 border border-slate-200/50 rounded-[2rem] p-6 shadow-xl backdrop-blur-md mb-8 flex flex-col min-h-0 overflow-hidden">
-                  <div className="flex justify-between items-center gap-4 mb-5 border-b border-slate-200/30 pb-5 flex-none">
-                    <div className="flex-1"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Neural Unit</p><div className="text-[13px] font-black text-slate-800"><p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[11px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p><p className="text-slate-400 font-bold text-[10px] truncate">{player.equipment.armor}</p></div></div>
-                    <div className="px-4 py-1 bg-slate-800 text-white rounded-lg flex-none shadow-lg"><span className="text-[11px] font-black italic tracking-tighter">DATA REV.</span></div>
-                    <div className="flex-1 text-right"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Host</p><div className="text-[13px] font-black text-slate-800"><p className="truncate"><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-slate-400 font-bold text-[10px] truncate">{enemy.equipment.armor}</p></div></div>
+                <h1 className={`text-5xl font-black italic uppercase tracking-tighter mb-2 drop-shadow-sm flex-none ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>{gameState === 'victory' ? '对决胜利 / SUCCESS' : '对决失败 / FAILURE'}</h1>
+                <div className="w-full bg-white/40 border border-slate-200/50 rounded-[2rem] p-4 shadow-xl backdrop-blur-md mb-2 flex flex-col min-h-0 overflow-hidden">
+                  <div className="flex justify-between items-center gap-4 mb-2 border-b border-slate-200/30 pb-2 flex-none">
+                    <div className="flex-1"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">神经单元 / NEURAL UNIT</p><div className="text-[13px] font-black text-slate-800"><p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[11px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p><p className="text-slate-400 font-bold text-[10px] truncate">{player.equipment.armor}</p></div></div>
+                    <div className="px-4 py-1 bg-slate-800 text-white rounded-lg flex-none shadow-lg"><span className="text-[10px] font-black italic tracking-tighter">战果回放 / DATA REV.</span></div>
+                    <div className="flex-1 text-right"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">目标宿主 / TARGET HOST</p><div className="text-[13px] font-black text-slate-800"><p className="truncate"><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-slate-400 font-bold text-[10px] truncate">{enemy.equipment.armor}</p></div></div>
                   </div>
-                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-                    <div className="flex gap-2">
+                  <div className="flex-none pt-2 pb-0 border-t border-slate-200/20">
+                    <div className="flex flex-wrap items-center justify-center gap-y-2 text-[13px] font-black font-mono tracking-tighter">
                       {battleHistory.map((h, i) => (
-                        <div key={i} className="flex-1 bg-white/30 rounded-xl py-2 px-3 border border-white/50 text-center shadow-sm">
-                          <p className="text-[9px] font-black text-slate-400 mb-1">ROUND {h.round}</p>
-                          <div className="flex items-center justify-center gap-1 font-mono text-[14px] font-black">
-                            <span className="text-rose-600">-{h.pDmg}</span>
-                            <span className="text-slate-300">/</span>
-                            <span className="text-indigo-600">-{h.eDmg}</span>
-                          </div>
+                        <div key={i} className="flex items-center">
+                          <span className="text-slate-400 mr-2">R{h.round}:</span>
+                          <span className="text-rose-500">-{h.pDmg}</span>
+                          <span className="text-slate-300 mx-2 italic opacity-50">vs</span>
+                          <span className="text-indigo-500">-{h.eDmg}</span>
+                          {i < battleHistory.length - 1 && <span className="text-slate-200 mx-5 font-normal">/</span>}
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
-                <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-20 py-4 text-white font-black rounded-2xl shadow-2xl transition-all active:scale-95 text-[15px] flex items-center gap-4 flex-none border-b-4 ${gameState === 'victory' ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-rose-600 border-rose-800 hover:bg-rose-500'}`}>{gameState === 'victory' ? 'CONTINUE TASK' : 'RETRY NEURAL LINK'}<span className="group-hover:translate-x-1 transition-transform">➜</span></button>
+                <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-20 py-4 text-white font-black rounded-2xl shadow-2xl transition-all active:scale-95 text-[15px] flex items-center gap-4 flex-none border-b-4 ${gameState === 'victory' ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-rose-600 border-rose-800 hover:bg-rose-500'}`}>{gameState === 'victory' ? '继续执行任务 / CONTINUE' : '重新建立链路 / RETRY'}<span className="group-hover:translate-x-1 transition-transform">➜</span></button>
               </div>
             </div>
           )}
