@@ -46,6 +46,19 @@ interface Battlefield {
   accentColor: string;
 }
 
+// --- 像素进化资源 (Stage 1: Base64 占位符) ---
+const PIXEL_ASSETS_BASE64 = {
+  head: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAFklEQVQYlWNgYGD4z0A6YGRgYOBPAgAALhMB/6E7VfAAAAAASUVORK5CYII=',
+  torso: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGklEQVQYlWNgYGD4z0A6YGRgYOBPAgAA/v8DAAAmEwH/oTtV8AAAAABJRU5ErkJggg==',
+  arm: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGklEQVQYlWNgYGD4z0A6YGRgYOBPAgAA/v8DAAAmEwH/oTtV8AAAAABJRU5ErkJggg==',
+  leg: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGklEQVQYlWNgYGD4z0A6YGRgYOBPAgAA/v8DAAAmEwH/oTtV8AAAAABJRU5ErkJggg==',
+  sword: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGklEQVQYlWNgYGD4z0A6YGRgYOBPAgAA/v8DAAAmEwH/oTtV8AAAAABJRU5ErkJggg==',
+  shield: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAGklEQVQYlWNgYGD4z0A6YGRgYOBPAgAA/v8DAAAmEwH/oTtV8AAAAABJRU5ErkJggg==',
+  bg_far: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAANUlEQVRYw+2WwQoAIAhD7f8/unToYmSBC6L3vSAnS6ZpE7SInp7vBfSInp7vBfSInp7vBfSInre/BfgMf8Nf0R3v+mXvAAAAAElFTkSuQmCC',
+  bg_mid: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAa0lEQVRYw+2WwQoAIAhD7f8/unToYmSBC6L3vSAnS6ZpE7SInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfwGf8Nf0R3v+mXvAAAAAElFTkSuQmCC',
+  bg_floor: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAXklEQVRYw+2WwQoAIAhD7f8/unToYmSBC6L3vSAnS6ZpE7SInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfSInp7vBfwGf8Nf0R3w+mXvAAAAAElFTkSuQmCC',
+};
+
 const BATTLEFIELDS: Battlefield[] = [
   { id: 'neutral', name: '虚拟训练场', desc: '标准的模拟战斗环境。', effect: '无特殊修正。', bgColor: '#0f172a', accentColor: '#38bdf8' },
   { id: 'emp', name: '强磁雷暴区', desc: '强磁场使精密设备失灵。', effect: '史诗装备 -40%，普通装备 +60%。', bgColor: '#1e1b4b', accentColor: '#818cf8' },
@@ -59,15 +72,15 @@ const ITEMS = {
     { name: '长剑', damage: 15, icon: '⚔️', desc: '新手利刃', cost: 50, rarity: 'common', tag: 'slashing' },
     { name: '名刀', damage: 32, icon: '🎋', desc: '迅捷致命', cost: 150, rarity: 'novel', levelReq: 3, tag: 'slashing' },
     { name: '影刃', damage: 130, icon: '🔪', desc: '虚空之遗', cost: 8500, rarity: 'epic', levelReq: 40, tag: 'slashing' },
-    
+
     { name: '长弓', damage: 12, icon: '🏹', desc: '远程精准', cost: 50, rarity: 'common', tag: 'piercing' },
     { name: '战术弩', damage: 28, icon: '🎯', desc: '半自动连发', cost: 200, rarity: 'novel', levelReq: 5, tag: 'piercing' },
     { name: '神龙弓', damage: 55, icon: '🐉', desc: '破空之箭', cost: 600, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
-    
+
     { name: '重锤', damage: 25, icon: '🔨', desc: '势大力沉', cost: 60, rarity: 'common', tag: 'crushing' },
     { name: '动力锤', damage: 48, icon: '🚜', desc: '工业级粉碎', cost: 450, rarity: 'novel', levelReq: 8, tag: 'crushing' },
     { name: '雷神锤', damage: 150, icon: '⚡', desc: '众神之怒', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing' },
-    
+
     { name: '热能刀', damage: 18, icon: '🔥', desc: '分子切割', cost: 80, rarity: 'common', tag: 'energy' },
     { name: '等离子炮', damage: 75, icon: '🎇', desc: '高能聚合', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy' },
     { name: '激光剑', damage: 180, icon: '🔦', desc: '等离子刃', cost: 12000, rarity: 'epic', levelReq: 30, tag: 'energy' },
@@ -76,15 +89,15 @@ const ITEMS = {
     { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '轻便无负重', cost: 40, rarity: 'common', tag: 'light' },
     { name: '披风', defense: 3, evasion: 20, icon: '🧥', desc: '幻影闪避', cost: 60, rarity: 'common', tag: 'light' },
     { name: '潜行特工服', defense: 15, evasion: 45, icon: '🕴️', desc: '光学迷彩', cost: 800, rarity: 'novel', levelReq: 4, tag: 'light' },
-    
+
     { name: '凯夫拉', defense: 8, evasion: 0, icon: '🥋', desc: '防弹纤维', cost: 50, rarity: 'common', tag: 'medium' },
     { name: '动力装甲', defense: 45, evasion: 5, icon: '🤖', desc: '外骨骼增强', cost: 500, rarity: 'novel', levelReq: 5, tag: 'medium' },
     { name: '虚空甲', defense: 95, evasion: 10, icon: '🌌', desc: '暗物质抵挡', cost: 2000, rarity: 'perfect', levelReq: 15, tag: 'medium' },
-    
+
     { name: '铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '稳固防御', cost: 60, rarity: 'common', tag: 'heavy' },
     { name: '合金护板', defense: 35, evasion: -10, icon: '⛓️', desc: '强化钢材', cost: 400, rarity: 'novel', levelReq: 7, tag: 'heavy' },
     { name: '复合重装', defense: 220, evasion: -20, icon: '🚜', desc: '移动堡垒', cost: 8000, rarity: 'perfect', levelReq: 22, tag: 'heavy' },
-    
+
     { name: '干扰烟幕', defense: 5, evasion: 15, icon: '💨', desc: '电子波干扰', cost: 70, rarity: 'common', tag: 'field' },
     { name: '纳米蜂群', defense: 50, evasion: 60, icon: '🐝', desc: '微型机器人拦截', cost: 6500, rarity: 'epic', levelReq: 35, tag: 'field' },
     { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极防御屏障', cost: 15000, rarity: 'epic', levelReq: 60, tag: 'field' },
@@ -131,7 +144,7 @@ const getDefenseCounterMult = (aTag: string, wTag: string) => {
 const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { label: string, items: any[], selected: string, onSelect: (name: string) => void, unlockedItems: Record<string, number> }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [spacerHeight, setSpacerHeight] = useState(0);
-  const itemHeight = 64; 
+  const itemHeight = 64;
   const tripleItems = [...items, ...items, ...items];
   const centerOffset = items.length * itemHeight;
 
@@ -154,7 +167,7 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const st = scrollRef.current.scrollTop;
-    
+
     // 循环边界重置逻辑
     if (st < itemHeight) {
       scrollRef.current.scrollTop = st + centerOffset;
@@ -178,13 +191,13 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
   return (
     <div className="flex-1 flex flex-row items-center gap-4 min-w-0 h-full">
       <div className="flex-none flex flex-col items-center justify-center">
-         <p className="text-[13px] font-black text-slate-400 uppercase tracking-[0.4em] [writing-mode:vertical-rl] py-4 border-r-2 border-slate-100 pr-3 leading-none italic">{label}</p>
+        <p className="text-[10px] pixel-font text-slate-400 uppercase [writing-mode:vertical-rl] py-4 border-r-4 border-slate-900 pr-3 leading-none">{label}</p>
       </div>
-      <div className="flex-1 h-full bg-slate-900/[0.03] rounded-[2.5rem] relative border border-slate-100/50 overflow-hidden">
+      <div className="flex-1 h-full bg-slate-900/[0.05] relative border-4 border-slate-900 overflow-hidden shadow-inner">
         {/* 中心指示器 */}
-        <div className="absolute inset-x-2 h-[64px] top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-100 rounded-2xl pointer-events-none z-0"></div>
-        
-        <div 
+        <div className="absolute inset-x-0 h-[64px] top-1/2 -translate-y-1/2 bg-white/20 border-y-4 border-indigo-500 pointer-events-none z-0"></div>
+
+        <div
           ref={scrollRef}
           onScroll={handleScroll}
           className="relative z-10 h-full overflow-y-auto overflow-x-hidden custom-scrollbar snap-y snap-mandatory"
@@ -192,21 +205,21 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
         >
           {/* 上部占位 */}
           <div style={{ height: spacerHeight }} />
-          
+
           {tripleItems.map((item, idx) => {
             const isMatch = item.name === selected;
             return (
-              <div 
+              <div
                 key={`${item.name}-${idx}`}
-                className={`h-[64px] flex flex-row items-center justify-center gap-3 snap-center transition-all duration-200 px-2 ${isMatch ? 'opacity-100 scale-110' : 'opacity-20 scale-90'}`}
+                className={`h-[64px] flex flex-row items-center justify-center gap-3 snap-center transition-all duration-100 px-2 ${isMatch ? 'opacity-100 scale-100' : 'opacity-20 scale-90 grayscale'}`}
               >
                 <span className="text-3xl flex-none">{item.icon}</span>
                 <div className="flex flex-col justify-center min-w-0">
-                  <span className={`text-[14px] font-black truncate leading-tight ${isMatch ? 'text-slate-800' : 'text-slate-400'}`}>
+                  <span className={`text-[10px] pixel-font truncate leading-tight ${isMatch ? 'text-slate-800' : 'text-slate-400'}`}>
                     {item.name}
                   </span>
-                  <span className={`text-[9px] font-bold font-mono ${isMatch ? 'text-indigo-500' : 'text-slate-300'}`}>
-                    Lv.{unlockedItems[item.name] || 1}
+                  <span className={`text-[8px] pixel-font ${isMatch ? 'text-indigo-500' : 'text-slate-300'}`}>
+                    LV.{unlockedItems[item.name] || 1}
                   </span>
                 </div>
               </div>
@@ -225,9 +238,84 @@ interface BattleRoundRecord { round: number; pDmg: number; eDmg: number; pRemain
 
 class StickmanRenderer {
   private ctx: CanvasRenderingContext2D; private time: number = 0; public effects: any[] = []; private nextEffectId: number = 0;
-  constructor(ctx: CanvasRenderingContext2D) { this.ctx = ctx; }
-  addEffect(type: any, x: number, y: number, color: string = '#475569', count: number = 1) { 
-    for (let i = 0; i < count; i++) { 
+  private assets: Record<string, HTMLImageElement> = {};
+  private assetsLoaded: boolean = false;
+
+  constructor(ctx: CanvasRenderingContext2D) {
+    this.ctx = ctx;
+    this.loadAssets();
+  }
+
+  private loadAssets() {
+    const load = (name: string, url: string) => {
+      const img = new Image(); img.src = url;
+      img.onload = () => {
+        this.assets[name] = img;
+        if (Object.keys(this.assets).length >= 5) this.assetsLoaded = true;
+      };
+    };
+
+    // 加载精美外部资产
+    load('cyborg_ninja', '/cyborg_ninja_clean.png');
+    load('cyborg_ninja_laser', '/cyborg_ninja_laser.png');
+    load('cyborg_ninja_bow', '/cyborg_ninja_bow.png');
+    load('cyborg_ninja_hammer', '/cyborg_ninja_hammer.png');
+    load('s_idle_0', '/assets/s_idle.png');
+    load('s_idle_1', '/assets/s_idle.png'); // 暂时复用同一张，也可后期补齐
+    load('s_atk', '/assets/s_atk.png');
+
+    // 背景资产保持现状 (程序化生成)
+    const generateBG = (name: string, color: string) => {
+      const canv = document.createElement('canvas'); canv.width = 32; canv.height = 32;
+      const c = canv.getContext('2d')!;
+      c.fillStyle = color; c.fillRect(0, 0, 32, 32);
+      c.fillStyle = 'rgba(255,255,255,0.05)'; c.fillRect(8, 8, 4, 4);
+      const img = new Image(); img.src = canv.toDataURL();
+      img.onload = () => { this.assets[name] = img; };
+    };
+
+    generateBG('bg_far', '#0f172a');
+    generateBG('bg_mid', '#1e1b4b');
+    generateBG('bg_floor', '#334155');
+  }
+
+  private drawStickmanPath(pose: any, t: number, weaponIcon: string, isElite: boolean = false, isP: boolean = true) {
+    const ctx = this.ctx;
+
+    let frameName = 's_idle_0';
+    if (pose === 'idle') {
+      frameName = 's_idle_0';
+    } else if (pose === 'attack') {
+      frameName = 's_atk';
+    }
+
+    const img = this.assets[frameName];
+    if (img) {
+      // 呼吸感逻辑：首页慢速平稳，战场根据敏捷略微加快
+      const breathFreq = pose === 'idle' ? (isP && gameState === 'lobby' ? 1.2 : 3) : 3;
+      const breath = (pose === 'idle') ? Math.sin(t * breathFreq) * 0.03 : 0;
+
+      ctx.save();
+      if (!isP) {
+        ctx.scale(-1, 1);
+      }
+
+      // 绘制带呼吸效果的资产
+      const w = 96 * (1 - breath * 0.5);
+      const h = 96 * (1 + breath);
+
+      // 修正：总偏移量 82 像素
+      ctx.drawImage(img, -w / 2, -h + 82, w, h);
+
+      ctx.restore();
+    } else {
+      ctx.fillStyle = isElite ? '#f43f5e' : '#6366f1';
+      ctx.fillRect(-15, -60, 30, 60);
+    }
+  }
+
+  addEffect(type: any, x: number, y: number, color: string = '#475569', count: number = 1) {
+    for (let i = 0; i < count; i++) {
       if (type === 'charge') {
         const angle = Math.random() * Math.PI * 2;
         const dist = 120 + Math.random() * 80;
@@ -250,50 +338,143 @@ class StickmanRenderer {
           life: 1.0, color, size: 2
         });
       } else {
-        this.effects.push({ 
-          id: this.nextEffectId++, type, x, y, 
-          vx: type === 'heal' ? (Math.random() - 0.5) * 4 : (Math.random() - 0.5) * 10, 
-          vy: type === 'heal' ? -Math.random() * 5 : (Math.random() - 0.5) * 10, 
-          life: 1.0, color, size: type === 'scan' ? 800 : Math.random() * 6 + 3 
-        }); 
+        this.effects.push({
+          id: this.nextEffectId++, type, x, y,
+          vx: type === 'heal' ? (Math.random() - 0.5) * 4 : (Math.random() - 0.5) * 10,
+          vy: type === 'heal' ? -Math.random() * 5 : (Math.random() - 0.5) * 10,
+          life: 1.0, color, size: type === 'scan' ? 800 : Math.random() * 6 + 3
+        });
       }
-    } 
+    }
   }
-  advance() { 
+
+  advance() {
     this.time += 0.04;
-    this.effects = this.effects.filter(e => { 
-      e.x += e.vx; e.y += e.vy; 
+    this.effects = this.effects.filter(e => {
+      e.x += e.vx; e.y += e.vy;
       const decay = (e.type === 'scan' || e.type === 'shield' || e.type === 'charge' ? 0.012 : 0.02);
-      e.life -= decay; 
-      if (e.type === 'arrow') e.vx = 20; 
-      return e.life > 0; 
-    }); 
+      e.life -= decay;
+      if (e.type === 'arrow') e.vx = 20;
+      return e.life > 0;
+    });
   }
+
   drawBackground(field: Battlefield) {
-    const ctx = this.ctx; ctx.save(); ctx.fillStyle = field.bgColor; ctx.fillRect(0, 0, 800, 400);
-    if (field.id === 'neutral') { ctx.strokeStyle = field.accentColor; ctx.lineWidth = 1; ctx.globalAlpha = 0.2; for(let i=0; i<800; i+=40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i + Math.sin(this.time+i)*5, 400); ctx.stroke(); } }
-    else if (field.id === 'emp') { ctx.strokeStyle = '#818cf8'; ctx.lineWidth = 2; for(let i=0; i<5; i++) { if (Math.random() > 0.8) { ctx.beginPath(); ctx.moveTo(Math.random()*800, 0); ctx.lineTo(Math.random()*800, 400); ctx.globalAlpha = 0.3; ctx.stroke(); } } }
-    else if (field.id === 'narrow') { ctx.fillStyle = '#27272a'; ctx.fillRect(0, 0, 800, 60); ctx.fillRect(0, 340, 800, 60); }
-    else if (field.id === 'overload') { ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 3; ctx.globalAlpha = Math.abs(Math.sin(this.time*2))*0.3; ctx.beginPath(); ctx.arc(400, 200, 150 + Math.sin(this.time)*20, 0, Math.PI * 2); ctx.stroke(); }
+    const ctx = this.ctx;
+    ctx.save();
+
+    // 1. 基础底色
+    ctx.fillStyle = field.bgColor;
+    ctx.fillRect(0, 0, 800, 400);
+
+    const hexToRgb = (hex: string) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '255, 255, 255';
+    };
+    const accentRgb = hexToRgb(field.accentColor);
+
+    // --- 2. 远景层 (Speed: 5) ---
+    // 远景微粒
+    const drawFarEnv = (count: number, speed: number, opacity: number) => {
+      for (let i = 0; i < count; i++) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity * (0.5 + Math.random() * 0.5)})`;
+        const x = (Math.sin(i * 153.2) * 800 + 400 + this.time * speed) % 800;
+        const y = (i * (300 / count)) % 300;
+        ctx.fillRect(x, y, 2, 2);
+      }
+    };
+    drawFarEnv(30, 5, 0.5);
+
+    if (this.assetsLoaded) {
+      const pattern = ctx.createPattern(this.assets.bg_far, 'repeat');
+      if (pattern) {
+        ctx.save();
+        ctx.translate(-(this.time * 5) % 32, 0);
+        ctx.fillStyle = pattern; ctx.globalAlpha = 0.35;
+        ctx.fillRect(0, 0, 832, 400);
+        ctx.restore();
+      }
+    }
+
+    // --- 3. 中景层 (Speed: 7.5) ---
+    const midSpeed = 7.5;
+    const midXBase = (this.time * midSpeed) % 1600;
+
+    // 建筑物设为不透明，以遮挡远景
+    for (let i = 0; i < 25; i++) {
+      const bW = 40 + Math.abs(Math.sin(i * 456)) * 60;
+      const bH = 100 + Math.abs(Math.cos(i * 789)) * 150;
+      const bX = (i * 100 - midXBase + 1600) % 1600 - 400;
+
+      if (bX > -200 && bX < 1000) {
+        // 使用实色填充
+        ctx.fillStyle = `rgb(${hexToRgb(field.bgColor)})`; // 先涂一层背景色底
+        ctx.fillRect(bX, 320 - bH, bW, bH);
+        ctx.fillStyle = `rgba(${accentRgb}, 0.2)`; // 再叠一层环境强调色
+        ctx.fillRect(bX, 320 - bH, bW, bH);
+
+        // 建筑窗户
+        ctx.fillStyle = `rgba(${accentRgb}, 0.5)`;
+        ctx.fillRect(bX + 10, 320 - bH + 20, 10, 10);
+      }
+    }
+
+    if (this.assetsLoaded) {
+      const pattern = ctx.createPattern(this.assets.bg_mid, 'repeat');
+      if (pattern) {
+        ctx.save();
+        ctx.translate(-(this.time * midSpeed) % 32, 150);
+        ctx.fillStyle = pattern; ctx.globalAlpha = 0.3;
+        ctx.fillRect(0, 0, 832, 170);
+        ctx.restore();
+      }
+    }
+
+    // --- 4. 近景层 (Speed: 10) ---
+    if (this.assetsLoaded) {
+      const pattern = ctx.createPattern(this.assets.bg_floor, 'repeat');
+      if (pattern) {
+        ctx.save();
+        ctx.translate(-(this.time * 10) % 32, 320);
+        ctx.fillStyle = pattern; ctx.globalAlpha = 0.9;
+        ctx.fillRect(0, 0, 832, 80);
+        ctx.restore();
+      }
+    }
+
+    ctx.strokeStyle = `rgba(${accentRgb}, 0.2)`;
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(0, 320); ctx.lineTo(800, 320); ctx.stroke();
+
+    if (field.id === 'neutral' || field.id === 'emp') {
+      ctx.strokeStyle = `rgba(${accentRgb}, 0.08)`;
+      ctx.lineWidth = 2;
+      const floorX = (this.time * 10) % 60;
+      for (let i = -floorX; i < 800; i += 60) {
+        ctx.beginPath(); ctx.moveTo(i, 320); ctx.lineTo(i - 40, 400); ctx.stroke();
+      }
+    }
+
+    if (field.id === 'overload') {
+      ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = `rgba(244, 63, 94, ${0.1 + Math.sin(this.time * 2) * 0.05})`;
+      ctx.fillRect(0, 0, 800, 400);
+    }
+
     ctx.restore();
   }
+
   drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️', hasGhost: boolean = false, isElite: boolean = false) {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45);
-    
+
     // --- 精英特效：呼吸光晕 ---
     if (isElite && pose !== 'dead') {
-      ctx.save();
-      ctx.translate(x, y);
-      if (flip) ctx.scale(-1, 1);
+      ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
       ctx.globalAlpha = 0.15 + Math.abs(Math.sin(this.time * 3)) * 0.25;
-      ctx.strokeStyle = '#f43f5e';
-      ctx.lineWidth = 20;
-      ctx.lineCap = 'round';
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = '#f43f5e';
-      this.drawStickmanPath(pose, t, '');
-      ctx.stroke();
-      ctx.restore();
+      ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 20; ctx.lineCap = 'round';
+      ctx.shadowBlur = 15; ctx.shadowColor = '#f43f5e';
+      this.drawStickmanPath(pose, t, '', isElite, !flip);
+      ctx.stroke(); ctx.restore();
     }
 
     // --- 绘制残影 (Ghost Afterimages) ---
@@ -301,83 +482,112 @@ class StickmanRenderer {
       for (let i = 1; i <= 5; i++) {
         ctx.save();
         const ghostX = x + (flip ? i * 40 : -i * 40) * Math.sin(t * 3);
-        ctx.translate(ghostX, y);
-        if (flip) ctx.scale(-1, 1);
+        ctx.translate(ghostX, y); if (flip) ctx.scale(-1, 1);
         ctx.globalAlpha = 0.5 / i;
-        ctx.strokeStyle = isElite ? '#fb7185' : '#6366f1'; 
-        ctx.lineWidth = 3;
-        this.drawStickmanPath(pose, t - i * 0.12, weaponIcon);
+
+        const tGhost = this.time * (1 + agility * 0.02);
+        this.drawStickmanPath(pose, tGhost - i * 0.12, weaponIcon, isElite, !flip);
         ctx.restore();
       }
     }
 
     // --- 绘制本体 ---
     ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
-    ctx.strokeStyle = pose === 'dead' ? '#cbd5e1' : (isElite ? '#f43f5e' : '#f8fafc'); 
-    ctx.lineWidth = 6; ctx.lineCap = 'round';
-    if (isElite && pose !== 'dead') {
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = '#f43f5e';
-    }
-    this.drawStickmanPath(pose, t, weaponIcon);
+    if (isElite && pose !== 'dead') { ctx.shadowBlur = 10; ctx.shadowColor = '#f43f5e'; }
+    this.drawStickmanPath(pose, t, weaponIcon, isElite, !flip);
     ctx.restore();
   }
 
-  private drawStickmanPath(pose: any, t: number, weaponIcon: string) {
+  // --- 首页专用：高阶全息绘制 (Procedural Drawing) ---
+  drawLobbyHero(x: number, y: number, agility: number, equipment: { weapon: string, armor: string, skill: string }) {
     const ctx = this.ctx;
-    const headSize = 18; const bodyHeight = 55; let armAngle = Math.sin(t) * 0.4; let legAngle = Math.cos(t) * 0.4;
-    if (pose === 'attack') { armAngle = -1.8 + Math.sin(t * 8) * 1.2; ctx.translate(Math.sin(t * 8) * 20, 0); ctx.font = '32px serif'; ctx.fillText(weaponIcon, Math.cos(armAngle) * 40 - 15, -bodyHeight + Math.sin(armAngle) * 40); }
-    else if (pose === 'hit') { ctx.strokeStyle = '#ef4444'; ctx.translate(Math.sin(this.time * 60) * 10, 0); }
-    else if (pose === 'dead') { ctx.rotate(Math.PI / 2); ctx.translate(35, -15); armAngle = 0.5; legAngle = 0.2; }
-    ctx.beginPath(); ctx.arc(0, -bodyHeight - headSize, headSize, 0, Math.PI * 2); ctx.moveTo(0, -bodyHeight); ctx.lineTo(0, 0); 
-    ctx.moveTo(0, -bodyHeight + 8); ctx.lineTo(Math.cos(armAngle) * 35, -bodyHeight + 8 + Math.sin(armAngle) * 35);
-    ctx.moveTo(0, -bodyHeight + 8); ctx.lineTo(Math.cos(-armAngle) * -30, -bodyHeight + 8 + Math.sin(-armAngle) * 30);
-    ctx.moveTo(0, 0); ctx.lineTo(Math.sin(legAngle) * 30, 35); ctx.moveTo(0, 0); ctx.lineTo(Math.sin(-legAngle) * 30, 35);
+    const t = this.time * 1.5;
+    const breath = 0; // 取消上下移动起伏
+
+    ctx.save();
+    ctx.translate(x, y + breath - 15);
+
+    // 根据装备动态切换主角贴图
+    const weapon = equipment.weapon || '';
+    let imgKey = 'cyborg_ninja';
+    if (weapon.includes('弓')) imgKey = 'cyborg_ninja_bow';
+    else if (weapon.includes('锤')) imgKey = 'cyborg_ninja_hammer';
+    else if (weapon.includes('激光剑')) imgKey = 'cyborg_ninja_laser';
+
+    const img = this.assets[imgKey];
+    if (img) {
+      const w = 540; // 图片放大 20%
+      const h = (img.height / img.width) * w;
+      ctx.drawImage(img, -w / 2, -h / 2 - 20, w, h); // 居中调整
+    } else {
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(-20, -100, 40, 100);
+    }
+
+    ctx.restore();
+  }
+
+  private drawArmorDetailed(armorName: string) {
+    const ctx = this.ctx;
+    ctx.strokeStyle = armorName.includes('重型') ? '#f59e0b' : '#22d3ee';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(-10, -75);
+    ctx.lineTo(10, -75);
+    ctx.lineTo(15, -45);
+    ctx.lineTo(-15, -45);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fill();
+  }
+
+  private drawWeaponDetailed(weaponName: string, isLeftHand: boolean) {
+    const ctx = this.ctx;
+    ctx.strokeStyle = weaponName.includes('剑') ? '#ef4444' : '#6366f1';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-30, -30);
     ctx.stroke();
   }
+
   renderEffects() {
     const ctx = this.ctx;
-    this.effects.forEach(e => { 
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, e.life);
-      if (e.type === 'charge') {
-        ctx.strokeStyle = e.color; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(e.x, e.y);
-        ctx.lineTo(e.x + e.vx * 2, e.y + e.vy * 2);
-        ctx.stroke();
-        ctx.fillStyle = '#fff'; ctx.beginPath();
-        ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill();
-      }
-      else if (e.type === 'speed') {
-        ctx.strokeStyle = e.color || '#6366f1'; ctx.lineWidth = 4;
-        ctx.shadowBlur = 15; ctx.shadowColor = e.color;
-        ctx.beginPath(); 
-        ctx.moveTo(e.x - 90, e.y);
-        ctx.lineTo(e.x + 90, e.y); // 180px 长的极速光轨
-        ctx.stroke();
-      }
-      else if (e.type === 'scan') { 
-        ctx.fillStyle = e.color || '#818cf8';
-        const scanY = e.y + (1 - e.life) * 400 - 200;
-        ctx.fillRect(0, scanY, 800, 6);
-        ctx.globalAlpha = e.life * 0.4;
-        ctx.fillRect(0, scanY - 15, 800, 36);
-      }
-      else if (e.type === 'shield') { 
-        ctx.strokeStyle = e.color || '#ef4444'; ctx.lineWidth = 5; 
-        ctx.beginPath(); ctx.arc(e.x, e.y - 40, 65, 0, Math.PI * 2); ctx.stroke(); 
+    this.effects.forEach(e => {
+      ctx.save(); ctx.globalAlpha = Math.max(0, e.life);
+
+      if (e.type === 'hit' || e.type === 'clash') {
+        // 精致像素溅射：带重力和随机旋转的方块
+        ctx.fillStyle = e.color || '#fff';
+        const size = e.size * e.life;
+        ctx.translate(e.x, e.y);
+        ctx.rotate(e.life * 5); // 碎片旋转
+        ctx.fillRect(-size / 2, -size / 2, size, size);
+        e.vy += 0.4; // 模拟重力
+      } else if (e.type === 'charge') {
+        ctx.strokeStyle = e.color; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(e.x, e.y);
+        ctx.lineTo(e.x + e.vx * 2, e.y + e.vy * 2); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill();
+      } else if (e.type === 'speed') {
+        ctx.strokeStyle = e.color || '#6366f1'; ctx.lineWidth = 4; ctx.shadowBlur = 15; ctx.shadowColor = e.color;
+        ctx.beginPath(); ctx.moveTo(e.x - 90, e.y); ctx.lineTo(e.x + 90, e.y); ctx.stroke();
+      } else if (e.type === 'scan') {
+        ctx.fillStyle = e.color || '#818cf8'; const scanY = e.y + (1 - e.life) * 400 - 200;
+        ctx.fillRect(0, scanY, 800, 6); ctx.globalAlpha = e.life * 0.4; ctx.fillRect(0, scanY - 15, 800, 36);
+      } else if (e.type === 'shield') {
+        ctx.strokeStyle = e.color || '#ef4444'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(e.x, e.y - 40, 65, 0, Math.PI * 2); ctx.stroke();
         ctx.globalAlpha = e.life * 0.2; ctx.fillStyle = e.color; ctx.fill();
-      }
-      else if (e.type === 'heal') {
+      } else if (e.type === 'heal') {
         ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill();
-      }
-      else { 
-        ctx.fillStyle = e.color || '#f59e0b'; ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill(); 
+      } else {
+        ctx.fillStyle = e.color || '#f59e0b'; ctx.beginPath(); ctx.arc(e.x, e.y, e.size * e.life, 0, Math.PI * 2); ctx.fill();
       }
       ctx.restore();
     });
   }
 }
+
 
 interface Character {
   username?: string;
@@ -388,40 +598,44 @@ interface Character {
 }
 
 export default function App() {
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  // --- 调试模式：自动登录 ---
+  const [token, setToken] = useState(localStorage.getItem('token') || 'dev-token');
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [authForm, setAuthForm] = useState({ username: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [player, setPlayer] = useState<Character>(() => {
     const saved = localStorage.getItem('username');
-    console.log('🏗️ [Init] Player 初始加载. LocalStorage username:', saved);
-    return { 
-      ...INITIAL_CHAR, 
-      username: saved || INITIAL_CHAR.username 
+    return {
+      ...INITIAL_CHAR,
+      username: saved || 'DevWarrior',
+      statPoints: 5 // 给予初始点数方便测试
     };
   });
   const [enemy, setEnemy] = useState<Character>(() => {
     const eName = ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
     console.log('🏗️ [Init] Enemy 初始加载. Name:', eName);
-    return { 
-      ...INITIAL_CHAR, 
-      username: eName, 
-      stats: { strength: 8, agility: 7, constitution: 8 }, 
-      health: 90, maxHealth: 90 
+    return {
+      ...INITIAL_CHAR,
+      username: eName,
+      stats: { strength: 8, agility: 7, constitution: 8 },
+      health: 90, maxHealth: 90
     };
   });
+  const [isDeployed, setIsDeployed] = useState(false);
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
   const [battleLog, setBattleLog] = useState<string[]>(['等待连接...']);
-  const [currentPose, setCurrentPose] = useState<{player: any, enemy: any}>({player: 'idle', enemy: 'idle'});
+  const [currentPose, setCurrentPose] = useState<{ player: any, enemy: any }>({ player: 'idle', enemy: 'idle' });
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
   const [battleHistory, setBattleHistory] = useState<BattleRoundRecord[]>([]);
-  const [shopTab, setShopTab] = useState<'weapons' | 'armors' | 'skills'>('weapons');
-  const [activeSkill, setActiveSkill] = useState<{name: string, icon: string, isP: boolean} | null>(null);
+  const [shopTab, setShopTab] = useState<'weapons' | 'armors' | 'skills' | null>(null);
+  const [activeSkill, setActiveSkill] = useState<{ name: string, icon: string, isP: boolean } | null>(null);
   const [coinToss, setCoinToss] = useState<{ active: boolean, result: 'player' | 'enemy' | null }>({ active: false, result: null });
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lobbyCanvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<StickmanRenderer | null>(null);
+  const lobbyRendererRef = useRef<StickmanRenderer | null>(null);
   const hasLoaded = useRef(false);
 
   // 确保渲染器尽早初始化
@@ -435,60 +649,46 @@ export default function App() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (authView === 'register' && authForm.password !== authForm.confirmPassword) {
-      alert('接入密钥不一致，请核对。');
-      return;
-    }
-    try {
-      const res = await safeFetch(`${API_URL}/${authView}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(authForm) });
-      const data = await res.json();
-      if (data.token) { 
-        localStorage.setItem('token', data.token); 
-        localStorage.setItem('username', data.username);
-        setToken(data.token); 
-        setPlayer(prev => ({ ...prev, username: data.username || prev.username }));
-        addLog('神经链路已建立。'); 
-        hasLoaded.current = true; // 登录成功视为已加载，允许后续保存
-      } else setAuthView('login');
-    } catch (err: any) { alert(err.message); }
+    // 纯本地 Mock 逻辑：跳过 fetch，直接登录
+    const mockToken = `local_token_${Date.now()}`;
+    localStorage.setItem('token', mockToken);
+    localStorage.setItem('username', authForm.username);
+    setToken(mockToken);
+    setPlayer(prev => ({ ...prev, username: authForm.username }));
+    addLog('神经链路已在本地建立。');
+    hasLoaded.current = true;
   };
 
   useEffect(() => {
     if (token) {
       const savedUser = localStorage.getItem('username');
-      console.log('🔍 [Load] Token 存在，尝试恢复档案. SavedUser:', savedUser);
-      fetch(`${API_URL}/load`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()).then(data => { 
-        console.log('🔍 [Load] 后端响应:', data);
-        if (data.gameData) {
-          const rawData = data.gameData; 
-          if (Array.isArray(rawData.unlockedItems)) { 
-            const m: any = {}; rawData.unlockedItems.forEach((n: any) => m[n] = 1); rawData.unlockedItems = m; 
-          }
-          setPlayer(prev => ({ 
-            ...prev, 
-            ...rawData, 
-            username: savedUser || rawData.username || prev.username || INITIAL_CHAR.username 
-          })); 
-          addLog('档案同步成功。');
-        } else if (savedUser) {
-          setPlayer(prev => ({ ...prev, username: savedUser }));
+      const localData = localStorage.getItem('stickman_pdata');
+      console.log('🔍 [Load] 正在从本地存储恢复档案...', savedUser);
+
+      if (localData) {
+        try {
+          const rawData = JSON.parse(localData);
+          setPlayer(prev => ({
+            ...prev,
+            ...rawData,
+            username: savedUser || prev.username
+          }));
+          addLog('本地档案同步成功。');
+        } catch (e) {
+          console.error('档案解析失败:', e);
         }
-        // 关键：标记为已加载，只有加载完成后才允许保存
-        setTimeout(() => { hasLoaded.current = true; }, 500);
-      });
+      }
+
+      setTimeout(() => { hasLoaded.current = true; }, 300);
     }
   }, [token]);
 
   useEffect(() => {
     if (token && hasLoaded.current) {
-      console.log('💾 [Save] 正在同步数据至云端...', player.level);
-      fetch(`${API_URL}/save`, { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-        body: JSON.stringify({ gameData: player }) 
-      }); 
+      console.log('💾 [Save] 正在同步数据至本地存储...', player.level);
+      localStorage.setItem('stickman_pdata', JSON.stringify(player));
     }
-  }, [player.level, player.gold, player.stats, player.unlockedItems]);
+  }, [player.level, player.gold, player.stats, player.unlockedItems, player.health]);
 
   // 新增：空格键快捷操作
   useEffect(() => {
@@ -496,6 +696,7 @@ export default function App() {
       if (e.code === 'Space') {
         if (gameState === 'victory' || gameState === 'defeat') {
           e.preventDefault();
+          setIsDeployed(false);
           setGameState('lobby');
           resetGame();
         } else if (gameState === 'tactics') {
@@ -513,42 +714,91 @@ export default function App() {
 
   useEffect(() => {
     let frame: number;
+    // --- 统一渲染循环 ---
     const loop = () => {
-      if (canvasRef.current) {
-        if (!rendererRef.current) rendererRef.current = new StickmanRenderer(canvasRef.current.getContext('2d')!);
-        
+      // 1. 战场渲染逻辑
+      if (canvasRef.current && gameState === 'battle') {
+        const ctx = canvasRef.current.getContext('2d')!;
+        if (!rendererRef.current) rendererRef.current = new StickmanRenderer(ctx);
         const r = rendererRef.current;
-        r.advance(); // 更新逻辑
-        r.drawBackground(field);
-        
+        // 动态绑定最新画布上下文，防止组件重新挂载后渲染到旧的离线画布上
+        (r as any).ctx = ctx;
+        r.advance(); r.drawBackground(field);
         const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon);
         const eW = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
-        
-        const isE = enemy.username?.includes('[精英]');
-        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility, pW?.icon, activeSkill?.name === '幻影连击' && activeSkill.isP); 
-        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, eW?.icon || '⚔️', activeSkill?.name === '幻影连击' && !activeSkill.isP, isE); 
-        
-        r.renderEffects(); // 始终在最上层渲染
+        // 调用升级：x, y, pose, isFlip, agility, equipment, gameState, isMultiHit
+        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility, player.equipment, gameState, activeSkill?.name === '幻影连击' && activeSkill.isP);
+        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, enemy.equipment, gameState, activeSkill?.name === '幻影连击' && !activeSkill.isP);
+        r.renderEffects();
       }
+
+      if (lobbyCanvasRef.current && gameState === 'lobby') {
+        const ctx = lobbyCanvasRef.current.getContext('2d');
+        if (ctx) {
+          if (!lobbyRendererRef.current) lobbyRendererRef.current = new StickmanRenderer(ctx);
+          const lr = lobbyRendererRef.current;
+          // 动态绑定最新画布上下文
+          (lr as any).ctx = ctx;
+          ctx.clearRect(0, 0, 600, 700);
+          lr.advance();
+          const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon);
+          ctx.save();
+          // 居中校准
+          ctx.translate(300, 350);
+          // 使用全新的高阶全息绘制方法
+          lr.drawLobbyHero(0, 0, player.stats.agility, player.equipment);
+          ctx.restore();
+        }
+      }
+
       frame = requestAnimationFrame(loop);
     };
     frame = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frame);
-  }, [field, currentPose, player.equipment.weapon, enemy.equipment.weapon, player.stats.agility, enemy.stats.agility, activeSkill]);
+  }, [gameState, field, currentPose, player.equipment.weapon, enemy.equipment.weapon, player.stats.agility, enemy.stats.agility, activeSkill]);
 
-  const buyItem = (item: Item) => setPreviewItem(item);
-  const confirmPurchase = (item: Item) => {
-    const curLvl = player.unlockedItems[item.name] || 0; const cost = Math.floor((item.cost || 0) * Math.pow(1.6, curLvl));
-    if (player.gold >= cost) { setPlayer(prev => ({ ...prev, gold: prev.gold - cost, unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 } })); addLog(`强化: ${item.name} [Lv.${curLvl+1}]`); setPreviewItem(null); }
+  const buyItem = (item: Item, tab: 'weapons' | 'armors' | 'skills') => {
+    const curLvl = player.unlockedItems[item.name] || 0;
+    // 忽略价格限制，保障购买测试，并且购买后直接装备
+    setPlayer(prev => {
+      const eqKey = tab === 'weapons' ? 'weapon' : tab === 'armors' ? 'armor' : 'skill';
+      return {
+        ...prev,
+        equipment: { ...prev.equipment, [eqKey]: item.name },
+        unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 }
+      };
+    });
+    addLog(`成功装载: ${item.name} [Lv.${curLvl + 1}]`);
+  };
+
+  const resetGame = () => {
+    setRound(1);
+    setIsDeployed(false);
+    setBattleLog(['系统就绪 / SYSTEM READY']);
+    setPlayer(prev => ({ ...prev, health: prev.maxHealth }));
+    setEnemy(prev => {
+      const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= prev.level);
+      const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= prev.level);
+      const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= prev.level);
+      const rw = aW[Math.floor(Math.random() * aW.length)];
+      const ra = aA[Math.floor(Math.random() * aA.length)];
+      const rs = aS[Math.floor(Math.random() * aS.length)];
+      return {
+        ...prev,
+        health: prev.maxHealth,
+        equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }
+      };
+    });
   };
 
   const handleLevelUp = (stat: Stat) => { if (player.statPoints > 0) setPlayer(prev => { const nMax = stat === 'constitution' ? Math.floor(prev.maxHealth + 15) : prev.maxHealth; return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax }; }); };
 
   const startRound = async () => {
+    setIsDeployed(true);
     // --- 掷币决定先手 ---
     const playerFirst = Math.random() > 0.5;
     const resultStr = playerFirst ? 'player' : 'enemy';
-    
+
     setCoinToss({ active: true, result: null });
     await new Promise(r => setTimeout(r, 1000)); // 旋转时间
     setCoinToss({ active: true, result: resultStr });
@@ -560,7 +810,7 @@ export default function App() {
 
     let pHP = Math.floor(player.health); let eHP = Math.floor(enemy.health);
     let curP_Dmg = 0; let curE_Dmg = 0;
-    
+
     const pS = ITEMS.skills.find(i => i.name === player.equipment.skill) || ITEMS.skills[0];
     const eS = ITEMS.skills.find(i => i.name === enemy.equipment.skill) || ITEMS.skills[0];
 
@@ -570,19 +820,19 @@ export default function App() {
       if (!s) return;
       setActiveSkill({ name: s.name, icon: s.icon, isP });
       addLog(`${isP ? '>>' : '<<'} [准备] ${isP ? player.username : enemy.username}: ${s.name}`);
-      
+
       if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
       if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
       if (s.name === '系统过载') rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20);
-      if (s.name === '蓄能重击') rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40); 
+      if (s.name === '蓄能重击') rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40);
       if (s.name === '幻影连击') rendererRef.current?.addEffect('speed', x, 280, '#6366f1', 15);
       if (s.name === '神经修复') {
         const atk = isP ? player : enemy;
         const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
         const heal = Math.floor((atk.maxHealth - (isP ? pHP : eHP)) * 0.25 + atk.stats.constitution * 0.5 * sL);
         rendererRef.current?.addEffect('heal', x, 280, '#10b981', 12);
-        if (isP) { pHP = Math.min(player.maxHealth, pHP + heal); setPlayer(prev => ({...prev, health: pHP})); }
-        else { eHP = Math.min(enemy.maxHealth, eHP + heal); setEnemy(prev => ({...prev, health: eHP})); }
+        if (isP) { pHP = Math.min(player.maxHealth, pHP + heal); setPlayer(prev => ({ ...prev, health: pHP })); }
+        else { eHP = Math.min(enemy.maxHealth, eHP + heal); setEnemy(prev => ({ ...prev, health: eHP })); }
         addLog(`${isP ? '>>' : '<<'} [修复] +${heal} HP`);
       }
       await new Promise(r => setTimeout(r, 1200));
@@ -608,7 +858,7 @@ export default function App() {
       const s = isP ? pS : eS;
       const wL = isP ? (player.unlockedItems[w.name] || 1) : (enemy.unlockedItems[w.name] || 1);
       const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
-      
+
       const x = isP ? 240 : 560; const tx = isP ? 560 : 240;
       const numHits = s.name === '幻影连击' ? 2 : 1;
 
@@ -620,7 +870,7 @@ export default function App() {
         let attackBonus = getAttackCounterMult(w.tag, a.tag);
         let defenseReduction = getDefenseCounterMult(a.tag, w.tag);
         if (s.name === '弱点扫描') { defenseReduction = 1.0; }
-        
+
         let dmg = (calcVal(w.damage!, wL) + atk.stats.strength * (isP ? 1.0 : 1.5)) * attackBonus * defenseReduction;
         if (s.mult) {
           let sMult = s.mult * (1 + 0.1 * (sL - 1));
@@ -630,30 +880,30 @@ export default function App() {
 
         const fD = Math.floor(field.id === 'overload' ? dmg * 1.3 : dmg);
         rendererRef.current?.addEffect('spark', tx, 250, isP ? '#f59e0b' : '#ef4444', 15);
-        
-        if (isP) { eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg += fD; addLog(`>>打击: ${fD}`); } 
+
+        if (isP) { eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg += fD; addLog(`>>打击: ${fD}`); }
         else { pHP = Math.max(0, pHP - fD); setPlayer(prev => ({ ...prev, health: pHP })); curE_Dmg += fD; addLog(`<<受创: ${fD}`); }
 
         // 反伤 (仅在受创方有反射技能时触发)
         const defenderSkill = isP ? eS : pS;
         if (defenderSkill.name === '动能反射' && fD > 0) {
           const reflect = Math.floor(fD * 0.5);
-          if (isP) { pHP = Math.max(0, pHP - reflect); setPlayer(prev => ({...prev, health: pHP})); addLog(`<< [反馈] -${reflect} HP`); }
-          else { eHP = Math.max(0, eHP - reflect); setEnemy(prev => ({...prev, health: eHP})); addLog(`>> [反馈] -${reflect} HP`); }
+          if (isP) { pHP = Math.max(0, pHP - reflect); setPlayer(prev => ({ ...prev, health: pHP })); addLog(`<< [反馈] -${reflect} HP`); }
+          else { eHP = Math.max(0, eHP - reflect); setEnemy(prev => ({ ...prev, health: eHP })); addLog(`>> [反馈] -${reflect} HP`); }
         }
 
         // 过载
         if (s.name === '系统过载') {
           const backlash = Math.floor(atk.maxHealth * 0.1);
-          if (isP) { pHP = Math.max(0, pHP - backlash); setPlayer(prev => ({...prev, health: pHP})); }
-          else { eHP = Math.max(0, eHP - backlash); setEnemy(prev => ({...prev, health: eHP})); }
+          if (isP) { pHP = Math.max(0, pHP - backlash); setPlayer(prev => ({ ...prev, health: pHP })); }
+          else { eHP = Math.max(0, eHP - backlash); setEnemy(prev => ({ ...prev, health: eHP })); }
           addLog(`!! [过载] -${backlash} HP`);
         }
 
         setCurrentPose(prev => ({ ...prev, [isP ? 'enemy' : 'player']: 'hit' }));
         await new Promise(r => setTimeout(r, 200)); // 缩短至 200ms
       }
-      setCurrentPose({player: 'idle', enemy: 'idle'});
+      setCurrentPose({ player: 'idle', enemy: 'idle' });
       await new Promise(r => setTimeout(r, 300));
     };
 
@@ -667,16 +917,28 @@ export default function App() {
 
     // 结算逻辑
     setBattleHistory(prev => [...prev, { round, pDmg: curP_Dmg, eDmg: curE_Dmg, pRemainingHp: pHP, eRemainingHp: eHP }]);
-    
+
     const finalize = (isW: boolean) => {
       const gR = isW ? (60 + player.level * 25) : (20 + player.level * 10); const xR = isW ? (70 + player.level * 10) : 0;
-      if (isW) { setPlayer(prev => { let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints; if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; } return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 }; }); setGameState('victory'); } 
-      else { setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 })); setGameState('defeat'); }
+      if (isW) {
+        setPlayer(prev => {
+          let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints;
+          if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; }
+          return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 };
+        });
+        setGameState('victory');
+        addLog(`>> 任务完成: 获得 ₿${gR} | EXP +${xR}`);
+      } else {
+        setPlayer(prev => ({ ...prev, gold: prev.gold + gR, defeatCount: (prev.defeatCount || 0) + 1 }));
+        setGameState('defeat');
+        addLog(`<< 连接断开: 获得补偿 ₿${gR}`);
+      }
     };
 
-    if (pHP <= 0) finalize(false); else if (eHP <= 0) finalize(true); 
-    else if (round >= 3) finalize(pHP > eHP); 
-    else { 
+    if (pHP <= 0) finalize(false);
+    else if (eHP <= 0) finalize(true);
+    else if (round >= 3) finalize(pHP > eHP);
+    else {
       const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level);
       const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level);
       const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
@@ -687,383 +949,521 @@ export default function App() {
       const eL = Math.max(1, Math.floor(player.level / 2.2 * (isElite ? 1.5 : 1)));
       setEnemy(prev => ({ ...prev, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL } }));
       addLog(`>>> 目标正在重新校准战术单元...`);
-      setRound(prev => prev + 1); setGameState('tactics'); 
+      setRound(prev => prev + 1);
+      setIsDeployed(false);
+      // 关键修改：不再切换状态，保持在 battle 场景
     }
   };
 
-  const resetGame = () => {
-    const oF = BATTLEFIELDS.filter(f => f.id !== field.id); const nF = oF[Math.floor(Math.random() * oF.length)]; setField(nF);
-    const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon)!; const pA = ITEMS.armors.find(a => a.name === player.equipment.armor)!;
-    const wL = player.unlockedItems[pW.name] || 1; const aL = player.unlockedItems[pA.name] || 1;
-    const pP = (player.stats.strength + player.stats.agility + player.stats.constitution) + calcVal(pW.damage!, wL) + calcVal(pA.defense!, aL);
-    const isElite = Math.random() < 0.12;
-    let dM = (1 + (pP / 750)) * Math.max(0.5, 1 - (player.defeatCount * 0.12));
-    if (isElite) dM *= 1.6;
-
-    const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= player.level); const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= player.level); const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= player.level);
-    const rw = aW[Math.floor(Math.random() * aW.length)]; const ra = aA[Math.floor(Math.random() * aA.length)]; const rs = aS[Math.floor(Math.random() * aS.length)];
-    setPlayer(prev => ({...prev, health: prev.maxHealth}));
-    const bS = player.level === 1 ? 0.5 : 0.8; const eS = { strength: Math.floor(player.stats.strength * bS * dM), agility: Math.floor(player.stats.agility * 0.7 * dM), constitution: Math.floor(player.stats.constitution * 0.8 * dM) };
-    const eH = Math.floor(player.maxHealth * (player.level === 1 ? 0.75 : 0.95) * (1 + (pP / 3000)) * Math.max(0.5, 1 - (player.defeatCount * 0.12)));
-    const eL = Math.max(1, Math.floor(player.level / 2.2 * (isElite ? 1.5 : 1)));
-    const eNameBase = ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
-    const eName = isElite ? `${eNameBase} [精英]` : eNameBase;
-    setEnemy({ username: eName, level: player.level, xp: 0, gold: 0, stats: eS, equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }, health: eH, maxHealth: eH, unlockedItems: { [rw.name]: eL, [ra.name]: eL, [rs.name]: eL }, defeatCount: 0, statPoints: 0 });
-    setRound(1); setGameState('lobby'); setCurrentPose({player: 'idle', enemy: 'idle'}); setBattleHistory([]); 
-    addLog(`部署至: ${nF.name} | 对手: ${eName}`);
-    if (isElite) addLog(`⚠️ 警告: 检测到高能神经信号! ${eName} 已接入!`);
-  };
-
   return (
-    <div className="h-screen w-full bg-slate-50 text-slate-800 p-4 font-sans overflow-hidden flex flex-col gap-4 relative">
-      {/* 登录遮罩层 */}
+    <div className="h-screen w-full bg-slate-950 text-slate-100 font-sans overflow-hidden relative">
+      {/* 1. AUTH OVERLAY */}
       {!token && (
-        <div className="absolute inset-0 z-[1000] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-500">
-          <div className="absolute inset-0 tactical-stripes opacity-20 pointer-events-none"></div>
-          <div className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-2xl relative z-10 animate-in zoom-in-95 duration-300">
-            <div className="mb-10 text-center">
-              <h1 className="text-4xl font-black italic text-indigo-600 mb-2 uppercase tracking-tighter">神经链路 · 接入层</h1>
-              <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.3em]">Neural Interface v1.0.4</p>
+        <div className="absolute inset-0 z-[1000] bg-slate-950/95 flex items-center justify-center p-4">
+          <div className="w-full max-w-md pixel-card p-10 animate-in zoom-in-95 duration-300">
+            <div className="text-center mb-8 border-b-4 border-slate-800 pb-6">
+              <h1 className="text-3xl pixel-font text-indigo-500 mb-2 glow-pixel">NEURAL LINK</h1>
+              <p className="text-xs pixel-font text-slate-500">神经链路接入 / ENCRYPTION ACTIVE</p>
             </div>
-            
-            <form onSubmit={handleAuth} className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">档案代号 / USERNAME</label>
-                <input 
-                  type="text" required placeholder="请输入档案代号..."
-                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-slate-800 font-bold focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
-                  value={authForm.username}
-                  onChange={e => setAuthForm(prev => ({ ...prev, username: e.target.value }))}
-                />
+            <form onSubmit={handleAuth} className="space-y-6">
+              <div className="space-y-1">
+                <label className="text-xs pixel-font text-slate-500 ml-1">档案代号 / USERNAME</label>
+                <input type="text" required className="w-full bg-slate-900 border-4 border-slate-800 p-4 text-white font-bold outline-none focus:border-indigo-500 transition-colors" value={authForm.username} onChange={e => setAuthForm(p => ({ ...p, username: e.target.value }))} />
               </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">接入密钥 / PASSWORD</label>
-                <div className="relative">
-                  <input 
-                    type={showPassword ? 'text' : 'password'} required placeholder="请输入密钥..."
-                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-slate-800 font-bold focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
-                    value={authForm.password}
-                    onChange={e => setAuthForm(prev => ({ ...prev, password: e.target.value }))}
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-indigo-500 transition-colors text-xl">
-                    {showPassword ? '👁️' : '🕶️'}
-                  </button>
+              <div className="space-y-1">
+                <label className="text-xs pixel-font text-slate-500 ml-1">接入密钥 / PASSWORD</label>
+                <input type="password" required className="w-full bg-slate-900 border-4 border-slate-800 p-4 text-white font-bold outline-none focus:border-indigo-500 transition-colors" value={authForm.password} onChange={e => setAuthForm(p => ({ ...p, password: e.target.value }))} />
+              </div>
+              <button type="submit" className="w-full py-5 pixel-button text-[12px] mt-4">建立连接 / ESTABLISH CONNECTION</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 2. MAIN CONTENT ROUTER */}
+      {(gameState === 'battle' || gameState === 'victory' || gameState === 'defeat') ? (
+        /* --- PERSISTENT BATTLE HUD --- */
+        <div className="fixed inset-0 bg-slate-950 flex flex-col overflow-hidden text-white font-mono z-[500]">
+
+
+          {/* TOP HUD */}
+          <div className="cyber-hud border-b-4 border-slate-900">
+            <div className="hud-unit">
+              <img src="/assets/p_port.png" className="portrait-box" alt="P" />
+              <div className="bar-stack">
+                <div className="unit-name text-cyan-400">玩家 / {player.username}</div>
+                {/* 玩家当前装备展示 */}
+                <div className="flex gap-2 text-[9px] text-slate-500 font-bold mb-1 uppercase">
+                  <span className="text-indigo-400">{player.equipment.weapon}</span>
+                  <span className="opacity-30">|</span>
+                  <span className="text-indigo-400">{player.equipment.armor}</span>
+                  <span className="opacity-30">|</span>
+                  <span className="text-indigo-400">{player.equipment.skill}</span>
+                </div>
+                <div className="pixel-bar-container">
+                  <div className="pixel-bar-fill bg-emerald-500" style={{ width: `${(player.health / player.maxHealth) * 100}%` }} />
+                  <span className="bar-label">生命值 / HP {player.health}/{player.maxHealth}</span>
+                </div>
+                <div className="pixel-bar-container">
+                  <div className="pixel-bar-fill bg-indigo-500" style={{ width: '100%' }} />
+                  <span className="bar-label">能量值 / EP 100%</span>
                 </div>
               </div>
-              {authView === 'register' && (
-                <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">确认密钥 / CONFIRM</label>
-                  <input 
-                    type="password" required placeholder="请再次输入以确认..."
-                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-slate-800 font-bold focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all"
-                    value={authForm.confirmPassword}
-                    onChange={e => setAuthForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  />
+            </div>
+
+            <div className="hud-info-center">
+              <div className="round-text">回合进度 / ROUND {round}</div>
+              <div className="mini-log animate-pulse text-[11px] font-bold">
+                {!isDeployed ? '等待战术确认 / WAITING FOR READY' : (battleLog[0] || '系统就绪 / SYSTEM READY')}
+              </div>
+            </div>
+
+            <div className="hud-unit flex-row-reverse">
+              <img src="/assets/e_port.png" className="portrait-box border-rose-900" alt="E" />
+              <div className="bar-stack text-right">
+                <div className="unit-name text-rose-400">目标 / {enemy.username}</div>
+                {/* 敌人当前装备展示 (提供博弈信息) */}
+                <div className="flex justify-end gap-2 text-[9px] text-slate-500 font-bold mb-1 uppercase">
+                  <span className="text-rose-400">{enemy.equipment.weapon}</span>
+                  <span className="opacity-30">|</span>
+                  <span className="text-rose-400">{enemy.equipment.armor}</span>
+                  <span className="opacity-30">|</span>
+                  <span className="text-rose-400">{enemy.equipment.skill}</span>
+                </div>
+                <div className="pixel-bar-container">
+                  <div className="pixel-bar-fill bg-rose-600" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} />
+                  <span className="bar-label left-2 right-auto">HP {enemy.health}/{enemy.maxHealth}</span>
+                </div>
+                <div className="pixel-bar-container">
+                  <div className="pixel-bar-fill bg-sky-500" style={{ width: '100%' }} />
+                  <span className="bar-label left-2 right-auto">盾 / SHIELD 100%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* BATTLE FIELD / 场景展示 */}
+          <div className="flex-1 relative flex items-center justify-center gap-8 p-8 bg-[radial-gradient(circle_at_center,_#1e1b4b_0%,_#020617_100%)]">
+            
+            {/* 环境与目标情报 (移至场景左侧) */}
+            <div className="w-[280px] h-[400px] pixel-card bg-slate-900/80 p-5 flex flex-col gap-4 border-indigo-500/40 backdrop-blur-md animate-in slide-in-from-left-8 duration-500">
+              <div className="flex flex-col gap-2">
+                <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest border-b-2 border-indigo-500/20 pb-2">情报终端 / INTEL_TERMINAL</p>
+                <div className="space-y-3 mt-2">
+                  <div>
+                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">环境特征 / ENVR_SPEC</p>
+                    <p className="text-sm font-black text-white italic">“{field.name}”</p>
+                    <p className="text-[10px] text-indigo-400 font-bold mt-1">修正：{field.effect}</p>
+                  </div>
+                  <div className="border-t border-slate-800 pt-3">
+                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter mb-2">目标识别 / TARGET_ID</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
+                        <span className="text-[9px] text-slate-500 font-bold">攻击单元</span>
+                        <span className="text-[10px] text-rose-400 font-black uppercase">{enemy.equipment.weapon}</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
+                        <span className="text-[9px] text-slate-500 font-bold">防御规格</span>
+                        <span className="text-[10px] text-rose-400 font-black uppercase">{enemy.equipment.armor}</span>
+                      </div>
+                      <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
+                        <span className="text-[9px] text-slate-500 font-bold">逻辑插件</span>
+                        <span className="text-[10px] text-rose-400 font-black uppercase">{enemy.equipment.skill}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-auto pt-4 border-t border-slate-800">
+                <div className="flex items-center gap-2 animate-pulse">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
+                  <span className="text-[8px] text-emerald-500 font-black tracking-widest">终端在线 / ENCRYPTED_LINK_UP</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <canvas ref={canvasRef} width={800} height={400} className="max-w-full h-auto border-4 border-slate-800 shadow-2xl bg-black image-pixelated" />
+
+            {activeSkill && (
+              <div className="absolute top-1/4 text-5xl font-black italic text-cyan-400 drop-shadow-[0_0_15px_#00f2ff] animate-bounce">
+                {activeSkill.name}!!
+              </div>
+            )}
+
+            {coinToss.active && (
+              <div className="absolute inset-0 z-[300] bg-slate-950/80 flex flex-col items-center justify-center animate-in fade-in">
+                <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-4xl shadow-2xl transition-all duration-700 ${!coinToss.result ? 'animate-spin border-slate-400 bg-slate-800' : coinToss.result === 'player' ? 'border-emerald-500 bg-emerald-600 scale-125' : 'border-rose-500 bg-rose-600 scale-125'}`}>
+                  {!coinToss.result ? '🪙' : coinToss.result === 'player' ? 'YOU' : 'HOST'}
+                </div>
+                <p className="mt-8 text-2xl font-black pixel-font text-white uppercase text-center tracking-widest">判 定 行 动 顺 序 . . .</p>
+              </div>
+            )}
+
+            {/* MISSION RESULT OVERLAY */}
+            {(gameState === 'victory' || gameState === 'defeat') && (
+              <div className="absolute inset-0 z-[400] bg-slate-950/80 flex items-center justify-center animate-in zoom-in-95">
+                <div className={`p-12 border-4 ${gameState === 'victory' ? 'border-emerald-500 bg-emerald-950/50' : 'border-rose-500 bg-rose-950/50'} text-center shadow-[0_0_100px_rgba(0,0,0,1)]`}>
+                  <h2 className={`text-6xl font-black italic mb-4 ${gameState === 'victory' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {gameState === 'victory' ? 'MISSION COMPLETE' : 'CONNECTION LOST'}
+                  </h2>
+                  <p className="text-white pixel-font text-sm mb-10 tracking-[0.2em]">{gameState === 'victory' ? '目标已被彻底清除' : '严重损伤，被迫断开连接'}</p>
+                  <button onClick={() => { setGameState('lobby'); resetGame(); }} className="px-12 py-4 bg-white text-black font-bold pixel-font text-xs hover:bg-indigo-500 hover:text-white transition-all">RETURN TO BASE [ESC]</button>
+                </div>
+              </div>
+            )}
+            </div>
+          </div>
+
+          {/* 实时战术底部面板 - 优化布局 */}
+          <div className="flex flex-col gap-3 p-4 bg-slate-950 border-t-4 border-slate-900">
+            {/* 第一行：操作 (左)、日志 (右) */}
+            <div className="flex gap-3 h-[140px]">
+              {/* 操作控制 (对决卡片) */}
+              <div className="w-[340px] flex flex-col gap-2">
+                {!isDeployed ? (
+                  <button onClick={startRound} className="flex-1 pixel-button success !p-0 text-lg shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+                    执行任务部署 / START ROUND {round}
+                  </button>
+                ) : (
+                  <div className="flex-1 pixel-card bg-slate-900 flex items-center justify-center text-slate-500 font-bold italic animate-pulse border-indigo-500/30 text-xs">
+                    同步中... SYNCING
+                  </div>
+                )}
+                <button onClick={() => { setGameState('lobby'); resetGame(); }} className="h-8 text-[9px] font-black text-rose-500 hover:text-white hover:bg-rose-500/20 border border-rose-500/30 transition-all uppercase tracking-widest">
+                  中止任务 / ABORT MISSION
+                </button>
+              </div>
+
+              {/* 任务数据流 (右 - 信息流卡片) */}
+              <div className="flex-1 pixel-card bg-slate-900/50 p-3 flex flex-col overflow-hidden">
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-1 mb-1">数据流解析 / BATTLE_LOG_DECODER</p>
+                <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1 text-[9px] font-mono pr-2">
+                  {battleLog.map((log, i) => (
+                    <div key={i} className={`border-l-2 pl-2 ${log.includes('打击') ? 'text-emerald-400' : log.includes('受创') ? 'text-rose-400' : 'text-slate-500'}`}>
+                      {log}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 第二行：实时装载变更 (变宽) */}
+            <div className="pixel-card bg-slate-900/50 p-3 flex flex-col gap-2">
+              <p className="text-[9px] font-black text-indigo-500 uppercase tracking-widest border-b border-indigo-500/20 pb-1">实时载荷调节 / LIVE LOADOUT ADJUSTMENT</p>
+              <div className="grid grid-cols-3 gap-6">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] text-slate-500 font-bold">攻击链路 / WEAPON</label>
+                  <select disabled={isDeployed} className="bg-slate-950 border border-slate-800 text-white text-[10px] p-2 outline-none cursor-pointer"
+                    value={player.equipment.weapon}
+                    onChange={e => setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: e.target.value } }))}>
+                    {ITEMS.weapons.filter(i => player.unlockedItems[i.name]).map(i => <option key={i.name} value={i.name}>{i.icon} {i.name}</option>)}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] text-slate-500 font-bold">防御规格 / ARMOR</label>
+                  <select disabled={isDeployed} className="bg-slate-950 border border-slate-800 text-white text-[10px] p-2 outline-none cursor-pointer"
+                    value={player.equipment.armor}
+                    onChange={e => setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: e.target.value } }))}>
+                    {ITEMS.armors.filter(i => player.unlockedItems[i.name]).map(i => <option key={i.name} value={i.name}>{i.icon} {i.name}</option>)}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[9px] text-slate-500 font-bold">核心逻辑 / NEURAL SKILL</label>
+                  <select disabled={isDeployed} className="bg-slate-950 border border-slate-800 text-white text-[10px] p-2 outline-none cursor-pointer"
+                    value={player.equipment.skill}
+                    onChange={e => setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: e.target.value } }))}>
+                    {ITEMS.skills.filter(i => player.unlockedItems[i.name]).map(i => <option key={i.name} value={i.name}>{i.icon} {i.name}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* --- BASE INTERFACE (Lobby/Shop/Tactics) --- */
+        <div className="flex flex-col h-full p-4 gap-4 animate-in fade-in duration-500">
+          {/* HEADER */}
+          <div className="flex justify-between items-center bg-slate-900 border-4 border-slate-800 px-8 py-5 shadow-lg flex-none">
+            <div className="flex items-center gap-16">
+              <div className="flex flex-col"><span className="text-xs font-bold text-slate-500 uppercase mb-1 tracking-tighter">档案代号 / PROFILE</span><span className="text-xl font-black tracking-widest">{player.username}</span></div>
+              <div className="flex flex-col items-center"><span className="text-xs text-slate-400 font-bold uppercase mb-1 tracking-tighter">同步等级 / LINK LEVEL</span><span className="text-2xl font-black text-indigo-500">LV.{player.level}</span></div>
+              <div className="text-right"><span className="text-xs text-slate-400 font-bold uppercase block mb-1 tracking-tighter">信用余额 / CREDITS</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div>
+            </div>
+            <div className="flex gap-4">
+              <button onClick={() => {
+                resetGame();
+                setGameState('battle');
+              }} className="pixel-button success text-lg px-16 shadow-[0_0_40px_rgba(16,185,129,0.3)]">执行任务部署 / DEPLOY</button>
+            </div>
+          </div>
+
+          <div className="flex-1 flex gap-4 min-h-0">
+            {/* LEFT MAIN PANEL */}
+            <div className="flex-1 pixel-card flex flex-col gap-6 overflow-hidden relative">
+              {/* 放大模糊的主角背影背景 */}
+              <div className="absolute inset-0 pointer-events-none opacity-80" style={{
+                backgroundImage: `url('${player.equipment.weapon.includes('锤') ? '/cyborg_ninja_hammer.png' : '/cyborg_ninja_clean_bg.png'}')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(10px)',
+                zIndex: 0
+              }}></div>
+
+              {gameState === 'lobby' && (
+                <div className="h-full flex gap-6 p-4 overflow-hidden relative z-10">
+                  {/* 1. 左侧：参数与装载 (STATS & LOADOUT) */}
+                  <div className="w-[340px] flex flex-col gap-4">
+                    {/* 属性面板 */}
+                    <div className="pixel-card bg-slate-900/80 p-6 flex-none">
+                      <div className="flex justify-between items-end border-b-2 border-indigo-500/30 pb-2 mb-4">
+                        <h2 className="text-sm font-black italic text-indigo-400 uppercase tracking-widest">参数调优 / TUNING</h2>
+                        <span className="text-[10px] text-slate-500">POINTS: {player.statPoints}</span>
+                      </div>
+                      <div className="space-y-4">
+                        {(['strength', 'agility', 'constitution'] as Stat[]).map(s => (
+                          <div key={s} className="flex items-center justify-between group">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-slate-500 font-bold uppercase">{s === 'strength' ? '力量' : s === 'agility' ? '敏捷' : '体质'} / {s}</span>
+                              <span className="text-2xl font-black text-white">{player.stats[s]}</span>
+                            </div>
+                            {player.statPoints > 0 && (
+                              <button onClick={() => handleLevelUp(s)} className="w-10 h-10 bg-indigo-600/20 border-2 border-indigo-500 text-indigo-400 font-black hover:bg-indigo-600 hover:text-white transition-all active:scale-90">▲</button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 装备列表 */}
+                    <div className="pixel-card bg-slate-900/80 p-6 flex-1 overflow-hidden flex flex-col">
+                      <div className="flex justify-between items-end border-b-2 border-slate-800 pb-2 mb-4">
+                        <h2 className="text-sm font-black italic text-slate-400 uppercase tracking-widest">当前载荷 / LOADOUT</h2>
+                      </div>
+                      <div className="space-y-6 overflow-y-auto custom-scrollbar pr-2">
+                        <div className="border-l-4 border-amber-500 pl-4 py-2 bg-amber-500/5">
+                          <p className="text-[10px] text-slate-500 uppercase font-bold">攻击链路 / WEAPON</p>
+                          <p className="text-lg font-black text-amber-500">{player.equipment.weapon || '空'}</p>
+                        </div>
+                        <div className="border-l-4 border-cyan-500 pl-4 py-2 bg-cyan-500/5">
+                          <p className="text-[10px] text-slate-500 uppercase font-bold">防护链路 / ARMOR</p>
+                          <p className="text-lg font-black text-cyan-500">{player.equipment.armor || '空'}</p>
+                        </div>
+                        <div className="border-l-4 border-indigo-500 pl-4 py-2 bg-indigo-500/5">
+                          <p className="text-[10px] text-slate-500 uppercase font-bold">核心逻辑 / SKILL</p>
+                          <p className="text-lg font-black text-indigo-500">{player.equipment.skill || '空'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 2. 中央：英雄全息交互 (HERO HOLOGRAPHIC) */}
+                  <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden bg-[radial-gradient(circle_at_center,_rgba(99,102,241,0.08)_0%,_transparent_70%)]">
+
+
+                    {/* 扫描线背景效果 */}
+                    <div className="absolute inset-0 pointer-events-none opacity-20" style={{ background: 'linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.25) 50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))', backgroundSize: '100% 4px, 3px 100%' }}></div>
+
+                    <div className="hero-platform absolute top-[360px] w-80 h-16 bg-indigo-500/20 rounded-[100%] blur-2xl animate-pulse border-t border-indigo-500/40"></div>
+
+                    {/* 实时渲染 Canvas */}
+                    <div className="relative z-10 animate-in zoom-in-90 duration-700 mt-[100px]">
+                      <canvas ref={lobbyCanvasRef} width={600} height={700} className="drop-shadow-[0_0_25px_rgba(99,102,241,0.4)]" />
+
+                      {/* 浮动交互节点 (Hotspots) - 强化引导 */}
+                      <div className="absolute inset-0 pointer-events-none">
+                        {/* 动态精准引导线 */}
+                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                          <defs>
+                            <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
+                              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.1" />
+                            </linearGradient>
+                            <linearGradient id="lineGradRev" x1="100%" y1="0%" x2="0%" y2="0%">
+                              <stop offset="0%" stopColor="#f97316" stopOpacity="0.8" />
+                              <stop offset="100%" stopColor="#f97316" stopOpacity="0.1" />
+                            </linearGradient>
+                          </defs>
+                          {/* Armor (Back): 从左上角指向后背区域 */}
+                          <path d="M 120 150 L 260 220" stroke="url(#lineGrad)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
+                          {/* Weapon (Left Hand): 再左移20px */}
+                          <path d="M 360 400 L 310 430" stroke="url(#lineGradRev)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
+                          {/* Skill (Core): 上移40px */}
+                          <path d="M 100 480 L 290 350" stroke="url(#lineGrad)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
+                        </svg>
+
+                        {/* 头部：防护 (后背位置) */}
+                        <div onClick={() => setShopTab('armors')} className="pointer-events-auto absolute top-[100px] left-[60px] w-24 h-24 rounded-full cursor-pointer group/h">
+                          <div className="absolute inset-0 border border-cyan-500/30 rounded-full animate-[ping_3s_linear_infinite]"></div>
+                          <div className="absolute inset-0 border-2 border-cyan-500/20 rounded-full flex items-center justify-center">
+                            <div className="w-1 h-1 bg-cyan-400 rounded-full shadow-[0_0_10px_#22d3ee]"></div>
+                          </div>
+                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                            <span className="text-[9px] text-cyan-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-cyan-500/50">ARMOR_SYSTEM</span>
+                            <div className="w-[1px] h-4 bg-cyan-500/50"></div>
+                          </div>
+                        </div>
+
+                        {/* 手臂：武器 (再左移20px -> right 从 140 增加到 160) */}
+                        <div onClick={() => setShopTab('weapons')} className="pointer-events-auto absolute top-[300px] right-[160px] w-32 h-48 cursor-pointer group/w">
+                          <div className="absolute inset-0 border-2 border-amber-500/10 rounded-lg animate-pulse"></div>
+                          <div className="absolute -right-28 top-1/2 -translate-y-1/2 flex items-center flex-row-reverse">
+                            <div className="flex flex-col items-start">
+                              <span className="text-[9px] text-amber-500 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-amber-500/50">ATK_WEAPONRY</span>
+                              <span className="text-[8px] text-amber-500/60 font-bold mt-1">CLICK_UPGRADE</span>
+                            </div>
+                            <div className="w-8 h-[1px] bg-amber-500/50 mr-2"></div>
+                          </div>
+                        </div>
+
+                        {/* 核心：技能 (上移40px -> top 从 480 减到 440) */}
+                        <div onClick={() => setShopTab('skills')} className="pointer-events-auto absolute top-[440px] left-[60px] w-16 h-16 cursor-pointer group/s">
+                          <div className="absolute inset-0 bg-indigo-500/10 border-2 border-indigo-500/30 rounded-full animate-pulse shadow-[0_0_20px_rgba(99,102,241,0.4)]"></div>
+                          <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                            <div className="w-[1px] h-6 bg-indigo-500/50 mb-1"></div>
+                            <span className="text-[9px] text-indigo-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-indigo-500/50 uppercase">Neural_Core</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 选中的部位升级菜单 (弹出层保持原有逻辑) */}
+                    {shopTab && (
+                      <div className="absolute inset-0 z-[1000] bg-slate-950/95 backdrop-blur-xl flex flex-col p-12 animate-in slide-in-from-bottom-8 duration-300 border-x border-slate-800">
+                        <div className="flex justify-between items-center border-b-4 border-slate-800 pb-6 mb-8">
+                          <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">
+                            部位升级 / {(shopTab === 'weapons' ? '攻击链路' : (shopTab === 'armors' ? '防护链路' : '核心逻辑'))}
+                          </h3>
+                          <button className="pixel-button danger !py-2 !px-6" style={{ background: 'transparent', border: 'none', color: '#94a3b8', textDecoration: 'underline' }} onClick={() => setShopTab(null as any)}>关闭终端 / CLOSE</button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-3 gap-6 pr-4">
+                          {ITEMS[shopTab].map(item => (
+                            <div key={item.name} className="pixel-card bg-slate-900 p-6 hover:border-indigo-500 transition-all group flex flex-col items-center">
+                              <span className="text-6xl mb-6 group-hover:scale-110 transition-transform">{item.icon}</span>
+                              <p className="text-lg font-black text-white mb-1">{item.name}</p>
+                              <p className="text-[10px] text-slate-500 uppercase mb-6 tracking-widest">{item.rarity}</p>
+                              <button onClick={() => buyItem(item, shopTab as 'weapons' | 'armors' | 'skills')} className="w-full py-4 bg-indigo-600 text-sm font-black hover:bg-indigo-500 transition-colors shadow-lg">升级强化 / ₿{item.cost}</button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 3. 右侧：系统日志 (已被全局外层 Log 覆盖，此处移除) */}
                 </div>
               )}
-              <button type="submit" className="w-full py-5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-[15px] shadow-2xl active:scale-[0.98] transition-all mt-4 uppercase tracking-widest border-b-4 border-indigo-800">
-                {authView === 'login' ? '建立神经连接' : '初始化新档案'}
-              </button>
-            </form>
-            
-            <div className="mt-10 pt-8 border-t border-slate-50 flex flex-col items-center gap-5">
-               <button onClick={() => setAuthView(authView === 'login' ? 'register' : 'login')} className="text-slate-400 hover:text-indigo-600 font-black text-[12px] transition-colors uppercase tracking-wider">
-                 {authView === 'login' ? '还没有档案？申请新链路' : '已有授权？返回接入层'}
-               </button>
+            </div>
+
+            {/* RIGHT SIDEBAR - LOGS */}
+            <div className="w-96 pixel-card flex flex-col bg-slate-900/50 backdrop-blur-sm">
+              <h3 className="text-[9px] pixel-font text-slate-500 uppercase mb-4 border-b-4 border-slate-800 p-4">任务数据流 / MISSION DATA LOGS</h3>
+              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 p-4 text-[11px] font-mono">
+                {battleLog.map((log, i) => (
+                  <div key={i} className={`border-l-4 pl-3 py-1 ${log.includes('任务完成') ? 'border-emerald-500 text-emerald-400' : log.includes('连接断开') ? 'border-rose-500 text-rose-400' : 'border-slate-700 text-slate-400'}`}>
+                    <span className="opacity-30 mr-2">[{new Date().toLocaleTimeString([], { hour12: false })}]</span>
+                    {log}
+                  </div>
+                ))}
+                {battleLog.length === 0 && <div className="text-slate-700 italic">等待数据注入 / WAITING FOR DATA...</div>}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex justify-between items-center bg-white border border-slate-200 px-6 py-4 rounded-2xl shadow-sm flex-none">
-        <div className="flex items-center gap-12">
-          <div className="flex items-center gap-4 border-r border-slate-100 pr-8">
-            <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-black text-lg shadow-lg shadow-indigo-100 italic">
-              {player.username?.[0]?.toUpperCase() || 'U'}
-            </div>
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Neural Profile</p>
-              <p className="text-[16px] font-black text-slate-800 leading-none">{player.username}</p>
-            </div>
-          </div>
-          <div className="flex flex-col items-center"><span className="text-[13px] text-slate-400 font-bold uppercase tracking-widest">神经等级</span><span className="text-2xl font-black text-indigo-600">LV.{player.level}</span></div>
-          <div className="space-y-2"><div className="flex gap-6 text-[13px] font-bold text-slate-600"><span className="flex items-center gap-1.5">力 <b className="text-rose-500">{player.stats.strength}</b></span><span className="flex items-center gap-1.5">敏 <b className="text-emerald-500">{player.stats.agility}</b></span><span className="flex items-center gap-1.5">体 <b className="text-sky-500">{player.stats.constitution}</b></span></div><div className="flex items-center gap-3"><div className="w-56 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className="bg-indigo-500 h-full transition-all duration-500" style={{ width: `${(player.xp / (player.level * 100)) * 100}%` }} /></div><span className="text-[11px] font-mono text-slate-400 font-bold">{player.xp} / {player.level * 100} XP</span></div></div>
-        </div>
-        <div className="flex items-center gap-8"><div className="text-right"><span className="text-[13px] text-slate-400 font-bold uppercase block">储备</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div><div className="flex gap-2"><button onClick={() => setGameState('shop')} className="px-5 py-2.5 bg-slate-800 text-white text-[13px] font-bold rounded-xl hover:bg-slate-700 shadow-lg shadow-slate-200">黑市</button><button onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('username'); setToken(''); }} className="px-3 py-2.5 bg-slate-100 text-slate-400 text-[11px] font-bold rounded-xl hover:bg-slate-200">退出</button></div></div>
-      </div>
-
-      <div className="flex-none h-[46vh] flex gap-4 min-h-0">
-        <div className="flex-1 bg-white rounded-3xl border border-slate-200 relative overflow-hidden shadow-sm">
-          <canvas ref={canvasRef} width={800} height={400} className="w-full h-full object-contain" />
-          <div className="absolute top-6 inset-x-10 flex justify-between pointer-events-none">
-            <div className="w-64"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-rose-500 h-full transition-all duration-1000" style={{ width: `${(player.health / player.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-rose-600 font-black uppercase">{player.username}: {Math.floor(player.health)} HP</p></div>
-            <div className="w-64 text-right"><div className="h-2.5 bg-slate-50 rounded-full border border-slate-100 overflow-hidden"><div className="bg-slate-800 h-full transition-all duration-1000" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} /></div><p className="text-[13px] mt-2 text-slate-500 font-black uppercase">{enemy.username || 'UNIT'}: {Math.floor(enemy.health)} HP</p></div>
-          </div>
-          <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 animate-in slide-in-from-left-4 duration-500"><p className="text-[9px] font-black text-white/40 uppercase tracking-widest">当前战场</p><p className="text-[14px] font-black text-white">{field.name}</p></div>
-          
-          {/* 技能释放提示 */}
-          {activeSkill && (
-            <div className={`absolute bottom-16 inset-x-0 flex justify-center z-[200] animate-in slide-in-from-bottom-4 duration-300`}>
-              <div className={`px-10 py-4 rounded-[2rem] border-2 backdrop-blur-xl shadow-2xl flex items-center gap-4 ${activeSkill.isP ? 'bg-indigo-600/90 border-indigo-400 text-white' : 'bg-rose-600/90 border-rose-400 text-white'}`}>
-                <span className="text-4xl animate-bounce">{activeSkill.icon}</span>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 italic">{activeSkill.isP ? 'Neural Link Active' : 'Enemy Skill Detected'}</span>
-                  <span className="text-2xl font-black italic tracking-tighter uppercase">{activeSkill.name}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 掷币动画层 */}
-          {coinToss.active && (
-            <div className="absolute inset-0 z-[300] bg-slate-950/60 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
-              <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-4xl shadow-2xl transition-all duration-700 ${!coinToss.result ? 'animate-spin border-slate-400 bg-slate-800' : coinToss.result === 'player' ? 'border-emerald-500 bg-emerald-600 scale-125' : 'border-rose-500 bg-rose-600 scale-125'}`}>
-                {!coinToss.result ? '🪙' : coinToss.result === 'player' ? 'YOU' : 'HOST'}
-              </div>
-              <div className="mt-10 text-center animate-bounce">
-                <p className={`text-4xl font-black italic uppercase tracking-tighter drop-shadow-xl ${!coinToss.result ? 'text-white' : coinToss.result === 'player' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                  {!coinToss.result ? (
-                    <>正在判定行动顺序...<br/><span className="text-[16px] opacity-40 font-bold tracking-[0.2em] block mt-1">DECIDING INITIATIVE</span></>
-                  ) : coinToss.result === 'player' ? (
-                    <>神经链路优先：你先手<br/><span className="text-[16px] opacity-80 font-bold tracking-[0.2em] block mt-1">NEURAL LINK PRIORITY</span></>
-                  ) : (
-                    <>敌方信号拦截：对方先手<br/><span className="text-[16px] opacity-80 font-bold tracking-[0.2em] block mt-1">ENEMY SIGNAL FIRST</span></>
-                  )}
-                </p>
-                {coinToss.result && <p className="text-white/20 text-[10px] font-black uppercase mt-4 tracking-[0.5em]">行动序列已锁定 / ACTION SEQUENCE LOCKED</p>}
-              </div>
-            </div>
-          )}
-
-          {(gameState === 'victory' || gameState === 'defeat') && (
-            <div className={`absolute inset-0 z-[150] flex flex-col items-center justify-center p-4 animate-in fade-in duration-300 overflow-hidden bg-slate-50`}>
-              <div className="absolute inset-0 tactical-stripes opacity-100 z-0"></div>
-              <div className={`absolute inset-0 ${gameState === 'victory' ? 'bg-emerald-500/5' : 'bg-rose-500/5'} z-10`}></div>
-              <div className="w-full max-w-lg flex flex-col items-center max-h-full relative z-20">
-                <h1 className={`text-5xl font-black italic uppercase tracking-tighter mb-2 drop-shadow-sm flex-none ${gameState === 'victory' ? 'text-emerald-600' : 'text-rose-600'}`}>{gameState === 'victory' ? '对决胜利 / SUCCESS' : '对决失败 / FAILURE'}</h1>
-                <div className="w-full bg-white/40 border border-slate-200/50 rounded-[2rem] p-4 shadow-xl backdrop-blur-md mb-2 flex flex-col min-h-0 overflow-hidden">
-                  <div className="flex justify-between items-center gap-4 mb-2 border-b border-slate-200/30 pb-2 flex-none">
-                    <div className="flex-1"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">神经单元 / NEURAL UNIT</p><div className="text-[13px] font-black text-slate-800"><p className="truncate">{player.equipment.weapon} <span className="text-indigo-500 font-mono text-[11px]">Lv.{player.unlockedItems[player.equipment.weapon]}</span></p><p className="text-slate-400 font-bold text-[10px] truncate">{player.equipment.armor}</p></div></div>
-                    <div className="px-4 py-1 bg-slate-800 text-white rounded-lg flex-none shadow-lg"><span className="text-[10px] font-black italic tracking-tighter">战果回放 / DATA REV.</span></div>
-                    <div className="flex-1 text-right"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">目标宿主 / TARGET HOST</p><div className="text-[13px] font-black text-slate-800"><p className="truncate"><span className="text-rose-500 font-mono text-[11px]">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</span> {enemy.equipment.weapon}</p><p className="text-slate-400 font-bold text-[10px] truncate">{enemy.equipment.armor}</p></div></div>
-                  </div>
-                  <div className="flex-none pt-2 pb-0 border-t border-slate-200/20">
-                    <div className="flex flex-wrap items-center justify-center gap-y-2 text-[13px] font-black font-mono tracking-tighter">
-                      {battleHistory.map((h, i) => (
-                        <div key={i} className="flex items-center">
-                          <span className="text-slate-400 mr-2">R{h.round}:</span>
-                          <span className="text-rose-500">-{h.pDmg}</span>
-                          <span className="text-slate-300 mx-2 italic opacity-50">vs</span>
-                          <span className="text-indigo-500">-{h.eDmg}</span>
-                          {i < battleHistory.length - 1 && <span className="text-slate-200 mx-5 font-normal">/</span>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <button onClick={() => { setGameState('lobby'); resetGame(); }} className={`group px-20 py-4 text-white font-black rounded-2xl shadow-2xl transition-all active:scale-95 text-[15px] flex items-center gap-4 flex-none border-b-4 ${gameState === 'victory' ? 'bg-emerald-600 border-emerald-800 hover:bg-emerald-500' : 'bg-rose-600 border-rose-800 hover:bg-rose-500'}`}>{gameState === 'victory' ? '继续执行任务 / CONTINUE' : '重新建立链路 / RETRY'}<span className="group-hover:translate-x-1 transition-transform">➜</span></button>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="w-72 bg-white border border-slate-200 rounded-3xl p-5 flex flex-col shadow-sm">
-           <h3 className="text-[13px] font-black text-slate-300 uppercase mb-4 tracking-widest border-b border-slate-50 pb-2">链路日志</h3>
-           <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar">
-              {battleLog.map((log, i) => ( <p key={i} className={`text-[13px] leading-relaxed border-l-2 pl-3 ${log.includes('压制') ? 'text-rose-600 font-bold border-rose-200' : log.includes('抵抗') ? 'text-sky-600 font-bold border-sky-200' : log.includes('造成') || log.includes('受创') ? 'text-indigo-600 border-indigo-100' : 'text-slate-400 border-slate-100'}`}>{log}</p> ))}
-           </div>
-        </div>
-      </div>
-
-      <div className="flex-1 bg-white rounded-3xl border border-slate-200 p-6 relative shadow-sm overflow-hidden flex flex-col">
-        {(gameState === 'lobby' || gameState === 'victory' || gameState === 'defeat') && (
-          <div className="h-full flex flex-col gap-3">
-            <div className="flex justify-between items-center flex-none"><h3 className="text-[13px] font-black text-slate-400 uppercase tracking-widest">属性强化系统</h3><span className="text-[13px] bg-indigo-50 text-indigo-600 px-4 py-0.5 rounded-full font-bold border border-indigo-100">潜能: {player.statPoints}</span></div>
-            <div className="grid grid-cols-3 gap-6 flex-1 min-h-0">{(['strength', 'agility', 'constitution'] as Stat[]).map(s => (<button key={s} onClick={() => handleLevelUp(s)} disabled={player.statPoints === 0 || gameState !== 'lobby'} className="group bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col justify-center items-center hover:border-indigo-300 transition-all disabled:opacity-50 active:scale-95"><p className="text-[13px] text-slate-400 font-bold uppercase mb-2">{s === 'strength' ? '力量 STR' : s === 'agility' ? '敏捷 AGI' : '体质 CON'}</p><p className="text-5xl font-black text-slate-800 leading-none">{player.stats[s]}</p></button>))}</div>
-            <button onClick={() => setGameState('tactics')} disabled={gameState !== 'lobby'} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xl shadow-xl active:scale-95 flex-none mt-1 disabled:grayscale">进入部署阶段</button>
-          </div>
-        )}
-
-        {gameState === 'shop' && (
-          <div className="h-full flex flex-col animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex justify-between items-center mb-4 flex-none">
-              <h3 className="text-xl font-black italic text-amber-500 tracking-widest uppercase">地下黑市 · 战术中心</h3>
-              
-              <div className="flex bg-slate-100 p-1 rounded-2xl gap-1 border border-slate-200 shadow-inner">
-                {[
-                  { id: 'weapons', label: '主武器库', icon: '⚔️' },
-                  { id: 'armors', label: '防御矩阵', icon: '🛡️' },
-                  { id: 'skills', label: '神经技能', icon: '⚡' }
-                ].map(tab => (
-                  <button 
-                    key={tab.id}
-                    onClick={() => setShopTab(tab.id as any)}
-                    className={`px-6 py-2 rounded-xl flex items-center gap-2 transition-all font-black text-[13px] ${shopTab === tab.id ? 'bg-white text-slate-800 shadow-md scale-105' : 'text-slate-400 hover:text-slate-600'}`}
-                  >
-                    <span>{tab.icon}</span>
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              <button onClick={() => setGameState('lobby')} className="text-[13px] font-bold text-slate-400 hover:text-slate-800 underline flex items-center gap-1 group">
-                <span className="group-hover:-translate-x-1 transition-transform">⇠</span> 返回
-              </button>
-            </div>
-
-            <div className="flex-1 grid grid-cols-6 gap-4 pr-2 content-start overflow-y-auto custom-scrollbar pt-2">
-              {ITEMS[shopTab].map(item => {
-                const rc = { common: { color: 'bg-slate-400' }, novel: { color: 'bg-blue-500' }, perfect: { color: 'bg-emerald-500' }, epic: { color: 'bg-amber-500' } }[item.rarity];
-                const itemLvl = player.unlockedItems[item.name] || 0; 
-                const isLocked = player.level < (item.levelReq || 0); 
-                const cost = Math.floor((item.cost || 0) * Math.pow(1.6, itemLvl));
-                
-                return ( 
-                  <button 
-                    key={item.name} 
-                    onClick={() => buyItem(item)} 
-                    className={`group p-4 rounded-[2rem] border-2 text-left transition-all relative flex flex-col items-center gap-3 ${isLocked ? 'bg-slate-50 grayscale opacity-60' : 'bg-white hover:border-indigo-300 hover:shadow-xl hover:-translate-y-1 active:scale-95'}`}
-                  >
-                    <span className="text-4xl mb-1 group-hover:scale-110 transition-transform">{item.icon}</span>
-                    <div className="text-center w-full">
-                      <p className="font-black text-[12px] text-slate-700 truncate mb-1">{item.name}</p>
-                      <div className="flex flex-col items-center gap-1.5">
-                        {itemLvl > 0 ? (
-                          <span className="text-[10px] font-black text-white bg-indigo-500 rounded-full px-2 py-0.5 shadow-sm">Lv.{itemLvl}</span>
-                        ) : (
-                          <span className="text-[10px] font-black text-slate-400 bg-slate-100 rounded-full px-2 py-0.5 italic">未获取</span>
-                        )}
-                        <p className="text-amber-600 font-black text-[13px] flex items-center gap-1">
-                          <span className="text-[10px] opacity-60 italic">₿</span> {cost}
-                        </p>
-                      </div>
-                    </div>
-                    {/* 稀有度圆点 */}
-                    <div className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full ring-4 ring-white ${rc.color}`}></div>
-                    
-                    {/* 克制提示标签 */}
-                    {item.tag && !isLocked && (
-                      <div className="absolute -bottom-2 px-3 py-0.5 bg-slate-800 text-white text-[9px] font-black rounded-full uppercase tracking-tighter shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
-                        {item.tag}
-                      </div>
-                    )}
-                  </button> 
-                );
-              })}
-            </div>
-            {previewItem && (
-              <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] p-4 flex items-center justify-center animate-in fade-in duration-200" onClick={() => setPreviewItem(null)}>
-                <div className="bg-white text-slate-900 p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm relative animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
-                  <div className="text-6xl mb-6 text-center">{previewItem.icon}</div>
-                  <h2 className="text-2xl font-black text-center mb-1 uppercase tracking-tighter">{previewItem.name}</h2>
-                  <p className="text-slate-400 text-center text-[13px] font-bold mb-6 italic">"{previewItem.desc}"</p>
-                  <div className="space-y-2 bg-slate-50 p-5 rounded-3xl border border-slate-100 mb-8 text-[13px]">
-                    <div className="flex justify-between border-b border-slate-200/50 pb-2 mb-2"><span className="text-slate-400 font-bold uppercase tracking-wider">强化阶段</span><div className="flex items-center gap-2"><span className="text-slate-400 font-black">Lv.{player.unlockedItems[previewItem.name] || 0}</span><span className="text-indigo-300">➜</span><span className="text-indigo-600 font-black">Lv.{(player.unlockedItems[previewItem.name] || 0) + 1}</span></div></div>
-                    {previewItem.levelReq && (<div className="flex justify-between items-center"><span className="text-slate-400 font-bold">要求等级</span><span className={`${player.level >= previewItem.levelReq ? 'text-emerald-400' : 'text-rose-400'} font-black`}>LV.{previewItem.levelReq}</span></div>)}
-                    {previewItem.damage && (<div className="flex justify-between"><span className="text-slate-400 font-bold">基础威力</span><div className="flex items-center gap-2"><span className="text-slate-400">{calcVal(previewItem.damage, player.unlockedItems[previewItem.name] || 1)}</span><span className="text-rose-300">➜</span><span className="text-rose-500 font-black">+{calcVal(previewItem.damage, (player.unlockedItems[previewItem.name] || 0) + 1)}</span></div></div>)}
-                    {previewItem.defense && (<div className="flex justify-between"><span className="text-slate-400 font-bold">防御力</span><div className="flex items-center gap-2"><span className="text-slate-400">{calcVal(previewItem.defense, player.unlockedItems[previewItem.name] || 1)}</span><span className="text-sky-300">➜</span><span className="text-sky-500 font-black">+{calcVal(previewItem.defense, (player.unlockedItems[previewItem.name] || 0) + 1)}</span></div></div>)}
-                    {previewItem.mult ? (<div className="flex justify-between"><span className="text-slate-400 font-bold">技能倍率</span><div className="flex items-center gap-2"><span className="text-slate-400">x{(previewItem.mult * (1 + 0.1 * Math.max(0, (player.unlockedItems[previewItem.name] || 1) - 1))).toFixed(1)}</span><span className="text-indigo-300">➜</span><span className="text-indigo-600 font-black">x{(previewItem.mult * (1 + 0.1 * (player.unlockedItems[previewItem.name] || 0))).toFixed(1)}</span></div></div>) : null}
-                  </div>
-                  <div className="flex gap-3"><button onClick={() => setPreviewItem(null)} className="flex-1 py-4 bg-slate-100 text-slate-400 font-black rounded-2xl hover:bg-slate-200">取消</button><button onClick={() => confirmPurchase(previewItem)} disabled={player.level < (previewItem.levelReq || 0) || player.gold < Math.floor((previewItem.cost || 0) * Math.pow(1.6, player.unlockedItems[previewItem.name] || 0))} className="flex-[2] py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl active:scale-95 disabled:opacity-30">{player.unlockedItems[previewItem.name] ? '神经强化' : '立即获取'}</button></div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {gameState === 'tactics' && (
-          <div className="h-full flex flex-col animate-in zoom-in-95 duration-300">
-             <div className="flex items-center gap-4 mb-4 flex-none bg-slate-900/5 p-2 rounded-2xl border border-slate-200/50">
-                <div className="flex items-center gap-3 border-r border-slate-200 pr-4">
-                  <h3 className="text-xl font-black italic text-indigo-600 uppercase tracking-tighter whitespace-nowrap">战术部署</h3>
-                </div>
-
-                <div className="flex-1 flex items-center gap-4 min-w-0">
-                  <div className="flex-[0.8] flex flex-col justify-center min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-1.5 py-0.5 rounded">环境修正</span>
-                    </div>
-                    <p className="text-[13px] font-black text-slate-700 leading-tight line-clamp-2">{field.desc} <span className="text-rose-500">{field.effect}</span></p>
-                  </div>
-                  
-                  <div className="w-[1px] h-10 bg-slate-200 flex-none"></div>
-                  
-                  <div className="flex-[1.2] flex items-center gap-4 bg-indigo-600 px-5 py-3 rounded-2xl shadow-inner relative overflow-hidden min-w-0">
-                    <div className="absolute inset-0 bg-white/5 animate-pulse pointer-events-none"></div>
-                    <p className="text-[10px] font-black text-white/40 uppercase tracking-tighter whitespace-nowrap flex-none relative z-10">神经探测:</p>
-                    <div className="flex items-center gap-4 text-white font-black text-[13px] min-w-0 relative z-10">
-                      <div className="flex items-center gap-2 flex-none">
-                        <span className="text-xl">{ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)?.icon}</span>
-                        <span className="whitespace-nowrap">{enemy.equipment.weapon}</span>
-                        <b className="text-indigo-300 font-mono text-[10px] whitespace-nowrap">Lv.{enemy.unlockedItems[enemy.equipment.weapon] || 1}</b>
-                        {getDefenseCounterMult(player.equipment.armor ? ITEMS.armors.find(a=>a.name===player.equipment.armor)!.tag : '', ITEMS.weapons.find(w=>w.name===enemy.equipment.weapon)!.tag) < 1 && (
-                          <span className="px-1.5 py-0.5 bg-sky-400 text-sky-950 text-[9px] rounded-md animate-bounce">防御</span>
-                        )}
-                      </div>
-                      <span className="w-[1px] h-4 bg-white/20"></span>
-                      <div className="flex items-center gap-2 flex-none">
-                        <span className="text-xl">{ITEMS.armors.find(a=>a.name===enemy.equipment.armor)?.icon}</span>
-                        <span className="whitespace-nowrap">{enemy.equipment.armor}</span>
-                        <b className="text-indigo-300 font-mono text-[10px] whitespace-nowrap">Lv.{enemy.unlockedItems[enemy.equipment.armor] || 1}</b>
-                        {getAttackCounterMult(player.equipment.weapon ? ITEMS.weapons.find(w=>w.name===player.equipment.weapon)!.tag : '', ITEMS.armors.find(a=>a.name===enemy.equipment.armor)!.tag) > 1 && (
-                          <span className="px-1.5 py-0.5 bg-emerald-400 text-emerald-950 text-[9px] rounded-md animate-bounce">压制</span>
-                        )}
-                      </div>
-                      <span className="w-[1px] h-4 bg-white/20"></span>
-                      <div className="flex items-center gap-2 flex-none">
-                        <span className="text-xl">{ITEMS.skills.find(s=>s.name===enemy.equipment.skill)?.icon}</span>
-                        <span className="whitespace-nowrap">{enemy.equipment.skill}</span>
-                        <b className="text-indigo-300 font-mono text-[10px] whitespace-nowrap">Lv.{enemy.unlockedItems[enemy.equipment.skill] || 1}</b>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button onClick={startRound} className="px-12 py-4 bg-indigo-600 text-white font-black rounded-xl hover:bg-indigo-500 active:scale-95 transition-all text-[16px] shadow-xl shadow-indigo-200 flex-none ml-2 border-b-4 border-indigo-800 uppercase tracking-widest">开始出击 ➜</button>
-             </div>
-
-             <div className="flex-1 flex gap-4 min-h-0 h-full pb-2">
-                <NeuralPicker label="主武器库" items={ITEMS.weapons.filter(w => player.unlockedItems[w.name])} selected={player.equipment.weapon} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, weapon: v}}))} unlockedItems={player.unlockedItems} />
-                <NeuralPicker label="防御矩阵" items={ITEMS.armors.filter(a => player.unlockedItems[a.name])} selected={player.equipment.armor} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, armor: v}}))} unlockedItems={player.unlockedItems} />
-                <NeuralPicker label="神经技能" items={ITEMS.skills.filter(s => player.unlockedItems[s.name])} selected={player.equipment.skill} onSelect={(v) => setPlayer(p => ({...p, equipment: {...p.equipment, skill: v}}))} unlockedItems={player.unlockedItems} />
-             </div>
-          </div>
-        )}
-
-        {gameState === 'battle' && (
-          <div className="h-full flex flex-col items-center justify-center animate-pulse">
-            <div className="text-7xl font-black italic text-slate-100 tracking-tighter uppercase">Analyzing...</div>
-            <p className="text-[13px] text-slate-400 font-bold uppercase mt-6 tracking-[0.8em]">参数实时校准</p>
-          </div>
-        )}
-      </div>
-
+      {/* 3. GLOBAL STYLES */}
       <style>{`
-        .tactical-stripes {
-          background-image: repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 30px,
-            rgba(0, 0, 0, 0.03) 30px,
-            rgba(0, 0, 0, 0.03) 60px
-          );
-          background-size: 200% 200%;
-          animation: slide-stripes 40s linear infinite;
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;700;900&display=swap');
+
+        /* 全局字体标准化：优先像素，中文保底 */
+        :root {
+          --pixel-font: 'Press Start 2P', cursive;
+          --ui-font: 'Outfit', 'PingFang SC', 'Microsoft YaHei', sans-serif;
         }
-        @keyframes slide-stripes {
-          from { background-position: 0 0; }
-          to { background-position: 100% 100%; }
+
+        body { 
+          background: #020617; 
+          font-family: var(--ui-font);
+          overflow: hidden; 
+          -webkit-font-smoothing: antialiased;
+          text-rendering: optimizeLegibility;
         }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+        .pixel-font { font-family: var(--pixel-font); }
+        
+        .pixel-card { 
+          background: #0f172a; 
+          border: 4px solid #1e293b; 
+          box-shadow: 8px 8px 0px #000; 
+          position: relative;
+        }
+        
+        /* 优化按钮：支持双语混排，字号加大 */
+        .pixel-button { 
+          background: #4f46e5; 
+          border: 4px solid #000; 
+          box-shadow: 4px 4px 0px #312e81; 
+          color: white; 
+          font-family: var(--ui-font);
+          font-weight: 900;
+          font-size: 13px; 
+          padding: 0.8rem 1.8rem; 
+          transition: all 0.1s; 
+          cursor: pointer;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .pixel-button:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #312e81; }
+        .pixel-button.success { background: #10b981; box-shadow: 4px 4px 0px #065f46; }
+        .pixel-button.danger { background: #ef4444; box-shadow: 4px 4px 0px #991b1b; }
+
+        /* HUD 文字标准化 */
+        .cyber-hud { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.5rem 2.5rem; gap: 2rem; background: linear-gradient(to bottom, #020617, transparent); }
+        .hud-unit { display: flex; gap: 24px; width: 33%; }
+        .portrait-box { width: 84px; height: 84px; border: 4px solid #1e293b; box-shadow: 0 0 30px rgba(0, 242, 255, 0.15); image-rendering: pixelated; background: #000; }
+        .bar-stack { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .unit-name { font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
+        
+        .pixel-bar-container { height: 26px; background: #000; border: 3px solid #1e293b; position: relative; overflow: hidden; }
+        .pixel-bar-fill { height: 100%; transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .bar-label { 
+          position: absolute; right: 12px; top: 4px; 
+          font-size: 11px; font-weight: 900;
+          text-shadow: 2px 2px #000; color: #fff; 
+          font-family: var(--ui-font);
+        }
+        
+        .hud-info-center { flex: 1; text-align: center; background: rgba(15, 23, 42, 0.95); border: 4px solid #1e293b; padding: 12px; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
+        .round-text { font-family: var(--pixel-font); font-size: 11px; color: #facc15; border-bottom: 2px solid #1e293b; padding-bottom: 10px; margin-bottom: 10px; letter-spacing: 2px; }
+
+        .tactical-footer { display: flex; justify-content: space-between; padding: 2.5rem 3.5rem; background: #020617; border-top: 6px solid #1e293b; }
+        .skill-list { display: flex; flex-direction: column; gap: 12px; }
+        .skill-item { 
+          font-weight: 900; font-size: 14px; color: #fff; cursor: pointer; 
+          transition: all 0.2s; display: flex; align-items: center; 
+        }
+        .skill-item:hover { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; transform: translateX(15px); }
+        
+        .stat-grid { display: grid; gap: 10px; text-align: right; }
+        .stat-row { font-weight: 700; font-size: 12px; }
+        .stat-label { color: #475569; }
+        .stat-val { color: #facc15; }
+
+        .image-pixelated { image-rendering: pixelated; }
+        .custom-scrollbar { scrollbar-width: thin; scrollbar-color: #1e293b transparent; }
+        
+        @keyframes glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .glow-pixel { animation: glow 2s infinite; }
+        
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slide-in-from-left-4 { from { transform: translateX(-1rem); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes zoom-in-95 { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes zoom-in-95 { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .animate-in { animation-fill-mode: forwards; }
-        .fade-in { animation-name: fade-in; }
-        .slide-in-from-left-4 { animation-name: slide-in-from-left-4; }
-        .zoom-in-95 { animation-name: zoom-in-95; }
+        .fade-in { animation: fade-in 0.5s ease-out; }
+        .zoom-in-95 { animation: zoom-in-95 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
       `}</style>
     </div>
   );
