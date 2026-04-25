@@ -237,9 +237,13 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
 interface BattleRoundRecord { round: number; pDmg: number; eDmg: number; pRemainingHp: number; eRemainingHp: number; }
 
 class StickmanRenderer {
-  private ctx: CanvasRenderingContext2D; private time: number = 0; public effects: any[] = []; private nextEffectId: number = 0;
+  private ctx: CanvasRenderingContext2D; 
+  public assetsLoaded: boolean = false;
+  public gameState: string = 'lobby'; 
+  public effects: any[] = [];
+  private nextEffectId: number = 0;
   private assets: Record<string, HTMLImageElement> = {};
-  private assetsLoaded: boolean = false;
+  private time: number = 0;
 
   constructor(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx;
@@ -248,10 +252,16 @@ class StickmanRenderer {
 
   private loadAssets() {
     const load = (name: string, url: string) => {
-      const img = new Image(); img.src = url;
+      const img = new Image(); 
+      img.src = url;
       img.onload = () => {
         this.assets[name] = img;
         if (Object.keys(this.assets).length >= 5) this.assetsLoaded = true;
+      };
+      img.onerror = () => {
+        console.error(`❌ Asset failed to load: ${url}`);
+        // 即使加载失败，也标记一个空对象，避免无限等待
+        this.assets[name] = new Image();
       };
     };
 
@@ -290,16 +300,13 @@ class StickmanRenderer {
     }
 
     const img = this.assets[frameName];
-    if (img) {
+    // 确保 img 已加载且有实际尺寸
+    if (img && img.width > 0) {
       // 呼吸感逻辑：首页慢速平稳，战场根据敏捷略微加快
-      const breathFreq = pose === 'idle' ? (isP && gameState === 'lobby' ? 1.2 : 3) : 3;
-      const breath = (pose === 'idle') ? Math.sin(t * breathFreq) * 0.03 : 0;
+      const breathFreq = pose === 'idle' ? (isP && this.gameState === 'lobby' ? 1.2 : 3) : 3;
+      const breath = (pose === 'idle') ? Math.sin(t * breathFreq) * 0.015 : 0;
 
       ctx.save();
-      if (!isP) {
-        ctx.scale(-1, 1);
-      }
-
       // 绘制带呼吸效果的资产
       const w = 96 * (1 - breath * 0.5);
       const h = 96 * (1 + breath);
@@ -309,8 +316,25 @@ class StickmanRenderer {
 
       ctx.restore();
     } else {
+      // Fallback: 如果图片未加载或加载失败，绘制一个显眼的占位符火柴人
+      ctx.save();
+      if (!isP) ctx.scale(-1, 1);
+      
+      // 躯干
       ctx.fillStyle = isElite ? '#f43f5e' : '#6366f1';
       ctx.fillRect(-15, -60, 30, 60);
+      
+      // 头部
+      ctx.beginPath();
+      ctx.arc(0, -75, 15, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 提示文字
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '10px sans-serif';
+      ctx.fillText('LOADING', -20, -100);
+      
+      ctx.restore();
     }
   }
 
@@ -744,19 +768,21 @@ export default function App() {
     let frame: number;
     // --- 统一渲染循环 ---
     const loop = () => {
-      // 1. 战场渲染逻辑
-      if (canvasRef.current && gameState === 'battle') {
+      // 1. 战场渲染逻辑 (包含战术调整阶段)
+      if (canvasRef.current && (gameState === 'battle' || gameState === 'tactics')) {
         const ctx = canvasRef.current.getContext('2d')!;
         if (!rendererRef.current) rendererRef.current = new StickmanRenderer(ctx);
         const r = rendererRef.current;
-        // 动态绑定最新画布上下文，防止组件重新挂载后渲染到旧的离线画布上
+        // 动态同步状态
+        r.gameState = gameState;
+        // 动态绑定最新画布上下文
         (r as any).ctx = ctx;
         r.advance(); r.drawBackground(field);
-        const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon);
-        const eW = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon);
-        // 调用升级：x, y, pose, isFlip, agility, equipment, gameState, isMultiHit
-        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility, player.equipment, gameState, activeSkill?.name === '幻影连击' && activeSkill.isP);
-        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility, enemy.equipment, gameState, activeSkill?.name === '幻影连击' && !activeSkill.isP);
+        
+        // 调用升级：x, y, pose, isFlip, agility, weaponIcon, hasGhost, isElite
+        // 修正：根据新素材朝向(右)，玩家(左)不翻转(false)面向右侧，对手(右)翻转(true)面向左侧
+        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility || 10, player.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && activeSkill.isP));
+        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility || 10, enemy.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && !activeSkill.isP));
         r.renderEffects();
       }
 
@@ -1009,14 +1035,14 @@ export default function App() {
       )}
 
       {/* 2. MAIN CONTENT ROUTER */}
-      {(gameState === 'battle' || gameState === 'victory' || gameState === 'defeat') ? (
+      {(gameState === 'battle' || gameState === 'tactics' || gameState === 'victory' || gameState === 'defeat') ? (
         /* --- PERSISTENT BATTLE HUD --- */
         <div className="fixed inset-0 bg-slate-950 flex flex-col overflow-hidden text-white font-mono z-[500]">
 
 
           {/* TOP HUD */}
           <div className="cyber-hud border-b-4 border-slate-900">
-            <div className="hud-unit">
+            <div className="hud-unit pl-4">
               <img src="/assets/p_port.png" className="portrait-box" alt="P" />
               <div className="bar-stack">
                 <div className="unit-name text-cyan-400 cn-text">玩家 / {player.username}</div>
@@ -1028,12 +1054,12 @@ export default function App() {
                   <span className="opacity-30">|</span>
                   <span className="text-indigo-400">{player.equipment.skill}</span>
                 </div>
-                <div className="flex gap-2 w-[480px]">
+                <div className="flex gap-2 w-[400px]">
                   <div className="flex-1 pixel-bar-container !mb-0">
                     <div className="pixel-bar-fill bg-emerald-500" style={{ width: `${(player.health / player.maxHealth) * 100}%` }} />
                     <span className="bar-label cn-text">HP {player.health}/{player.maxHealth}</span>
                   </div>
-                  <div className="w-[200px] pixel-bar-container !mb-0">
+                  <div className="w-[180px] pixel-bar-container !mb-0">
                     <div className="pixel-bar-fill bg-indigo-500 shadow-[0_0_15px_#6366f1]" style={{ width: '100%' }} />
                     <span className="bar-label cn-text">EP 能量 100%</span>
                   </div>
@@ -1049,7 +1075,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="hud-unit flex-row-reverse">
+            <div className="hud-unit flex-row-reverse pr-4">
               <img src="/assets/e_port.png" className="portrait-box border-rose-900" alt="E" />
               <div className="bar-stack text-right">
                 <div className="unit-name text-rose-400 cn-text">目标 / {enemy.username}</div>
@@ -1061,12 +1087,12 @@ export default function App() {
                   <span className="opacity-30">|</span>
                   <span className="text-rose-400">{enemy.equipment.skill}</span>
                 </div>
-                <div className="flex flex-row-reverse gap-2 w-[480px]">
+                <div className="flex flex-row-reverse gap-2 w-[400px]">
                   <div className="flex-1 pixel-bar-container !mb-0">
                     <div className="pixel-bar-fill bg-rose-600" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} />
                     <span className="bar-label left-2 right-auto cn-text">HP {enemy.health}/{enemy.maxHealth}</span>
                   </div>
-                  <div className="w-[200px] pixel-bar-container !mb-0">
+                  <div className="w-[180px] pixel-bar-container !mb-0">
                     <div className="pixel-bar-fill bg-sky-500 shadow-[0_0_15px_#0ea5e9]" style={{ width: '100%' }} />
                     <span className="bar-label left-2 right-auto cn-text">盾 状态条 100%</span>
                   </div>
@@ -1665,8 +1691,8 @@ export default function App() {
         .pixel-button.danger { background: #ef4444; box-shadow: 4px 4px 0px #991b1b; }
 
         /* HUD 文字标准化 */
-        .cyber-hud { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.5rem 2.5rem; gap: 2rem; background: linear-gradient(to bottom, #020617, transparent); }
-        .hud-unit { display: flex; gap: 24px; width: 33%; }
+        .cyber-hud { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.5rem 3.5rem; gap: 2rem; background: linear-gradient(to bottom, #020617, transparent); }
+        .hud-unit { display: flex; gap: 24px; flex: 1; min-width: 0; }
         .portrait-box { width: 84px; height: 84px; border: 4px solid #1e293b; box-shadow: 0 0 30px rgba(0, 242, 255, 0.15); image-rendering: pixelated; background: #000; }
         .bar-stack { flex: 1; display: flex; flex-direction: column; gap: 10px; }
         .unit-name { font-weight: 900; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: #fff; }
