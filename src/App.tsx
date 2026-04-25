@@ -635,9 +635,27 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const lobbyCanvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<StickmanRenderer | null>(null);
+  const lobbyRendererRef = useRef<StickmanRenderer | null>(null);
   const hasLoaded = useRef(false);
   const lastWheelTime = useRef(0);
-  // Removed wheelIndices for stability as requested
+  const [wheelIndices, setWheelIndices] = useState({ weapon: 60, armor: 60, skill: 60 });
+  
+  // 确保在切换到调整页面时，拨轮位置与当前装备匹配
+  useEffect(() => {
+    if (gameState === 'tactics' || gameState === 'battle') {
+      const syncIndex = (items: any[], currentName: string) => {
+        const idx = items.findIndex(i => i.name === currentName);
+        const base = 60; // 从第5轮左右开始，保证双向都有空间
+        return base - (base % (items.length || 1)) + (idx >= 0 ? idx : 0);
+      };
+      
+      setWheelIndices({
+        weapon: syncIndex(ITEMS.weapons.filter(i => player.unlockedItems[i.name]), player.equipment.weapon),
+        armor: syncIndex(ITEMS.armors.filter(i => player.unlockedItems[i.name]), player.equipment.armor),
+        skill: syncIndex(ITEMS.skills.filter(i => player.unlockedItems[i.name]), player.equipment.skill)
+      });
+    }
+  }, [gameState]);
   
   // 确保渲染器尽早初始化
 
@@ -1175,42 +1193,43 @@ export default function App() {
                           onWheel={(e) => {
                             if (isDeployed) return;
                             const now = Date.now();
-                            if (now - lastWheelTime.current < 220) return;
+                            if (now - lastWheelTime.current < 400) return;
                             lastWheelTime.current = now;
                             
                             const items = ITEMS.weapons.filter(i => player.unlockedItems[i.name]);
-                            const currentIdx = items.findIndex(i => i.name === player.equipment.weapon);
-                            if (e.deltaY > 0) {
-                              const nextIdx = (currentIdx + 1) % items.length;
-                              setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[nextIdx].name } }));
-                            } else if (e.deltaY < 0) {
-                              const prevIdx = (currentIdx - 1 + items.length) % items.length;
-                              setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[prevIdx].name } }));
-                            }
+                            const direction = e.deltaY > 0 ? 1 : -1;
+                            const newIdx = wheelIndices.weapon + direction;
+                            
+                            setWheelIndices(prev => ({ ...prev, weapon: newIdx }));
+                            const realIdx = (newIdx % items.length + items.length) % items.length;
+                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[realIdx].name } }));
                           }}
-                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/30 rounded"
+                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded"
                         >
                           <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
-                            <div className="flex-1 bg-gradient-to-b from-slate-950/80 to-transparent"></div>
-                            <div className="h-[48px] border-y border-indigo-500/50 bg-indigo-500/10"></div>
-                            <div className="flex-1 bg-gradient-to-t from-slate-950/80 to-transparent"></div>
+                            <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                            <div className="h-[48px] border-y border-indigo-500/30 bg-indigo-500/5"></div>
+                            <div className="flex-1 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
                           </div>
                           <div 
-                            className="absolute left-0 right-0 transition-transform duration-300 ease-out"
+                            className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)"
                             style={{ 
                               top: '50%',
-                              marginTop: `-${itemHeight / 2}px`,
-                              transform: `translateY(${-currentIdx * itemHeight}px)`
+                              marginTop: '-24px',
+                              transform: `translateY(${-wheelIndices.weapon * 48}px)`
                             }}
                           >
-                            {items.map((item, idx) => {
-                              const isActive = idx === currentIdx;
+                            {Array.from({ length: 120 }).map((_, vIdx) => {
+                              const item = items[vIdx % items.length];
+                              const isActive = vIdx === wheelIndices.weapon;
+                              // 只渲染可见区域附近的项，性能更好
+                              if (Math.abs(vIdx - wheelIndices.weapon) > 4) return <div key={vIdx} className="h-[48px]" />;
                               return (
                                 <div 
-                                  key={`weapon-${idx}`}
+                                  key={vIdx}
                                   onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: item.name } }))}
                                   className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${
-                                    isActive ? 'text-white scale-110' : 'text-slate-500 opacity-50 scale-90'
+                                    isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
                                   } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                   <span className={isActive ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
@@ -1239,42 +1258,42 @@ export default function App() {
                           onWheel={(e) => {
                             if (isDeployed) return;
                             const now = Date.now();
-                            if (now - lastWheelTime.current < 220) return;
+                            if (now - lastWheelTime.current < 400) return;
                             lastWheelTime.current = now;
                             
                             const items = ITEMS.armors.filter(i => player.unlockedItems[i.name]);
-                            const currentIdx = items.findIndex(i => i.name === player.equipment.armor);
-                            if (e.deltaY > 0) {
-                              const nextIdx = (currentIdx + 1) % items.length;
-                              setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[nextIdx].name } }));
-                            } else if (e.deltaY < 0) {
-                              const prevIdx = (currentIdx - 1 + items.length) % items.length;
-                              setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[prevIdx].name } }));
-                            }
+                            const direction = e.deltaY > 0 ? 1 : -1;
+                            const newIdx = wheelIndices.armor + direction;
+                            
+                            setWheelIndices(prev => ({ ...prev, armor: newIdx }));
+                            const realIdx = (newIdx % items.length + items.length) % items.length;
+                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[realIdx].name } }));
                           }}
-                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/30 rounded"
+                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded"
                         >
                           <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
-                            <div className="flex-1 bg-gradient-to-b from-slate-950/80 to-transparent"></div>
-                            <div className="h-[48px] border-y border-emerald-500/50 bg-emerald-500/10"></div>
-                            <div className="flex-1 bg-gradient-t from-slate-950/80 to-transparent"></div>
+                            <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                            <div className="h-[48px] border-y border-emerald-500/30 bg-emerald-500/5"></div>
+                            <div className="flex-1 bg-gradient-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
                           </div>
                           <div 
-                            className="absolute left-0 right-0 transition-transform duration-300 ease-out"
+                            className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)"
                             style={{ 
                               top: '50%',
-                              marginTop: `-${itemHeight / 2}px`,
-                              transform: `translateY(${-currentIdx * itemHeight}px)`
+                              marginTop: '-24px',
+                              transform: `translateY(${-wheelIndices.armor * 48}px)`
                             }}
                           >
-                            {items.map((item, idx) => {
-                              const isActive = idx === currentIdx;
+                            {Array.from({ length: 120 }).map((_, vIdx) => {
+                              const item = items[vIdx % items.length];
+                              const isActive = vIdx === wheelIndices.armor;
+                              if (Math.abs(vIdx - wheelIndices.armor) > 4) return <div key={vIdx} className="h-[48px]" />;
                               return (
                                 <div 
-                                  key={`armor-${idx}`}
+                                  key={vIdx}
                                   onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: item.name } }))}
                                   className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${
-                                    isActive ? 'text-white scale-110' : 'text-slate-500 opacity-50 scale-90'
+                                    isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
                                   } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                   <span className={isActive ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
@@ -1303,42 +1322,42 @@ export default function App() {
                           onWheel={(e) => {
                             if (isDeployed) return;
                             const now = Date.now();
-                            if (now - lastWheelTime.current < 220) return;
+                            if (now - lastWheelTime.current < 400) return;
                             lastWheelTime.current = now;
                             
                             const items = ITEMS.skills.filter(i => player.unlockedItems[i.name]);
-                            const currentIdx = items.findIndex(i => i.name === player.equipment.skill);
-                            if (e.deltaY > 0) {
-                              const nextIdx = (currentIdx + 1) % items.length;
-                              setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[nextIdx].name } }));
-                            } else if (e.deltaY < 0) {
-                              const prevIdx = (currentIdx - 1 + items.length) % items.length;
-                              setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[prevIdx].name } }));
-                            }
+                            const direction = e.deltaY > 0 ? 1 : -1;
+                            const newIdx = wheelIndices.skill + direction;
+                            
+                            setWheelIndices(prev => ({ ...prev, skill: newIdx }));
+                            const realIdx = (newIdx % items.length + items.length) % items.length;
+                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[realIdx].name } }));
                           }}
-                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/30 rounded"
+                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded"
                         >
                           <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
-                            <div className="flex-1 bg-gradient-to-b from-slate-950/80 to-transparent"></div>
+                            <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
                             <div className="h-[48px] border-y border-amber-500/50 bg-amber-500/10"></div>
-                            <div className="flex-1 bg-gradient-t from-slate-950/80 to-transparent"></div>
+                            <div className="flex-1 bg-gradient-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
                           </div>
                           <div 
-                            className="absolute left-0 right-0 transition-transform duration-300 ease-out"
+                            className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)"
                             style={{ 
                               top: '50%',
-                              marginTop: `-${itemHeight / 2}px`,
-                              transform: `translateY(${-currentIdx * itemHeight}px)`
+                              marginTop: '-24px',
+                              transform: `translateY(${-wheelIndices.skill * 48}px)`
                             }}
                           >
-                            {items.map((item, idx) => {
-                              const isActive = idx === currentIdx;
+                            {Array.from({ length: 120 }).map((_, vIdx) => {
+                              const item = items[vIdx % items.length];
+                              const isActive = vIdx === wheelIndices.skill;
+                              if (Math.abs(vIdx - wheelIndices.skill) > 4) return <div key={vIdx} className="h-[48px]" />;
                               return (
                                 <div 
-                                  key={`skill-${idx}`}
+                                  key={vIdx}
                                   onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: item.name } }))}
                                   className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${
-                                    isActive ? 'text-white scale-110' : 'text-slate-500 opacity-50 scale-90'
+                                    isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
                                   } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                   <span className={isActive ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
