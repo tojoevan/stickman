@@ -1785,6 +1785,7 @@ export default function App() {
           border: 4px solid #1e293b; 
           box-shadow: 8px 8px 0px #000; 
           position: relative;
+          border-radius: 0 !important;
         }
         
         /* 优化按钮：支持双语混排，字号加大 */
