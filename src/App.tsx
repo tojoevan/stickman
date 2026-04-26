@@ -300,8 +300,8 @@ class StickmanRenderer {
       c.fillStyle = color; c.fillRect(0, 0, 32, 32);
       c.fillStyle = 'rgba(255,255,255,0.05)'; c.fillRect(8, 8, 4, 4);
       const img = new Image(); img.src = canv.toDataURL();
-      img.onload = () => { 
-        this.assets[name] = img; 
+      img.onload = () => {
+        this.assets[name] = img;
         checkAllLoaded();
       };
     };
@@ -311,45 +311,45 @@ class StickmanRenderer {
     generateBG('bg_floor', '#334155');
   }
 
-  private drawStickmanPath(pose: any, t: number, weaponIcon: string, isElite: boolean = false, isP: boolean = true) {
+  private drawStickmanPath(pose: any, t: number, weaponTag: string, isElite: boolean = false, isP: boolean = true) {
     const ctx = this.ctx;
 
     let frameName = isP ? 'm_idle' : 's_idle_0';
 
     if (pose === 'attack') {
-      if (isP && weaponIcon.includes('锤')) {
-        frameName = 'h_atk';
-      } else if (isP && weaponIcon.includes('弓')) {
-        frameName = 'b_atk';
-      } else if (isP && weaponIcon.includes('激光剑')) {
-        frameName = 'l_atk';
+      if (isP) {
+        if (weaponTag === 'crushing') frameName = 'h_atk';
+        else if (weaponTag === 'piercing') frameName = 'b_atk';
+        else if (weaponTag === 'energy') frameName = 'l_atk';
+        else frameName = 'm_atk';
       } else {
-        frameName = isP ? 'm_atk' : 's_atk';
+        frameName = 's_atk';
       }
-    } else if (isP && weaponIcon.includes('锤')) {
-      frameName = 'h_idle';
-    } else if (isP && weaponIcon.includes('弓')) {
-      frameName = 'b_idle';
-    } else if (isP && weaponIcon.includes('激光剑')) {
-      frameName = 'l_idle';
+    } else if (isP) {
+      if (weaponTag === 'crushing') frameName = 'h_idle';
+      else if (weaponTag === 'piercing') frameName = 'b_idle';
+      else if (weaponTag === 'energy') frameName = 'l_idle';
+      else frameName = 'm_idle';
     }
 
     const img = this.assets[frameName];
     // 确保 img 已加载且有实际尺寸
     if (img && img.width > 0) {
       // 呼吸感逻辑：首页慢速平稳，战场根据敏捷略微加快
-      const breathFreq = pose === 'idle' ? (isP && this.gameState === 'lobby' ? 1.2 : 3) : 3;
-      const breath = (pose === 'idle') ? Math.sin(t * breathFreq) * 0.015 : 0;
+      const baseFreq = (isP && this.gameState === 'lobby') ? 0.84 : 2.1;
+      const breathFreq = pose === 'idle' ? baseFreq : 3;
+      const breathIntensity = isP ? 0.0054 : 0.012;
+      const breath = (pose === 'idle') ? Math.sin(t * breathFreq) * breathIntensity : 0;
 
       ctx.save();
       // 绘制带呼吸效果的资产
       // 调整显示尺寸：增加100%（从48恢复至96）
-      const baseSize = 96;
+      const baseSize = isP ? 162 : 169;
       const w = baseSize * (1 - breath * 0.5);
       const h = baseSize * (1 + breath);
 
       const offsetX = -w / 2;
-      const offsetY = -h + 82;
+      const offsetY = -h + (baseSize * 0.85) - 50; // 整体向上移动 50px (累计)
 
       ctx.drawImage(img, offsetX, offsetY, w, h);
 
@@ -533,7 +533,7 @@ class StickmanRenderer {
     ctx.restore();
   }
 
-  drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️', hasGhost: boolean = false, isElite: boolean = false, isP: boolean = true) {
+  drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponTag: string = '', hasGhost: boolean = false, isElite: boolean = false, isP: boolean = true) {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45);
 
     // 动态修正：由于素材 s_idle(右) 和 s_atk(左) 基础朝向相反，进攻时需要自动反转 flip 逻辑
@@ -558,7 +558,7 @@ class StickmanRenderer {
         ctx.globalAlpha = 0.5 / i;
 
         const tGhost = this.time * (1 + agility * 0.02);
-        this.drawStickmanPath(pose, tGhost - i * 0.12, weaponIcon, isElite, isP);
+        this.drawStickmanPath(pose, tGhost - i * 0.12, weaponTag, isElite, isP);
         ctx.restore();
       }
     }
@@ -566,7 +566,7 @@ class StickmanRenderer {
     // --- 绘制本体 ---
     ctx.save(); ctx.translate(x, y); if (finalFlip) ctx.scale(-1, 1);
     if (isElite && pose !== 'dead') { ctx.shadowBlur = 10; ctx.shadowColor = '#f43f5e'; }
-    this.drawStickmanPath(pose, t, weaponIcon, isElite, isP);
+    this.drawStickmanPath(pose, t, weaponTag, isElite, isP);
     ctx.restore();
   }
 
@@ -580,11 +580,11 @@ class StickmanRenderer {
     ctx.translate(x, y + breath - 15);
 
     // 根据装备动态切换主角贴图
-    const weapon = equipment.weapon || '';
+    const wObj = ITEMS.weapons.find(w => w.name === equipment.weapon);
     let imgKey = 'cyborg_ninja';
-    if (weapon.includes('弓')) imgKey = 'cyborg_ninja_bow';
-    else if (weapon.includes('锤')) imgKey = 'cyborg_ninja_hammer';
-    else if (weapon.includes('激光剑')) imgKey = 'cyborg_ninja_laser';
+    if (wObj?.tag === 'piercing') imgKey = 'cyborg_ninja_bow';
+    else if (wObj?.tag === 'crushing') imgKey = 'cyborg_ninja_hammer';
+    else if (wObj?.tag === 'energy') imgKey = 'cyborg_ninja_laser';
 
     const img = this.assets[imgKey];
     if (img) {
@@ -750,7 +750,7 @@ export default function App() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (authView === 'register') {
       if (authForm.password !== authForm.confirmPassword) {
         addLog(`>> [错误] 密钥确认不匹配，请重新输入`);
@@ -850,8 +850,10 @@ export default function App() {
         // 调用升级：x, y, pose, isFlip, agility, weaponIcon, hasGhost, isElite
         // 修正：当前素材(s_idle, s_atk)均默认面向右侧
         // 玩家(左)不翻转(false)以面向右侧对手，对手(右)翻转(true)以面向左侧玩家
-        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility || 10, player.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && activeSkill.isP), true);
-        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility || 10, enemy.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && !activeSkill.isP), false);
+        const pTag = ITEMS.weapons.find(w => w.name === player.equipment.weapon)?.tag || '';
+        const eTag = ITEMS.weapons.find(w => w.name === enemy.equipment.weapon)?.tag || '';
+        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility || 10, pTag, false, Boolean(activeSkill?.name === '幻影连击' && activeSkill.isP), true);
+        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility || 10, eTag, false, Boolean(activeSkill?.name === '幻影连击' && !activeSkill.isP), false);
         r.renderEffects();
       }
 
@@ -918,7 +920,7 @@ export default function App() {
 
     // 情报探测：强磁雷暴区 (EMP) 必然模糊，其他环境 30% 概率
     const isFailure = randomField.id === 'emp' ? true : Math.random() < 0.3;
-    
+
     if (isFailure) {
       const keys: ('weapon' | 'armor' | 'skill')[] = ['weapon', 'armor', 'skill'];
       const shuffled = keys.sort(() => 0.5 - Math.random());
@@ -1190,7 +1192,7 @@ export default function App() {
                 {authView === 'login' ? '建立连接 / ESTABLISH CONNECTION' : '初始化档案 / INITIALIZE PROFILE'}
               </button>
               <div className="text-center mt-8 border-t-2 border-slate-800 pt-6">
-                <button 
+                <button
                   type="button"
                   onClick={() => setAuthView(authView === 'login' ? 'register' : 'login')}
                   className="w-full flex items-center justify-center gap-2 hover:opacity-80 transition-all group"
@@ -1920,8 +1922,8 @@ export default function App() {
                                   仅装备 / EQUIP<br />
                                   <span className="text-[10px] text-emerald-400 font-bold">FREE / 免费</span>
                                 </button>
-                                <button 
-                                  onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, true)} 
+                                <button
+                                  onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, true)}
                                   disabled={player.gold < (confirmingItem.item.cost || 0)}
                                   className={`py-4 border-2 text-sm font-black transition-all cn-text ${player.gold < (confirmingItem.item.cost || 0) ? 'bg-slate-800 border-slate-700 opacity-50 cursor-not-allowed' : 'bg-indigo-600 border-indigo-400 hover:bg-indigo-500'}`}
                                 >
