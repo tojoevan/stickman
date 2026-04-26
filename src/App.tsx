@@ -658,6 +658,7 @@ export default function App() {
     '等待连接...'
   ]);
   const [currentPose, setCurrentPose] = useState<{ player: any, enemy: any }>({ player: 'idle', enemy: 'idle' });
+  const [confirmingItem, setConfirmingItem] = useState<{ item: Item, tab: 'weapons' | 'armors' | 'skills' } | null>(null);
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
   const [battleHistory, setBattleHistory] = useState<BattleRoundRecord[]>([]);
@@ -815,18 +816,32 @@ export default function App() {
     return () => cancelAnimationFrame(frame);
   }, [gameState, field, currentPose, player.equipment.weapon, enemy.equipment.weapon, player.stats.agility, enemy.stats.agility, activeSkill]);
 
-  const buyItem = (item: Item, tab: 'weapons' | 'armors' | 'skills') => {
+  const buyItem = (item: Item, tab: 'weapons' | 'armors' | 'skills', isUpgrade: boolean) => {
     const curLvl = player.unlockedItems[item.name] || 0;
-    // 忽略价格限制，保障购买测试，并且购买后直接装备
+    const cost = isUpgrade ? item.cost : 0;
+    
+    if (isUpgrade && player.gold < cost) {
+      addLog(`❌ 信用点不足! 需要 ₿${cost}`);
+      return;
+    }
+
     setPlayer(prev => {
       const eqKey = tab === 'weapons' ? 'weapon' : tab === 'armors' ? 'armor' : 'skill';
+      const nLvl = isUpgrade ? curLvl + 1 : (curLvl || 1);
       return {
         ...prev,
+        gold: prev.gold - cost,
         equipment: { ...prev.equipment, [eqKey]: item.name },
-        unlockedItems: { ...prev.unlockedItems, [item.name]: curLvl + 1 }
+        unlockedItems: { ...prev.unlockedItems, [item.name]: nLvl }
       };
     });
-    addLog(`成功装载: ${item.name} [Lv.${curLvl + 1}]`);
+    
+    if (isUpgrade) {
+      addLog(`✅ 升级成功: ${item.name} [Lv.${curLvl + 1}]`);
+    } else {
+      addLog(`⚡ 已装载设备: ${item.name}`);
+    }
+    setConfirmingItem(null);
   };
 
   const resetGame = () => {
@@ -1597,9 +1612,32 @@ export default function App() {
                               <span className="text-4xl mb-4 group-hover:scale-110 transition-transform">{item.icon}</span>
                               <p className="text-base font-black text-white mb-1 cn-text">{item.name}</p>
                               <p className="text-[9px] text-slate-500 uppercase mb-4 tracking-widest">{item.rarity}</p>
-                              <button onClick={() => buyItem(item, shopTab as 'weapons' | 'armors' | 'skills')} className="w-full py-2.5 bg-indigo-600 text-xs font-black hover:bg-indigo-500 transition-colors shadow-lg cn-text">↑ ₿{item.cost}</button>
+                              <button onClick={() => setConfirmingItem({ item, tab: shopTab as any })} className="w-full py-2.5 bg-indigo-600 text-xs font-black hover:bg-indigo-500 transition-colors shadow-lg cn-text">↑ ₿{item.cost}</button>
                             </div>
                           ))}
+                          {/* 确认操作弹窗 */}
+                          {confirmingItem && (
+                            <div className="absolute inset-0 z-[1100] bg-slate-950/90 flex items-center justify-center p-8 backdrop-blur-md">
+                              <div className="w-full max-w-sm pixel-card p-8 bg-slate-900 border-indigo-500 shadow-[0_0_50px_rgba(99,102,241,0.2)]">
+                                <div className="text-center mb-8">
+                                  <span className="text-5xl block mb-4">{confirmingItem.item.icon}</span>
+                                  <h4 className="text-xl font-black text-white italic mb-1">{confirmingItem.item.name}</h4>
+                                  <p className="text-xs text-slate-500 uppercase tracking-widest">当前等级: Lv.{player.unlockedItems[confirmingItem.item.name] || 0}</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, false)} className="py-4 bg-slate-800 border-2 border-slate-700 text-sm font-black hover:bg-slate-700 transition-all cn-text">
+                                    仅装备 / EQUIP<br/>
+                                    <span className="text-[10px] text-emerald-400 font-bold">FREE / 免费</span>
+                                  </button>
+                                  <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, true)} className="py-4 bg-indigo-600 border-2 border-indigo-400 text-sm font-black hover:bg-indigo-500 transition-all cn-text">
+                                    升级 / UPGRADE<br/>
+                                    <span className="text-[10px] text-amber-300 font-bold">₿{confirmingItem.item.cost}</span>
+                                  </button>
+                                </div>
+                                <button onClick={() => setConfirmingItem(null)} className="w-full mt-6 text-xs text-slate-500 underline hover:text-white transition-colors">取消操作 / CANCEL</button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
