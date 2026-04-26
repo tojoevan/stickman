@@ -857,10 +857,10 @@ export default function App() {
     const curLvl = player.unlockedItems[item.name] || 0;
     const cost = isUpgrade ? (item.cost || 0) : 0;
 
-    if (isUpgrade && player.gold < cost) {
-      addLog(`❌ 信用点不足! 需要 ₿${cost}`);
-      return;
-    }
+    // if (isUpgrade && player.gold < cost) {
+    //   addLog(`❌ 信用点不足! 需要 ₿${cost}`);
+    //   return;
+    // }
 
     setPlayer(prev => {
       const eqKey = tab === 'weapons' ? 'weapon' : tab === 'armors' ? 'armor' : 'skill';
