@@ -281,7 +281,13 @@ class StickmanRenderer {
     load('cyborg_ninja_bow', '/cyborg_ninja_bow.png');
     load('cyborg_ninja_hammer', '/cyborg_ninja_hammer.png');
     load('m_idle', '/assets/m_idle.png');
+    load('h_idle', '/assets/h_idle.png');
+    load('b_idle', '/assets/b_idle.png');
+    load('l_idle', '/assets/l_idle.png');
     load('m_atk', '/assets/m_atk.png');
+    load('h_atk', '/assets/h_atk.png');
+    load('b_atk', '/assets/b_atk.png');
+    load('l_atk', '/assets/l_atk.png');
     load('s_idle_0', '/assets/s_idle.png');
     load('s_idle_1', '/assets/s_idle.png'); // 暂时复用同一张，也可后期补齐
     load('s_atk', '/assets/s_atk.png');
@@ -311,7 +317,21 @@ class StickmanRenderer {
     let frameName = isP ? 'm_idle' : 's_idle_0';
 
     if (pose === 'attack') {
-      frameName = isP ? 'm_atk' : 's_atk';
+      if (isP && weaponIcon.includes('锤')) {
+        frameName = 'h_atk';
+      } else if (isP && weaponIcon.includes('弓')) {
+        frameName = 'b_atk';
+      } else if (isP && weaponIcon.includes('激光剑')) {
+        frameName = 'l_atk';
+      } else {
+        frameName = isP ? 'm_atk' : 's_atk';
+      }
+    } else if (isP && weaponIcon.includes('锤')) {
+      frameName = 'h_idle';
+    } else if (isP && weaponIcon.includes('弓')) {
+      frameName = 'b_idle';
+    } else if (isP && weaponIcon.includes('激光剑')) {
+      frameName = 'l_idle';
     }
 
     const img = this.assets[frameName];
