@@ -197,7 +197,7 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
   };
 
   return (
-    <div className="flex-1 flex flex-row items-center gap-4 min-w-0 h-full">
+    <div className="flex-1 flex flex-row items-center gap-4 min-w-0 h-full select-none">
       <div className="flex-none flex flex-col items-center justify-center">
         <p className="text-[10px] pixel-font text-slate-400 uppercase [writing-mode:vertical-rl] py-4 border-r-4 border-slate-900 pr-3 leading-none">{label}</p>
       </div>
@@ -208,7 +208,7 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="relative z-10 h-full overflow-y-auto overflow-x-hidden custom-scrollbar snap-y snap-mandatory"
+          className="relative z-10 h-full overflow-y-scroll overflow-x-hidden custom-scrollbar"
           style={{ 
             scrollbarWidth: 'none', 
             msOverflowStyle: 'none', 
@@ -224,7 +224,7 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
             return (
               <div
                 key={`${item.name}-${idx}`}
-                className={`h-[64px] flex flex-row items-center justify-center gap-3 snap-center transition-all duration-100 px-2 ${isMatch ? 'opacity-100 scale-100' : 'opacity-20 scale-90 grayscale'}`}
+                className={`h-[64px] flex flex-row items-center justify-center gap-3 transition-all duration-100 px-2 pointer-events-none ${isMatch ? 'opacity-100 scale-100' : 'opacity-20 scale-90 grayscale'}`}
               >
                 <span className="text-3xl flex-none">{item.icon}</span>
                 <div className="flex flex-col justify-center min-w-0">
