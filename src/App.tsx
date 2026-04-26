@@ -656,7 +656,7 @@ interface Character {
 
 export default function App() {
   // --- 调试模式：自动登录 ---
-  const [token, setToken] = useState(localStorage.getItem('token') || 'dev-token');
+  const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [authForm, setAuthForm] = useState({ username: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -1130,11 +1130,11 @@ export default function App() {
       <div className={`vignette-layer ${shopTab ? 'danger' : ''}`} />
       {/* 1. AUTH OVERLAY */}
       {!token && (
-        <div className="absolute inset-0 z-[1000] bg-slate-950/95 flex items-center justify-center p-4">
+        <div className="absolute inset-0 z-[1000] bg-slate-950/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-md pixel-card p-10 animate-in zoom-in-95 duration-300">
             <div className="text-center mb-8 border-b-4 border-slate-800 pb-6">
-              <h1 className="text-3xl pixel-font text-indigo-500 mb-2 glow-pixel">NEURAL LINK</h1>
-              <p className="text-xs pixel-font text-slate-500">神经链路接入 / ENCRYPTION ACTIVE</p>
+              <h1 className="text-2xl font-black italic text-white mb-2 cn-text tracking-tighter glow-pixel">神经链路：赛博进化</h1>
+              <h2 className="text-[10px] pixel-font text-indigo-500 mb-2 tracking-widest uppercase opacity-80">NEURAL LINK / SYSTEM_ACCESS</h2>
             </div>
             <form onSubmit={handleAuth} className="space-y-6">
               <div className="space-y-1">
@@ -1587,10 +1587,18 @@ export default function App() {
                 </span>
                 <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] -mt-1">Neural Link: Cyber Evolution</span>
               </div>
-              <button onClick={() => {
-                resetGame();
-                setGameState('tactics');
-              }} className="pixel-button success btn-deploy-anim text-lg px-16">执行任务部署 / DEPLOY</button>
+              <div className="flex items-center gap-4">
+                <button onClick={() => {
+                  localStorage.removeItem('token');
+                  setToken('');
+                }} className="px-4 py-2 text-[10px] font-black text-slate-500 border-2 border-slate-800 hover:border-rose-500 hover:text-rose-500 transition-all uppercase tracking-widest">
+                  切断链路 / LOGOUT
+                </button>
+                <button onClick={() => {
+                  resetGame();
+                  setGameState('tactics');
+                }} className="pixel-button success btn-deploy-anim text-lg px-16">执行任务部署 / DEPLOY</button>
+              </div>
             </div>
           </div>
 
