@@ -775,6 +775,7 @@ export default function App() {
           startRound();
         } else if (gameState === 'lobby') {
           e.preventDefault();
+          resetGame();
           setGameState('tactics');
         }
       }
@@ -862,7 +863,12 @@ export default function App() {
   const resetGame = () => {
     setRound(1);
     setIsDeployed(false);
-    addLog('>> 作战结束，系统重置就绪。');
+    
+    // 随机化战斗环境
+    const randomField = BATTLEFIELDS[Math.floor(Math.random() * BATTLEFIELDS.length)];
+    setField(randomField);
+    
+    addLog(`>> 系统重置就绪，当前作战环境：[${randomField.name}]`);
     setPlayer(prev => ({ ...prev, health: prev.maxHealth }));
     setEnemy(prev => {
       const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= prev.level);
@@ -1508,7 +1514,7 @@ export default function App() {
               </div>
               <button onClick={() => {
                 resetGame();
-                setGameState('battle');
+                setGameState('tactics');
               }} className="pixel-button success btn-deploy-anim text-lg px-16">执行任务部署 / DEPLOY</button>
             </div>
           </div>
