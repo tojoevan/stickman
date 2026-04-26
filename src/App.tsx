@@ -1059,11 +1059,9 @@ export default function App() {
       if (s.name === '系统过载') rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20);
       if (s.name === '蓄能重击') {
         rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40);
-        setShowcasedSkill('xuneng');
       }
       if (s.name === '幻影连击') {
         rendererRef.current?.addEffect('speed', x, 280, '#6366f1', 15);
-        setShowcasedSkill('huanying');
       }
       if (s.name === '神经修复') {
         const atk = isP ? player : enemy;
