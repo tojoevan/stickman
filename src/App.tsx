@@ -70,20 +70,20 @@ const BATTLEFIELDS: Battlefield[] = [
 const ITEMS = {
   weapons: [
     { name: '长剑', damage: 15, icon: '⚔️', desc: '基础近战武器', story: '旧时代的钢刃，虽已锈迹斑斑，但其冰冷的触感依然能唤醒战士的本能。', cost: 50, rarity: 'common', tag: 'slashing' },
-    { name: '名刀', damage: 32, icon: '🎋', desc: '锋利的特制刀具', story: '由深山隐士打造，刀身覆盖着纳米级的锋利涂层，挥动时仿佛能切断风的声音。', cost: 150, rarity: 'novel', levelReq: 3, tag: 'slashing' },
-    { name: '影刃', damage: 130, icon: '🔪', desc: '无视防御的次元武器', story: '从虚空裂缝中提取的物质锻造而成，它不切割肉体，而是直接撕裂目标的现实存在感。', cost: 8500, rarity: 'epic', levelReq: 40, tag: 'slashing' },
+    { name: '名刀', damage: 30, icon: '🎋', desc: '锋利的特制刀具', story: '由深山隐士打造，刀身覆盖着纳米级的锋利涂层，挥动时仿佛能切断风的声音。', cost: 150, rarity: 'novel', levelReq: 3, tag: 'slashing' },
+    { name: '影刃', damage: 75, icon: '🔪', desc: '无视防御的次元武器', story: '从虚空裂缝中提取的物质锻造而成，它不切割肉体，而是直接撕裂目标的现实存在感。', cost: 8500, rarity: 'epic', levelReq: 40, tag: 'slashing' },
 
     { name: '长弓', damage: 12, icon: '🏹', desc: '基础远程武器', story: '复合碳纤维材质，轻盈而强韧，是荒野猎人在静谧夜晚最可靠的伙伴。', cost: 50, rarity: 'common', tag: 'piercing' },
-    { name: '战术弩', damage: 28, icon: '🎯', desc: '带辅助瞄准的连发弩', story: '黑市中流通的高级货，配备了简易的弹道辅助芯片，即使是新手也能打出精准的齐射。', cost: 200, rarity: 'novel', levelReq: 5, tag: 'piercing' },
-    { name: '神龙弓', damage: 55, icon: '🐉', desc: '附带能量冲击的强弓', story: '传闻弓身封印了上古数字生命的意识，每一支射出的箭矢都带着震慑灵魂的咆哮。', cost: 600, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
+    { name: '战术弩', damage: 25, icon: '🎯', desc: '带辅助瞄准的连发弩', story: '黑市中流通的高级货，配备了简易的弹道辅助芯片，即使是新手也能打出精准的齐射。', cost: 200, rarity: 'novel', levelReq: 5, tag: 'piercing' },
+    { name: '神龙弓', damage: 45, icon: '🐉', desc: '附带能量冲击的强弓', story: '传闻弓身封印了上古数字生命的意识，每一支射出的箭矢都带着震慑灵魂的咆哮。', cost: 600, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
 
-    { name: '重锤', damage: 25, icon: '🔨', desc: '沉重的破坏武器', story: '纯粹的质量，纯粹的破坏。在它面前，任何精密的防御结构都显得滑稽可笑。', cost: 60, rarity: 'common', tag: 'crushing' },
-    { name: '动力锤', damage: 48, icon: '🚜', desc: '附带震荡波的动力锤', story: '内置了液压增压系统，击中目标的瞬间会释放出强烈的震荡波，粉碎一切阻碍。', cost: 450, rarity: 'novel', levelReq: 8, tag: 'crushing' },
-    { name: '雷神锤', damage: 150, icon: '⚡', desc: '附带雷电伤害的终极巨锤', story: '众神之怒的数字化体现。挥动它时，空气中会充满电离的焦灼味，将敌人化为焦炭。', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing' },
+    { name: '重锤', damage: 22, icon: '🔨', desc: '沉重的破坏武器', story: '纯粹的质量，纯粹的破坏。在它面前，任何精密的防御结构都显得滑稽可笑。', cost: 60, rarity: 'common', tag: 'crushing' },
+    { name: '动力锤', damage: 42, icon: '🚜', desc: '附带震荡波的动力锤', story: '内置了液压增压系统，击中目标的瞬间会释放出强烈的震荡波，粉碎一切阻碍。', cost: 450, rarity: 'novel', levelReq: 8, tag: 'crushing' },
+    { name: '雷神锤', damage: 85, icon: '⚡', desc: '附带雷电伤害的终极巨锤', story: '众神之怒的数字化体现。挥动它时，空气中会充满电离的焦灼味，将敌人化为焦炭。', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing' },
 
     { name: '热能刀', damage: 18, icon: '🔥', desc: '高温切割武器', story: '刀刃边缘维持着千度高温，能够像切黄油一样切开最坚固的复合装甲。', cost: 80, rarity: 'common', tag: 'energy' },
-    { name: '等离子炮', damage: 75, icon: '🎇', desc: '微型黑洞发生器', story: '手持式核聚变发生器，发射出的等离子团会在触敌瞬间引发微型黑洞坍缩。', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy' },
-    { name: '激光剑', damage: 180, icon: '🔦', desc: '无视物理防御的光束剑', story: '纯净的能量凝聚成束。它没有实体，却能跨越物理世界的限制，斩断因果。', cost: 12000, rarity: 'epic', levelReq: 30, tag: 'energy' },
+    { name: '等离子炮', damage: 55, icon: '🎇', desc: '微型黑洞发生器', story: '手持式核聚变发生器，发射出的等离子团会在触敌瞬间引发微型黑洞坍缩。', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy' },
+    { name: '激光剑', damage: 100, icon: '🔦', desc: '无视物理防御的光束剑', story: '纯净的能量凝聚成束。它没有实体，却能跨越物理世界的限制，斩断因果。', cost: 12000, rarity: 'epic', levelReq: 30, tag: 'energy' },
   ] as Item[],
   armors: [
     { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '无任何防护效果', story: '在这个钢铁森林里，这层薄薄的纤维更像是一种心理安慰，而非实际保护。', cost: 40, rarity: 'common', tag: 'light' },
@@ -103,27 +103,27 @@ const ITEMS = {
     { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极力场防护', story: '通过消耗反物质电池产生的排斥力场，是人类技术能够达到的防御巅峰。', cost: 15000, rarity: 'epic', levelReq: 60, tag: 'field' },
   ] as Item[],
   skills: [
-    { name: '蓄能重击', mult: 1.8, icon: '💥', desc: '牺牲攻速换取爆发，附加100%力量伤害', story: '引导全身的生物能量于一瞬爆发。这一拳，包含了对命运所有的愤怒。', cost: 100, rarity: 'common', tag: 'crushing' },
+    { name: '蓄能重击', mult: 1.5, icon: '💥', desc: '牺牲攻速换取爆发，附加100%力量伤害', story: '引导全身的生物能量于一瞬爆发。这一拳，包含了对命运所有的愤怒。', cost: 100, rarity: 'common', tag: 'crushing' },
     { name: '幻影连击', mult: 0.8, icon: '⚡', desc: '极速二次打击，敏捷大幅增幅伤害', story: '通过超频神经突触，让肌肉在极短时间内完成两次打击，速度之快肉眼难辨。', cost: 300, rarity: 'novel', levelReq: 5, tag: 'slashing' },
     { name: '弱点扫描', mult: 1.2, icon: '🔍', desc: '解析对手防御，强制无视抗性修正', story: '开启眼部的扫描阵列，实时计算对手装甲的最薄弱点，执行精准的打击。', cost: 800, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
     { name: '神经修复', mult: 0, icon: '✨', desc: '生物纳米修复，基于体质大量回血', story: '注射纳米医疗凝胶，这些微小的医生会自动修复受损的器官与回路，带你重返巅峰。', cost: 500, rarity: 'novel', levelReq: 8, tag: 'light' },
     { name: '动能反射', mult: 0.5, icon: '🛡️', desc: '构建反击护盾，反弹受到的50%伤害', story: '利用能量守恒原理，将受到的冲击力储存并反弹，让敌人品尝自己的力量。', cost: 2000, rarity: 'perfect', levelReq: 20, tag: 'heavy' },
-    { name: '系统过载', mult: 3.5, icon: '☢️', desc: '极限超频，极高伤害但会反噬自身', story: '撤除所有的安全限制，释放核心全部的原始能量。这是最后的孤注一掷。', cost: 10000, rarity: 'epic', levelReq: 45, tag: 'energy' },
+    { name: '系统过载', mult: 2.2, icon: '☢️', desc: '极限超频，极高伤害但会反噬自身', story: '撤除所有的安全限制，释放核心全部的原始能量。这是最后的孤注一掷。', cost: 10000, rarity: 'epic', levelReq: 45, tag: 'energy' },
   ] as Item[]
 };
 const INITIAL_CHAR: Character = {
   username: 'Unknown',
   level: 1, xp: 0, gold: 100,
   stats: { strength: 10, agility: 10, constitution: 12 },
-  statPoints: 8, health: 180, maxHealth: 180,
-  equipment: { weapon: '长剑', armor: '布衣', skill: '斩击' },
-  unlockedItems: { '长剑': 1, '长弓': 1, '重锤': 1, '热能刀': 1, '布衣': 1, '铁盾': 1, '披风': 1, '凯夫拉': 1, '干扰烟幕': 1, '斩击': 1, '治疗': 1, '连击': 1 },
+  statPoints: 8, health: 250, maxHealth: 250,
+  equipment: { weapon: '长剑', armor: '布衣', skill: '蓄能重击' },
+  unlockedItems: { '长剑': 1, '长弓': 1, '重锤': 1, '热能刀': 1, '布衣': 1, '铁盾': 1, '披风': 1, '凯夫拉': 1, '干扰烟幕': 1, '蓄能重击': 1, '神经修复': 1, '幻影连击': 1 },
   defeatCount: 0
 };
 
 const ENEMY_NAMES = ['Aegis-7', 'Phantom-X', 'Cerberus', 'Viper-9', 'Titan-2', 'Ghost-Protocol', 'Nova-Core', 'Shadow-Stalker', 'Cyber-Reaper', 'Iron-Wraith'];
 
-const calcVal = (base: number, level: number) => Math.floor(base * (1 + 0.15 * (level - 1)));
+const calcVal = (base: number, level: number) => Math.floor(base * (1 + 0.06 * (level - 1)));
 const getAttackCounterMult = (wTag: string, aTag: string) => {
   if (wTag === 'slashing' && aTag === 'light') return 1.35;
   if (wTag === 'piercing' && aTag === 'medium') return 1.35;
@@ -164,7 +164,7 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
   }, [items.length]);
 
   const handleScroll = () => {
-    if (!scrollRef.current) return;
+    if (!scrollRef.current || items.length === 0) return;
     const st = scrollRef.current.scrollTop;
 
     // 循环边界重置逻辑
@@ -236,9 +236,9 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
 interface BattleRoundRecord { round: number; pDmg: number; eDmg: number; pRemainingHp: number; eRemainingHp: number; }
 
 class StickmanRenderer {
-  private ctx: CanvasRenderingContext2D; 
+  private ctx: CanvasRenderingContext2D;
   public assetsLoaded: boolean = false;
-  public gameState: string = 'lobby'; 
+  public gameState: string = 'lobby';
   public effects: any[] = [];
   private nextEffectId: number = 0;
   private assets: Record<string, HTMLImageElement> = {};
@@ -248,19 +248,29 @@ class StickmanRenderer {
     this.ctx = ctx;
     this.loadAssets();
   }
-
   private loadAssets() {
+    const requiredAssets = [
+      'cyborg_ninja', 'cyborg_ninja_laser', 'cyborg_ninja_bow', 'cyborg_ninja_hammer',
+      'm_idle', 'm_atk', 's_idle_0', 's_idle_1', 's_atk',
+      'bg_far', 'bg_mid', 'bg_floor'
+    ];
+    const checkAllLoaded = () => {
+      if (requiredAssets.every(name => this.assets[name])) {
+        this.assetsLoaded = true;
+      }
+    };
+
     const load = (name: string, url: string) => {
-      const img = new Image(); 
+      const img = new Image();
       img.src = url;
       img.onload = () => {
         this.assets[name] = img;
-        if (Object.keys(this.assets).length >= 5) this.assetsLoaded = true;
+        checkAllLoaded();
       };
       img.onerror = () => {
         console.error(`❌ Asset failed to load: ${url}`);
-        // 即使加载失败，也标记一个空对象，避免无限等待
-        this.assets[name] = new Image();
+        this.assets[name] = new Image(); // Fallback
+        checkAllLoaded();
       };
     };
 
@@ -278,11 +288,15 @@ class StickmanRenderer {
     // 背景资产保持现状 (程序化生成)
     const generateBG = (name: string, color: string) => {
       const canv = document.createElement('canvas'); canv.width = 32; canv.height = 32;
-      const c = canv.getContext('2d')!;
+      const c = canv.getContext('2d');
+      if (!c) return;
       c.fillStyle = color; c.fillRect(0, 0, 32, 32);
       c.fillStyle = 'rgba(255,255,255,0.05)'; c.fillRect(8, 8, 4, 4);
       const img = new Image(); img.src = canv.toDataURL();
-      img.onload = () => { this.assets[name] = img; };
+      img.onload = () => { 
+        this.assets[name] = img; 
+        checkAllLoaded();
+      };
     };
 
     generateBG('bg_far', '#0f172a');
@@ -294,7 +308,7 @@ class StickmanRenderer {
     const ctx = this.ctx;
 
     let frameName = isP ? 'm_idle' : 's_idle_0';
-    
+
     if (pose === 'attack') {
       frameName = isP ? 'm_atk' : 's_atk';
     } else if (isP) {
@@ -320,7 +334,7 @@ class StickmanRenderer {
 
       const offsetX = -w / 2;
       const offsetY = -h + 82;
-      
+
       ctx.drawImage(img, offsetX, offsetY, w, h);
 
       ctx.restore();
@@ -328,21 +342,21 @@ class StickmanRenderer {
       // Fallback: 如果图片未加载或加载失败，绘制一个显眼的占位符火柴人
       ctx.save();
       if (!isP) ctx.scale(-1, 1);
-      
+
       // 躯干
       ctx.fillStyle = isElite ? '#f43f5e' : '#6366f1';
       ctx.fillRect(-15, -60, 30, 60);
-      
+
       // 头部
       ctx.beginPath();
       ctx.arc(0, -75, 15, 0, Math.PI * 2);
       ctx.fill();
-      
+
       // 提示文字
       ctx.fillStyle = '#ffffff';
       ctx.font = '10px sans-serif';
       ctx.fillText('LOADING', -20, -100);
-      
+
       ctx.restore();
     }
   }
@@ -419,13 +433,15 @@ class StickmanRenderer {
     drawFarEnv(30, 5, 0.5);
 
     if (this.assetsLoaded) {
-      const pattern = ctx.createPattern(this.assets.bg_far, 'repeat');
-      if (pattern) {
-        ctx.save();
-        ctx.translate(-(this.time * 5) % 32, 0);
-        ctx.fillStyle = pattern; ctx.globalAlpha = 0.35;
-        ctx.fillRect(0, 0, 832, 400);
-        ctx.restore();
+      if (this.assets.bg_far) {
+        const pattern = ctx.createPattern(this.assets.bg_far, 'repeat');
+        if (pattern) {
+          ctx.save();
+          ctx.translate(-(this.time * 5) % 32, 0);
+          ctx.fillStyle = pattern; ctx.globalAlpha = 0.35;
+          ctx.fillRect(0, 0, 832, 400);
+          ctx.restore();
+        }
       }
     }
 
@@ -453,25 +469,29 @@ class StickmanRenderer {
     }
 
     if (this.assetsLoaded) {
-      const pattern = ctx.createPattern(this.assets.bg_mid, 'repeat');
-      if (pattern) {
-        ctx.save();
-        ctx.translate(-(this.time * midSpeed) % 32, 150);
-        ctx.fillStyle = pattern; ctx.globalAlpha = 0.3;
-        ctx.fillRect(0, 0, 832, 170);
-        ctx.restore();
+      if (this.assets.bg_mid) {
+        const pattern = ctx.createPattern(this.assets.bg_mid, 'repeat');
+        if (pattern) {
+          ctx.save();
+          ctx.translate(-(this.time * midSpeed) % 32, 150);
+          ctx.fillStyle = pattern; ctx.globalAlpha = 0.3;
+          ctx.fillRect(0, 0, 832, 170);
+          ctx.restore();
+        }
       }
     }
 
     // --- 4. 近景层 (Speed: 10) ---
     if (this.assetsLoaded) {
-      const pattern = ctx.createPattern(this.assets.bg_floor, 'repeat');
-      if (pattern) {
-        ctx.save();
-        ctx.translate(-(this.time * 10) % 32, 320);
-        ctx.fillStyle = pattern; ctx.globalAlpha = 0.9;
-        ctx.fillRect(0, 0, 832, 80);
-        ctx.restore();
+      if (this.assets.bg_floor) {
+        const pattern = ctx.createPattern(this.assets.bg_floor, 'repeat');
+        if (pattern) {
+          ctx.save();
+          ctx.translate(-(this.time * 10) % 32, 320);
+          ctx.fillStyle = pattern; ctx.globalAlpha = 0.9;
+          ctx.fillRect(0, 0, 832, 80);
+          ctx.restore();
+        }
       }
     }
 
@@ -499,7 +519,7 @@ class StickmanRenderer {
 
   drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️', hasGhost: boolean = false, isElite: boolean = false, isP: boolean = true) {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45);
-    
+
     // 动态修正：由于素材 s_idle(右) 和 s_atk(左) 基础朝向相反，进攻时需要自动反转 flip 逻辑
     const finalFlip = pose === 'attack' ? !flip : flip;
 
@@ -654,7 +674,7 @@ export default function App() {
       ...INITIAL_CHAR,
       username: eName,
       stats: { strength: 8, agility: 7, constitution: 8 },
-      health: 140, maxHealth: 140
+      health: 220, maxHealth: 220
     };
   });
   const [isDeployed, setIsDeployed] = useState(false);
@@ -681,8 +701,9 @@ export default function App() {
   const lobbyRendererRef = useRef<StickmanRenderer | null>(null);
   const hasLoaded = useRef(false);
   const lastWheelTime = useRef(0);
+  const [isIntelBlurred, setIsIntelBlurred] = useState(false);
   const [wheelIndices, setWheelIndices] = useState({ weapon: 60, armor: 60, skill: 60 });
-  
+
   // 确保在切换到调整页面时，拨轮位置与当前装备匹配
   useEffect(() => {
     if (gameState === 'tactics' || gameState === 'battle') {
@@ -691,7 +712,7 @@ export default function App() {
         const base = 60; // 从第5轮左右开始，保证双向都有空间
         return base - (base % (items.length || 1)) + (idx >= 0 ? idx : 0);
       };
-      
+
       setWheelIndices({
         weapon: syncIndex(ITEMS.weapons.filter(i => player.unlockedItems[i.name]), player.equipment.weapon),
         armor: syncIndex(ITEMS.armors.filter(i => player.unlockedItems[i.name]), player.equipment.armor),
@@ -699,7 +720,7 @@ export default function App() {
       });
     }
   }, [gameState]);
-  
+
   // 确保渲染器尽早初始化
 
   // 确保渲染器尽早初始化
@@ -719,13 +740,13 @@ export default function App() {
     localStorage.setItem('username', authForm.username);
     setToken(mockToken);
     setPlayer(prev => ({ ...prev, username: authForm.username }));
-    
+
     // 模拟系统初始化序列
     setTimeout(() => addLog(`>> 神经链路建立成功`), 100);
     setTimeout(() => addLog(`>> 权限验证通过: ${authForm.username}`), 300);
     setTimeout(() => addLog(`>> 正在拉取最新的作战指令...`), 500);
     setTimeout(() => addLog(`>> 系统已就绪，欢迎回来，指挥官。`), 700);
-    
+
     hasLoaded.current = true;
   };
 
@@ -798,7 +819,7 @@ export default function App() {
         // 动态绑定最新画布上下文
         (r as any).ctx = ctx;
         r.advance(); r.drawBackground(field);
-        
+
         // 调用升级：x, y, pose, isFlip, agility, weaponIcon, hasGhost, isElite
         // 修正：当前素材(s_idle, s_atk)均默认面向右侧
         // 玩家(左)不翻转(false)以面向右侧对手，对手(右)翻转(true)以面向左侧玩家
@@ -835,7 +856,7 @@ export default function App() {
   const buyItem = (item: Item, tab: 'weapons' | 'armors' | 'skills', isUpgrade: boolean) => {
     const curLvl = player.unlockedItems[item.name] || 0;
     const cost = isUpgrade ? (item.cost || 0) : 0;
-    
+
     if (isUpgrade && player.gold < cost) {
       addLog(`❌ 信用点不足! 需要 ₿${cost}`);
       return;
@@ -851,7 +872,7 @@ export default function App() {
         unlockedItems: { ...prev.unlockedItems, [item.name]: nLvl }
       };
     });
-    
+
     if (isUpgrade) {
       addLog(`✅ 升级成功: ${item.name} [Lv.${curLvl + 1}]`);
     } else {
@@ -863,24 +884,63 @@ export default function App() {
   const resetGame = () => {
     setRound(1);
     setIsDeployed(false);
-    
+
     // 随机化战斗环境
     const randomField = BATTLEFIELDS[Math.floor(Math.random() * BATTLEFIELDS.length)];
     setField(randomField);
-    
+
+    // 情报探测：20% 概率出现模糊
+    const blurred = Math.random() < 0.2;
+    setIsIntelBlurred(blurred);
+
     addLog(`>> 系统重置就绪，当前作战环境：[${randomField.name}]`);
+    if (blurred) {
+      addLog(`>> [警告] 环境干扰严重，情报终端探测模糊，无法获取精确目标情报`);
+    }
+
     setPlayer(prev => ({ ...prev, health: prev.maxHealth }));
     setEnemy(prev => {
-      const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= prev.level);
-      const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= prev.level);
-      const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= prev.level);
+      // 动态匹配玩家能力：基础等级 = 玩家等级，上下浮动 1 级 (最小 1)
+      const levelDiff = Math.floor(Math.random() * 3) - 1; // -1, 0, 1
+      const newLevel = Math.max(1, player.level + levelDiff);
+
+      // 属性浮动：略微平衡，波动区间缩小至 0.85 - 1.15
+      const floatMult = 0.85 + Math.random() * 0.3;
+      const scaleStat = (s: number) => Math.max(5, Math.floor(s * floatMult));
+
+      const newStats = {
+        strength: scaleStat(player.stats.strength),
+        agility: scaleStat(player.stats.agility),
+        constitution: scaleStat(player.stats.constitution)
+      };
+
+      // HP 平衡：基于玩家当前最大血量进行浮动 (80% - 120%)
+      // 这样无论玩家走什么路线，对手血量都在可理解范围内
+      const hpFloat = 0.8 + Math.random() * 0.4;
+      const baseHP = Math.floor(player.maxHealth * hpFloat);
+
+      const isElite = Math.random() < 0.25; // 概率提升至 25%
+      const eName = (isElite ? '[精英] ' : '') + ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
+
+      // 精英怪额外加成 (血量 +30%)
+      const finalMaxHP = isElite ? Math.floor(baseHP * 1.3) : baseHP;
+
+      const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= newLevel);
+      const aA = ITEMS.armors.filter(a => (a.levelReq || 0) <= newLevel);
+      const aS = ITEMS.skills.filter(s => (s.levelReq || 0) <= newLevel);
       const rw = aW[Math.floor(Math.random() * aW.length)];
       const ra = aA[Math.floor(Math.random() * aA.length)];
       const rs = aS[Math.floor(Math.random() * aS.length)];
+
       return {
         ...prev,
-        health: prev.maxHealth,
-        equipment: { weapon: rw.name, armor: ra.name, skill: rs.name }
+        username: eName,
+        level: newLevel,
+        stats: newStats,
+        maxHealth: finalMaxHP,
+        health: finalMaxHP,
+        equipment: { weapon: rw.name, armor: ra.name, skill: rs.name },
+        unlockedItems: { [rw.name]: newLevel, [ra.name]: newLevel, [rs.name]: newLevel }
       };
     });
   };
@@ -889,8 +949,11 @@ export default function App() {
 
   const startRound = async () => {
     setIsDeployed(true);
-    // --- 掷币决定先手 ---
-    const playerFirst = Math.random() > 0.5;
+    // --- 敏捷判定先手 (Agility Check) ---
+    // 计算先手值：敏捷 + 随机扰动 (0-15)
+    const pPriority = player.stats.agility + Math.random() * 15;
+    const ePriority = enemy.stats.agility + Math.random() * 15;
+    const playerFirst = pPriority >= ePriority;
     const resultStr = playerFirst ? 'player' : 'enemy';
 
     setCoinToss({ active: true, result: null });
@@ -965,14 +1028,20 @@ export default function App() {
         let defenseReduction = getDefenseCounterMult(a.tag, w.tag);
         if (s.name === '弱点扫描') { defenseReduction = 1.0; }
 
-        let dmg = (calcVal(w.damage!, wL) + atk.stats.strength * (isP ? 1.0 : 1.5)) * attackBonus * defenseReduction;
+        let rawDmg = (calcVal(w.damage!, wL) + atk.stats.strength) * attackBonus * defenseReduction;
         if (s.mult) {
           let sMult = s.mult * (1 + 0.1 * (sL - 1));
-          if (s.name === '蓄能重击') dmg += atk.stats.strength * 1.5 * sL;
-          dmg *= sMult;
+          if (s.name === '蓄能重击') rawDmg += atk.stats.strength * 1.5 * sL;
+          rawDmg *= sMult;
         }
 
-        const fD = Math.floor(field.id === 'overload' ? dmg * 1.3 : dmg);
+        // 护甲减伤逻辑：伤害 - 护甲值
+        const defL = isP ? (enemy.unlockedItems[a.name] || 1) : (player.unlockedItems[a.name] || 1);
+        const defenseVal = calcVal(a.defense || 0, defL);
+        const dmgAfterArmor = Math.max(1, rawDmg - defenseVal);
+
+        // 全局伤害抑制因子进一步加强 (0.70) 以彻底杜绝秒杀
+        const fD = Math.floor((field.id === 'overload' ? dmgAfterArmor * 1.3 : dmgAfterArmor) * 0.70);
         rendererRef.current?.addEffect('spark', tx, 250, isP ? '#f59e0b' : '#ef4444', 15);
 
         if (isP) { eHP = Math.max(0, eHP - fD); setEnemy(prev => ({ ...prev, health: eHP })); curP_Dmg += fD; addLog(`>>打击: ${fD}`); }
@@ -1018,7 +1087,7 @@ export default function App() {
         setPlayer(prev => {
           let nX = prev.xp + xR; let nL = prev.level; let nS = prev.statPoints;
           if (nX >= nL * 100) { nX -= nL * 100; nL += 1; nS += 3; }
-          return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, health: prev.maxHealth, defeatCount: 0 };
+          return { ...prev, gold: prev.gold + gR, xp: nX, level: nL, statPoints: nS, maxHealth: prev.maxHealth + (nL > prev.level ? 20 : 0), health: prev.maxHealth + (nL > prev.level ? 20 : 0), defeatCount: 0 };
         });
         setGameState('victory');
         addLog(`>> 任务完成: 获得 ₿${gR} | EXP +${xR}`);
@@ -1122,11 +1191,11 @@ export default function App() {
                 <div className="unit-name text-rose-400 cn-text">目标 / {enemy.username}</div>
                 {/* 敌人当前装备展示 (提供博弈信息) */}
                 <div className="flex justify-end gap-2 text-xs text-slate-500 font-bold mb-1 cn-text">
-                  <span className="text-rose-400">{enemy.equipment.weapon}</span>
+                  <span className="text-rose-400">{isIntelBlurred ? '???' : enemy.equipment.weapon}</span>
                   <span className="opacity-30">|</span>
-                  <span className="text-rose-400">{enemy.equipment.armor}</span>
+                  <span className="text-rose-400">{isIntelBlurred ? '???' : enemy.equipment.armor}</span>
                   <span className="opacity-30">|</span>
-                  <span className="text-rose-400">{enemy.equipment.skill}</span>
+                  <span className="text-rose-400">{isIntelBlurred ? '???' : enemy.equipment.skill}</span>
                 </div>
                 <div className="flex flex-row-reverse gap-2 w-[400px]">
                   <div className="flex-1 pixel-bar-container !mb-0">
@@ -1144,7 +1213,7 @@ export default function App() {
 
           {/* BATTLE FIELD / 场景展示 */}
           <div className="flex-1 relative flex items-center justify-center gap-8 px-8 py-2 bg-[radial-gradient(circle_at_center,_#1e1b4b_0%,_#020617_100%)]">
-            
+
             {/* 环境与目标情报 (移至场景左侧) */}
             <div className="w-[280px] h-[400px] pixel-card bg-slate-900/80 p-5 flex flex-col gap-4 border-indigo-500/40 backdrop-blur-md animate-in slide-in-from-left-8 duration-500">
               <div className="flex flex-col gap-2">
@@ -1160,15 +1229,15 @@ export default function App() {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
                         <span className="text-xs text-slate-400 font-bold cn-text">武器</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{enemy.equipment.weapon}</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred ? '数据无法精确解析' : enemy.equipment.weapon}</span>
                       </div>
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
                         <span className="text-xs text-slate-400 font-bold cn-text">防具</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{enemy.equipment.armor}</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred ? '数据无法精确解析' : enemy.equipment.armor}</span>
                       </div>
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
                         <span className="text-xs text-slate-400 font-bold cn-text">技能</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{enemy.equipment.skill}</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred ? '无法准确获取情报' : enemy.equipment.skill}</span>
                       </div>
                     </div>
                   </div>
@@ -1176,8 +1245,10 @@ export default function App() {
               </div>
               <div className="mt-auto pt-4 border-t border-slate-800">
                 <div className="flex items-center gap-2 animate-pulse">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
-                  <span className="text-xs text-emerald-500 font-black tracking-wide cn-text">终端在线 ONLINE</span>
+                  <div className={`w-2 h-2 rounded-full ${isIntelBlurred ? 'bg-rose-500 shadow-[0_0_10px_#f43f5e]' : 'bg-emerald-500 shadow-[0_0_10px_#10b981]'}`}></div>
+                  <span className={`text-xs ${isIntelBlurred ? 'text-rose-500' : 'text-emerald-500'} font-black tracking-wide cn-text`}>
+                    {isIntelBlurred ? '信号干扰 INTERFERENCE' : '终端在线 ONLINE'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -1185,36 +1256,36 @@ export default function App() {
             <div className="relative w-fit mx-auto">
               <canvas ref={canvasRef} width={800} height={400} className="max-w-full h-auto border-4 border-slate-800 shadow-2xl bg-black image-pixelated" />
 
-            {activeSkill && (
-              <div className="absolute top-1/4 left-0 right-0 text-center -ml-24 whitespace-nowrap z-50 text-5xl font-black italic text-cyan-400 drop-shadow-[0_0_15px_#00f2ff] animate-bounce">
-                {activeSkill.name}!!
-              </div>
-            )}
-
-            {coinToss.active && (
-              <div className="absolute inset-0 z-[300] bg-slate-950/80 flex flex-col items-center justify-center animate-in fade-in">
-                <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-3xl font-black shadow-2xl transition-all duration-700 cn-text ${!coinToss.result ? 'animate-spin border-slate-400 bg-slate-800' : coinToss.result === 'player' ? 'border-emerald-500 bg-emerald-600 scale-125' : 'border-rose-500 bg-rose-600 scale-125'}`}>
-                  {!coinToss.result ? '🪙' : coinToss.result === 'player' ? '玩家' : '对手'}
+              {activeSkill && (
+                <div className="absolute top-1/4 left-0 right-0 text-center -ml-24 whitespace-nowrap z-50 text-5xl font-black italic text-cyan-400 drop-shadow-[0_0_15px_#00f2ff] animate-bounce">
+                  {activeSkill.name}!!
                 </div>
-                <p className="mt-8 text-2xl font-black text-white uppercase text-center tracking-widest cn-text">判定行动顺序 . . .</p>
-              </div>
-            )}
+              )}
 
-            {/* MISSION RESULT OVERLAY */}
-            {(gameState === 'victory' || gameState === 'defeat') && (
-              <div className="absolute inset-0 z-[400] bg-slate-950/80 flex items-center justify-center animate-in zoom-in-95">
-                <div className={`p-12 border-4 ${gameState === 'victory' ? 'border-emerald-500 bg-emerald-950/50 victory-stripes' : 'border-rose-500 bg-rose-950/50 defeat-stripes'} text-center shadow-[0_0_100px_rgba(0,0,0,1)] relative overflow-hidden`}>
-                  <h2 className={`text-6xl font-black italic mb-2 ${gameState === 'victory' ? 'text-emerald-400' : 'text-rose-400'} cn-text`}>
-                    {gameState === 'victory' ? '任务达成 SUCCESS' : '链接中断 FAILED'}
-                  </h2>
-                  <div className={`text-2xl font-black mb-8 tracking-[0.3em] ${gameState === 'victory' ? 'text-emerald-500' : 'text-rose-500'} pixel-font`}>
-                    {gameState === 'victory' ? 'MISSION COMPLETE' : 'CONNECTION LOST'}
+              {coinToss.active && (
+                <div className="absolute inset-0 z-[300] bg-slate-950/80 flex flex-col items-center justify-center animate-in fade-in">
+                  <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-3xl font-black shadow-2xl transition-all duration-700 cn-text ${!coinToss.result ? 'animate-spin border-slate-400 bg-slate-800' : coinToss.result === 'player' ? 'border-emerald-500 bg-emerald-600 scale-125' : 'border-rose-500 bg-rose-600 scale-125'}`}>
+                    {!coinToss.result ? '🪙' : coinToss.result === 'player' ? '玩家' : '对手'}
                   </div>
-                  <p className="text-white text-sm mb-10 tracking-[0.2em] cn-text">{gameState === 'victory' ? '目标已被彻底清除' : '严重损伤，被迫断开连接'}</p>
-                  <button onClick={() => { setGameState('lobby'); resetGame(); }} className="px-12 py-4 bg-white text-black font-black text-sm hover:bg-indigo-500 hover:text-white transition-all cn-text">返回基地 / RETURN TO BASE [ESC]</button>
+                  <p className="mt-8 text-2xl font-black text-white uppercase text-center tracking-widest cn-text">判定行动顺序 . . .</p>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* MISSION RESULT OVERLAY */}
+              {(gameState === 'victory' || gameState === 'defeat') && (
+                <div className="absolute inset-0 z-[400] bg-slate-950/80 flex items-center justify-center animate-in zoom-in-95">
+                  <div className={`p-12 border-4 ${gameState === 'victory' ? 'border-emerald-500 bg-emerald-950/50 victory-stripes' : 'border-rose-500 bg-rose-950/50 defeat-stripes'} text-center shadow-[0_0_100px_rgba(0,0,0,1)] relative overflow-hidden`}>
+                    <h2 className={`text-6xl font-black italic mb-2 ${gameState === 'victory' ? 'text-emerald-400' : 'text-rose-400'} cn-text`}>
+                      {gameState === 'victory' ? '任务达成 SUCCESS' : '链接中断 FAILED'}
+                    </h2>
+                    <div className={`text-2xl font-black mb-8 tracking-[0.3em] ${gameState === 'victory' ? 'text-emerald-500' : 'text-rose-500'} pixel-font`}>
+                      {gameState === 'victory' ? 'MISSION COMPLETE' : 'CONNECTION LOST'}
+                    </div>
+                    <p className="text-white text-sm mb-10 tracking-[0.2em] cn-text">{gameState === 'victory' ? '目标已被彻底清除' : '严重损伤，被迫断开连接'}</p>
+                    <button onClick={() => { setGameState('lobby'); resetGame(); }} className="px-12 py-4 bg-white text-black font-black text-sm hover:bg-indigo-500 hover:text-white transition-all cn-text">返回基地 / RETURN TO BASE [ESC]</button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* 数据流卡片 (场景右侧) */}
@@ -1233,10 +1304,10 @@ export default function App() {
                   [...battleLog].reverse().map((log, i) => (
                     <div key={i} className={"px-2 py-1.5 border-l-2 text-xs leading-relaxed " + (
                       log.includes('打击') ? 'border-emerald-400 text-emerald-300 bg-emerald-500/5' :
-                      log.includes('受创') ? 'border-rose-400 text-rose-300 bg-rose-500/5' :
-                      log.includes('任务完成') ? 'border-yellow-400 text-yellow-300 bg-yellow-500/5' :
-                      log.includes('修复') ? 'border-teal-400 text-teal-300 bg-teal-500/5' :
-                      'border-slate-700 text-slate-400'
+                        log.includes('受创') ? 'border-rose-400 text-rose-300 bg-rose-500/5' :
+                          log.includes('任务完成') ? 'border-yellow-400 text-yellow-300 bg-yellow-500/5' :
+                            log.includes('修复') ? 'border-teal-400 text-teal-300 bg-teal-500/5' :
+                              'border-slate-700 text-slate-400'
                     ) + " cn-text"}>{log}</div>
                   ))
                 )}
@@ -1265,19 +1336,19 @@ export default function App() {
                       const items = ITEMS.weapons.filter(i => player.unlockedItems[i.name]);
                       const currentIdx = items.findIndex(i => i.name === player.equipment.weapon);
                       const itemHeight = 48; // Reduced height for closer spacing
-                      
+
                       return (
-                        <div 
+                        <div
                           onWheel={(e) => {
                             if (isDeployed) return;
                             const now = Date.now();
                             if (now - lastWheelTime.current < 400) return;
                             lastWheelTime.current = now;
-                            
+
                             const items = ITEMS.weapons.filter(i => player.unlockedItems[i.name]);
                             const direction = e.deltaY > 0 ? 1 : -1;
                             const newIdx = wheelIndices.weapon + direction;
-                            
+
                             setWheelIndices(prev => ({ ...prev, weapon: newIdx }));
                             const realIdx = (newIdx % items.length + items.length) % items.length;
                             setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[realIdx].name } }));
@@ -1289,9 +1360,9 @@ export default function App() {
                             <div className="h-[48px] border-y border-indigo-500/30 bg-indigo-500/5"></div>
                             <div className="flex-1 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
                           </div>
-                          <div 
+                          <div
                             className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)"
-                            style={{ 
+                            style={{
                               top: '50%',
                               marginTop: '-24px',
                               transform: `translateY(${-wheelIndices.weapon * 48}px)`
@@ -1303,12 +1374,11 @@ export default function App() {
                               // 只渲染可见区域附近的项，性能更好
                               if (Math.abs(vIdx - wheelIndices.weapon) > 4) return <div key={vIdx} className="h-[48px]" />;
                               return (
-                                <div 
+                                <div
                                   key={vIdx}
                                   onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: item.name } }))}
-                                  className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${
-                                    isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
-                                  } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                  className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
+                                    } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                   <span className={isActive ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
                                   <span className={`font-black truncate cn-text ${isActive ? 'text-base' : 'text-sm'}`}>{item.name}</span>
@@ -1330,19 +1400,19 @@ export default function App() {
                       const items = ITEMS.armors.filter(i => player.unlockedItems[i.name]);
                       const currentIdx = items.findIndex(i => i.name === player.equipment.armor);
                       const itemHeight = 48;
-                      
+
                       return (
-                        <div 
+                        <div
                           onWheel={(e) => {
                             if (isDeployed) return;
                             const now = Date.now();
                             if (now - lastWheelTime.current < 400) return;
                             lastWheelTime.current = now;
-                            
+
                             const items = ITEMS.armors.filter(i => player.unlockedItems[i.name]);
                             const direction = e.deltaY > 0 ? 1 : -1;
                             const newIdx = wheelIndices.armor + direction;
-                            
+
                             setWheelIndices(prev => ({ ...prev, armor: newIdx }));
                             const realIdx = (newIdx % items.length + items.length) % items.length;
                             setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[realIdx].name } }));
@@ -1354,9 +1424,9 @@ export default function App() {
                             <div className="h-[48px] border-y border-emerald-500/30 bg-emerald-500/5"></div>
                             <div className="flex-1 bg-gradient-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
                           </div>
-                          <div 
+                          <div
                             className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)"
-                            style={{ 
+                            style={{
                               top: '50%',
                               marginTop: '-24px',
                               transform: `translateY(${-wheelIndices.armor * 48}px)`
@@ -1367,12 +1437,11 @@ export default function App() {
                               const isActive = vIdx === wheelIndices.armor;
                               if (Math.abs(vIdx - wheelIndices.armor) > 4) return <div key={vIdx} className="h-[48px]" />;
                               return (
-                                <div 
+                                <div
                                   key={vIdx}
                                   onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: item.name } }))}
-                                  className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${
-                                    isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
-                                  } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                  className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
+                                    } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                   <span className={isActive ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
                                   <span className={`font-black truncate cn-text ${isActive ? 'text-base' : 'text-sm'}`}>{item.name}</span>
@@ -1394,19 +1463,19 @@ export default function App() {
                       const items = ITEMS.skills.filter(i => player.unlockedItems[i.name]);
                       const currentIdx = items.findIndex(i => i.name === player.equipment.skill);
                       const itemHeight = 48;
-                      
+
                       return (
-                        <div 
+                        <div
                           onWheel={(e) => {
                             if (isDeployed) return;
                             const now = Date.now();
                             if (now - lastWheelTime.current < 400) return;
                             lastWheelTime.current = now;
-                            
+
                             const items = ITEMS.skills.filter(i => player.unlockedItems[i.name]);
                             const direction = e.deltaY > 0 ? 1 : -1;
                             const newIdx = wheelIndices.skill + direction;
-                            
+
                             setWheelIndices(prev => ({ ...prev, skill: newIdx }));
                             const realIdx = (newIdx % items.length + items.length) % items.length;
                             setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[realIdx].name } }));
@@ -1418,9 +1487,9 @@ export default function App() {
                             <div className="h-[48px] border-y border-amber-500/50 bg-amber-500/10"></div>
                             <div className="flex-1 bg-gradient-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
                           </div>
-                          <div 
+                          <div
                             className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)"
-                            style={{ 
+                            style={{
                               top: '50%',
                               marginTop: '-24px',
                               transform: `translateY(${-wheelIndices.skill * 48}px)`
@@ -1431,12 +1500,11 @@ export default function App() {
                               const isActive = vIdx === wheelIndices.skill;
                               if (Math.abs(vIdx - wheelIndices.skill) > 4) return <div key={vIdx} className="h-[48px]" />;
                               return (
-                                <div 
+                                <div
                                   key={vIdx}
                                   onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: item.name } }))}
-                                  className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${
-                                    isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
-                                  } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                                  className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
+                                    } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                   <span className={isActive ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
                                   <span className={`font-black truncate cn-text ${isActive ? 'text-base' : 'text-sm'}`}>{item.name}</span>
@@ -1481,15 +1549,15 @@ export default function App() {
                 <span className="text-xs font-bold text-slate-400 uppercase mb-1 tracking-tighter">档案代号 / PROFILE</span>
                 <span className="text-2xl font-black tracking-widest leading-none">{player.username}</span>
               </div>
-              
+
               <div className="flex flex-col">
                 <span className="text-xs text-slate-400 font-bold uppercase mb-1 tracking-tighter">同步等级 / LINK LEVEL</span>
                 <div className="flex items-center gap-4">
                   <span className="text-2xl font-black text-indigo-500 leading-none">等级 {player.level}</span>
                   <div className="flex flex-col pt-1">
                     <div className="h-2 w-40 bg-slate-800 rounded-full overflow-hidden border border-slate-700/30">
-                      <div 
-                        className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all duration-1000 ease-out" 
+                      <div
+                        className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all duration-1000 ease-out"
                         style={{ width: `${Math.min(100, (player.xp / (player.level * 100)) * 100)}%` }}
                       />
                     </div>
@@ -1710,8 +1778,8 @@ export default function App() {
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-4 gap-4 pr-4">
                           {ITEMS[shopTab].map(item => (
-                            <div 
-                              key={item.name} 
+                            <div
+                              key={item.name}
                               onMouseEnter={() => setHoveredItem(item)}
                               onMouseLeave={() => setHoveredItem(null)}
                               className="pixel-card bg-slate-900 p-4 hover:border-indigo-500 transition-all group flex flex-col items-center relative"
@@ -1737,11 +1805,11 @@ export default function App() {
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, false)} className="py-4 bg-slate-800 border-2 border-slate-700 text-sm font-black hover:bg-slate-700 transition-all cn-text">
-                                  仅装备 / EQUIP<br/>
+                                  仅装备 / EQUIP<br />
                                   <span className="text-[10px] text-emerald-400 font-bold">FREE / 免费</span>
                                 </button>
                                 <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, true)} className="py-4 bg-indigo-600 border-2 border-indigo-400 text-sm font-black hover:bg-indigo-500 transition-all cn-text">
-                                  升级 / UPGRADE<br/>
+                                  升级 / UPGRADE<br />
                                   <span className="text-[10px] text-amber-300 font-bold">₿{confirmingItem.item.cost}</span>
                                 </button>
                               </div>
