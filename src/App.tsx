@@ -1812,7 +1812,7 @@ export default function App() {
         <div className="flex flex-col h-full p-4 gap-4 animate-in fade-in duration-500">
           {/* HEADER */}
           <div className="flex justify-between items-center bg-slate-900 border-4 border-slate-800 px-8 py-5 shadow-lg flex-none">
-            <div className="flex items-end gap-16">
+            <div className="flex items-end gap-10">
               <div className="flex flex-col">
                 <span className="text-xs font-bold text-slate-400 uppercase mb-1 tracking-tighter">档案代号 / PROFILE</span>
                 <span className="text-2xl font-black tracking-widest leading-none">{player.username}</span>
@@ -1823,7 +1823,7 @@ export default function App() {
                 <div className="flex items-center gap-4">
                   <span className="text-2xl font-black text-indigo-500 leading-none">等级 {player.level}</span>
                   <div className="flex flex-col pt-1">
-                    <div className="h-2 w-40 bg-slate-800 rounded-full overflow-hidden border border-slate-700/30">
+                    <div className="h-2 w-[120px] bg-slate-800 rounded-full overflow-hidden border border-slate-700/30">
                       <div
                         className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all duration-1000 ease-out"
                         style={{ width: `${Math.min(100, (player.xp / (player.level * 100)) * 100)}%` }}
