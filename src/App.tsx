@@ -1970,7 +1970,7 @@ export default function App() {
                           <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">
                             部位升级 / {(shopTab === 'weapons' ? '攻击链路' : (shopTab === 'armors' ? '防护链路' : '核心逻辑'))}
                           </h3>
-                          <button className="pixel-button danger !py-2 !px-6 btn-close-anim" style={{ background: 'transparent', border: 'none', color: '#94a3b8', textDecoration: 'underline' }} onClick={() => setShopTab(null as any)}>关闭终端 / CLOSE</button>
+                          <button className="pixel-button danger !py-2 !px-6 btn-close-anim" onClick={() => setShopTab(null as any)}>关闭终端 / CLOSE</button>
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-4 gap-4 pr-4">
                           {ITEMS[shopTab].map(item => (
@@ -2167,26 +2167,26 @@ export default function App() {
           animation: vignette-breath 5s ease-in-out infinite;
         }
 
-        @keyframes close-breath {
-          0%, 100% { opacity: 0.6; filter: brightness(0.8); }
-          50% { opacity: 1; filter: brightness(1.5); text-shadow: 0 0 10px rgba(148, 163, 184, 0.4); }
+        @keyframes close-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
         }
-        @keyframes close-hover-pulse {
-          0%, 100% { text-shadow: 0 0 10px #ef4444; }
-          50% { text-shadow: 0 0 25px #ef4444, 0 0 5px rgba(255,255,255,0.5); }
+        @keyframes close-pulse {
+          0% { transform: scale(1); box-shadow: 4px 4px 0px #991b1b, 0 0 20px rgba(239,68,68,0.4); }
+          50% { transform: scale(1.03); box-shadow: 4px 4px 0px #991b1b, 0 0 40px rgba(239,68,68,0.7); }
+          100% { transform: scale(1); box-shadow: 4px 4px 0px #991b1b, 0 0 20px rgba(239,68,68,0.4); }
         }
         .btn-close-anim {
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          animation: close-breath 3s ease-in-out infinite;
-          display: inline-block;
+          background: linear-gradient(90deg, #ef4444 0%, #f87171 45%, #ef4444 55%, #ef4444 100%);
+          background-size: 200% 100%;
+          animation: close-shimmer 3s infinite linear, close-pulse 2s ease-in-out infinite;
+          border: 4px solid #f87171 !important;
+          color: white !important;
+          text-decoration: none !important;
         }
         .btn-close-anim:hover {
-          animation: close-hover-pulse 1.2s ease-in-out infinite;
-          color: #fca5a5 !important;
-          letter-spacing: 3px;
-          transform: scale(1.1);
-          opacity: 1 !important;
-          text-decoration: none !important;
+          filter: brightness(1.2);
+          transform: scale(1.05);
         }
 
         /* HUD 文字标准化 */
