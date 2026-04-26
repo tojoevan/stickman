@@ -699,7 +699,7 @@ export default function App() {
     }
   }, []);
 
-  const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 20));
+  const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 50));
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -709,9 +709,13 @@ export default function App() {
     localStorage.setItem('username', authForm.username);
     setToken(mockToken);
     setPlayer(prev => ({ ...prev, username: authForm.username }));
-    addLog('>> 神经链路建立成功');
-    addLog('>> 权限验证通过: ' + authForm.username);
-    addLog('>> 系统已就绪，欢迎回来。');
+    
+    // 模拟系统初始化序列
+    setTimeout(() => addLog(`>> 神经链路建立成功`), 100);
+    setTimeout(() => addLog(`>> 权限验证通过: ${authForm.username}`), 300);
+    setTimeout(() => addLog(`>> 正在拉取最新的作战指令...`), 500);
+    setTimeout(() => addLog(`>> 系统已就绪，欢迎回来，指挥官。`), 700);
+    
     hasLoaded.current = true;
   };
 
@@ -729,7 +733,9 @@ export default function App() {
             ...rawData,
             username: savedUser || prev.username
           }));
-          addLog('本地档案同步成功。');
+          addLog('>> 正在恢复本地档案...');
+          addLog('>> 本地档案同步成功。');
+          addLog('>> 系统重连成功，欢迎回来。');
         } catch (e) {
           console.error('档案解析失败:', e);
         }
@@ -847,7 +853,7 @@ export default function App() {
   const resetGame = () => {
     setRound(1);
     setIsDeployed(false);
-    setBattleLog(['系统就绪 / SYSTEM READY']);
+    addLog('>> 作战结束，系统重置就绪。');
     setPlayer(prev => ({ ...prev, health: prev.maxHealth }));
     setEnemy(prev => {
       const aW = ITEMS.weapons.filter(w => (w.levelReq || 0) <= prev.level);
