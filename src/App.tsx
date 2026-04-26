@@ -1720,7 +1720,9 @@ export default function App() {
 
             {/* RIGHT SIDEBAR - LOGS */}
             <div className="w-96 pixel-card flex flex-col bg-slate-900/50 backdrop-blur-sm">
-              <h3 className="text-xs font-black text-slate-400 uppercase mb-4 border-b-4 border-slate-800 p-4 cn-text">任务数据流 / MISSION LOGS</h3>
+              <div className="flex justify-between items-end border-b-2 border-slate-800 pb-2 mb-4 px-6 pt-6">
+                <h2 className="text-sm font-black italic text-slate-400 uppercase tracking-widest">任务数据流 / MISSION LOGS</h2>
+              </div>
               <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 p-4 text-sm font-mono">
                 {battleLog.map((log, i) => (
                   <div key={i} className={"border-l-4 pl-3 py-1 " + (log.includes('任务完成') ? 'border-emerald-500 text-emerald-400' : log.includes('连接断开') ? 'border-rose-500 text-rose-400' : 'border-slate-700 text-slate-400')}>
