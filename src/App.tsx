@@ -684,6 +684,43 @@ export default function App() {
       statPoints: 5 // 给予初始点数方便测试
     };
   });
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const endpoint = authView === 'register' ? '/api/register' : '/api/login';
+    
+    try {
+      if (authView === 'register') {
+        if (authForm.password !== authForm.confirmPassword) {
+          addLog(`>> [错误] 密钥确认不匹配`);
+          return;
+        }
+        addLog(`>> 正在创建新档案: ${authForm.username}...`);
+      } else {
+        addLog(`>> 正在验证权限: ${authForm.username}...`);
+      }
+
+      const res = await safeFetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: authForm.username, password: authForm.password })
+      });
+      const data = await res.json();
+
+      if (authView === 'register') {
+        addLog(`>> 档案建立成功，请登录`);
+        setAuthView('login');
+      } else {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.username);
+        setToken(data.token);
+        addLog(`>> 神经链路建立成功`);
+        addLog(`>> 欢迎回来，指挥官 ${data.username}`);
+        hasLoaded.current = false; // 标记需要重新加载数据
+      }
+    } catch (err: any) {
+      addLog(`>> [系统错误] ${err.message}`);
+    }
+  };
   const [enemy, setEnemy] = useState<Character>(() => {
     const eName = ENEMY_NAMES[Math.floor(Math.random() * ENEMY_NAMES.length)];
     console.log('🏗️ [Init] Enemy 初始加载. Name:', eName);
@@ -747,67 +784,60 @@ export default function App() {
     }
   }, []);
 
-  const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 50));
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (authView === 'register') {
-      if (authForm.password !== authForm.confirmPassword) {
-        addLog(`>> [错误] 密钥确认不匹配，请重新输入`);
-        alert('密钥确认不匹配');
-        return;
-      }
-      addLog(`>> 正在创建新档案: ${authForm.username}...`);
-    }
-
-    // 纯本地 Mock 逻辑：跳过 fetch，直接登录/注册
-    const mockToken = `local_token_${Date.now()}`;
-    localStorage.setItem('token', mockToken);
-    localStorage.setItem('username', authForm.username);
-    setToken(mockToken);
-    setPlayer(prev => ({ ...prev, username: authForm.username }));
-
-    // 模拟系统初始化序列
-    setTimeout(() => addLog(`>> 神经链路建立成功`), 100);
-    const welcomeMsg = authView === 'register' ? `>> 欢迎加入，新晋指挥官: ${authForm.username}` : `>> 权限验证通过: ${authForm.username}`;
-    setTimeout(() => addLog(welcomeMsg), 300);
-    setTimeout(() => addLog(`>> 正在拉取最新的作战指令...`), 500);
-    setTimeout(() => addLog(`>> 系统已就绪，欢迎回来。`), 700);
-
-    hasLoaded.current = true;
-  };
-
+  // 1. 读档逻辑
   useEffect(() => {
-    if (token) {
-      const savedUser = localStorage.getItem('username');
-      const localData = localStorage.getItem('stickman_pdata');
-      console.log('🔍 [Load] 正在从本地存储恢复档案...', savedUser);
-
-      if (localData) {
+    if (token && !hasLoaded.current) {
+      const loadRemoteData = async () => {
         try {
-          const rawData = JSON.parse(localData);
-          setPlayer(prev => ({
-            ...prev,
-            ...rawData,
-            username: savedUser || prev.username
-          }));
-          addLog('>> 正在恢复本地档案...');
-          addLog('>> 本地档案同步成功。');
-          addLog('>> 系统重连成功，欢迎回来。');
-        } catch (e) {
-          console.error('档案解析失败:', e);
+          addLog('>> 正在从云端拉取作战指令...');
+          const res = await safeFetch('/api/load', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const { gameData } = await res.json();
+          if (gameData) {
+            setPlayer(prev => ({ ...prev, ...gameData }));
+            addLog('>> 远程档案同步成功。');
+          } else {
+            addLog('>> 未发现历史指令，正在初始化新档案...');
+          }
+          hasLoaded.current = true;
+        } catch (err: any) {
+          addLog(`>> [同步失败] ${err.message}`);
+          // 降级使用本地存储
+          const localData = localStorage.getItem('stickman_pdata');
+          if (localData) {
+             setPlayer(prev => ({ ...prev, ...JSON.parse(localData) }));
+             addLog('>> 已降级至本地离线档案。');
+          }
+          hasLoaded.current = true;
         }
-      }
-
-      setTimeout(() => { hasLoaded.current = true; }, 300);
+      };
+      loadRemoteData();
     }
   }, [token]);
 
+  // 2. 存档逻辑
   useEffect(() => {
     if (token && hasLoaded.current) {
-      console.log('💾 [Save] 正在同步数据至本地存储...', player.level);
-      localStorage.setItem('stickman_pdata', JSON.stringify(player));
+      const saveData = async () => {
+        try {
+          // 同时同步到本地和远程
+          localStorage.setItem('stickman_pdata', JSON.stringify(player));
+          await fetch('/api/save', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ gameData: player })
+          });
+        } catch (e) {
+          console.error('💾 [Save] 自动同步失败');
+        }
+      };
+      // 防抖/频率限制 (简单处理：仅在关键数值变动时触发)
+      saveData();
     }
   }, [player.level, player.gold, player.stats, player.unlockedItems, player.health]);
 
