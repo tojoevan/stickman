@@ -64,6 +64,9 @@ migrateData();
 app.use(cors());
 app.use(express.json());
 
+// 极速响应 CORS 预检请求，解决生产环境 5s 延迟
+app.options('*', cors());
+
 // 静态文件服务 (生产环境)
 // 假设前端 build 后的文件在根目录的 dist 文件夹中
 const distPath = path.join(__dirname, '../dist');
