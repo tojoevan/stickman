@@ -312,11 +312,6 @@ class StickmanRenderer {
 
     if (pose === 'attack') {
       frameName = isP ? 'm_atk' : 's_atk';
-    } else if (isP) {
-      // 玩家待机状态下根据武器切换外观
-      if (weaponIcon.includes('弓')) frameName = 'cyborg_ninja_bow';
-      else if (weaponIcon.includes('锤')) frameName = 'cyborg_ninja_hammer';
-      else if (weaponIcon.includes('激光剑')) frameName = 'cyborg_ninja_laser';
     }
 
     const img = this.assets[frameName];
