@@ -52,6 +52,14 @@ migrateData();
 app.use(cors());
 app.use(express.json());
 
+// 静态文件服务 (生产环境)
+// 假设前端 build 后的文件在根目录的 dist 文件夹中
+const distPath = path.join(__dirname, '../dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  console.log('🌐 生产环境模式: 已启用静态资源托管');
+}
+
 // 连通性测试
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: '影迹战术后端引擎已启动 (生产级 DB 模式)' }));
 
@@ -167,6 +175,16 @@ app.post('/api/admin/set-stats', async (req, res) => {
   } catch (e) {
     console.error('❌ 管理员操作失败:', e);
     res.status(500).json({ error: '系统内部故障' });
+  }
+});
+
+// 所有非 API 请求重定向到 index.html (支持 SPA 路由)
+app.get('*', (req, res) => {
+  const indexPath = path.join(__dirname, '../dist/index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send('未找到静态资源，请先执行 npm run build');
   }
 });
 
