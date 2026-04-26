@@ -9,10 +9,10 @@ export default defineConfig({
     allowedHosts: ['stickman.zhaoyouhan.com'],
     // 确保开发服务器监听所有地址，方便外部访问
     host: '0.0.0.0',
-    port: 5173,
+    port: 5174,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:5273',
+        target: 'http://127.0.0.1:3002',
         changeOrigin: true,
         rewrite: (path) => path // 保持 /api 前缀，因为后端代码里用了 app.get('/api/...')
       }

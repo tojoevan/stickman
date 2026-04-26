@@ -17,8 +17,8 @@ npm install
 ```bash
 npm run dev
 ```
-*   **前端地址**: http://localhost:5173
-*   **后端 API**: http://localhost:3001
+*   **前端地址**: http://localhost:5174
+*   **后端 API**: http://localhost:3002
 
 ## 2. 功能说明
 *   **注册/登录**: 首次打开请先“注册新档案”，数据将持久化保存在 `server/game.db` (SQLite) 中。

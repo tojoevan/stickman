@@ -7,7 +7,7 @@ const fs = require('fs');
 const Datastore = require('nedb-promises');
 
 const app = express();
-const PORT = 5273;
+const PORT = 3002;
 const SECRET_KEY = 'shadow_trace_secret_2026';
 
 // 采用 NeDB 进行数据持久化，确保生产环境数据隔离
