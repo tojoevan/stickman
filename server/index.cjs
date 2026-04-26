@@ -10,10 +10,11 @@ const app = express();
 const PORT = 3002;
 const SECRET_KEY = 'shadow_trace_secret_2026';
 
-// 采用 NeDB 进行数据持久化，确保生产环境数据隔离
+// 采用 NeDB 进行数据持久化，使用绝对路径确保可靠性
+const dbDir = path.join(__dirname);
 const db = {
-  users: Datastore.create({ filename: path.join(__dirname, 'users.db'), autoload: true }),
-  progress: Datastore.create({ filename: path.join(__dirname, 'progress.db'), autoload: true })
+  users: Datastore.create({ filename: path.join(dbDir, 'users.db'), autoload: true }),
+  progress: Datastore.create({ filename: path.join(dbDir, 'progress.db'), autoload: true })
 };
 
 // 一次性迁移逻辑：将旧的 JSON 数据导入到 DB
@@ -114,11 +115,12 @@ app.post('/api/save', authenticateToken, async (req, res) => {
     const { gameData } = req.body;
     await db.progress.update(
       { userId: req.user.id },
-      { userId: req.user.id, gameData },
+      { $set: { userId: req.user.id, gameData } },
       { upsert: true }
     );
     res.json({ message: '同步成功' });
   } catch (e) {
+    console.error('❌ [API Save Error]:', e.stack);
     res.status(500).json({ error: '同步失败' });
   }
 });
@@ -129,6 +131,7 @@ app.get('/api/load', authenticateToken, async (req, res) => {
     const doc = await db.progress.findOne({ userId: req.user.id });
     res.json({ gameData: doc ? doc.gameData : null });
   } catch (e) {
+    console.error('❌ [API Load Error]:', e);
     res.status(500).json({ error: '加载失败' });
   }
 });
@@ -148,44 +151,51 @@ app.post('/api/admin/set-stats', async (req, res) => {
     let gameData = progress ? progress.gameData : { 
       level: 1, xp: 0, gold: 100, 
       stats: { strength: 10, agility: 10, constitution: 12 }, 
-      statPoints: 8, health: 120, maxHealth: 120,
-      equipment: { weapon: '长剑', armor: '布衣', skill: '斩击' },
-      unlockedItems: { '长剑': 1, '长弓': 1, '重锤': 1, '布衣': 1, '铁盾': 1, '披风': 1, '斩击': 1, '治疗': 1, '连击': 1 },
+      statPoints: 8, health: 250, maxHealth: 250,
+      equipment: { weapon: '长剑', armor: '布衣', skill: '蓄能重击' },
+      unlockedItems: { '长剑': 1, '长弓': 1, '重锤': 1, '布衣': 1, '铁盾': 1, '披风': 1, '蓄能重击': 1, '治疗': 1, '幻影连击': 1 },
       defeatCount: 0
     };
 
-    // 深度克隆并更新数值，确保不会因为引用问题导致更新失败
+    // 确保 unlockedItems 存在
+    if (!gameData.unlockedItems) {
+      gameData.unlockedItems = { '长剑': 1, '长弓': 1, '重锤': 1, '布衣': 1, '铁盾': 1, '披风': 1, '蓄能重击': 1 };
+    }
+
+    // 深度克隆并更新数值
     const updatedGameData = JSON.parse(JSON.stringify(gameData));
     if (level !== undefined) updatedGameData.level = Number(level);
     if (gold !== undefined) updatedGameData.gold = Number(gold);
     if (statPoints !== undefined) updatedGameData.statPoints = Number(statPoints);
 
-    // 针对可能存在的旧版存档，确保基础属性存在
-    if (!updatedGameData.stats) updatedGameData.stats = { strength: 10, agility: 10, constitution: 12 };
-    if (updatedGameData.statPoints === undefined) updatedGameData.statPoints = 8;
-
     await db.progress.update(
       { userId: user.id },
-      { $set: { gameData: updatedGameData } },
+      { $set: { userId: user.id, gameData: updatedGameData } },
       { upsert: true }
     );
 
-    console.log(`🛠️ 管理员操作: 已更新用户 ${username} (ID: ${user.id}) 的状态 -> Level: ${updatedGameData.level}, Gold: ${updatedGameData.gold}, StatPoints: ${updatedGameData.statPoints}`);
-    res.json({ message: '参数校准完成', currentStats: { level: updatedGameData.level, gold: updatedGameData.gold, statPoints: updatedGameData.statPoints } });
+    console.log(`🛠️ 管理员操作成功: ${username} (ID: ${user.id})`);
+    res.json({ message: '参数校准完成', currentStats: updatedGameData });
   } catch (e) {
-    console.error('❌ 管理员操作失败:', e);
-    res.status(500).json({ error: '系统内部故障' });
+    console.error('❌ [Admin Command Error]:', e.stack);
+    res.status(500).json({ error: '系统内部故障', details: e.message });
   }
 });
 
 // 所有非 API 请求重定向到 index.html (支持 SPA 路由)
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
   const indexPath = path.join(__dirname, '../dist/index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
   } else {
     res.status(404).send('未找到静态资源，请先执行 npm run build');
   }
+});
+
+// 6. 全局错误捕获
+app.use((err, req, res, next) => {
+  console.error('🔥 [Global Error]:', err.stack);
+  res.status(500).json({ error: '服务器内部链路故障' });
 });
 
 app.listen(PORT, '0.0.0.0', () => {

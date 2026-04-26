@@ -670,8 +670,15 @@ interface Character {
 }
 
 export default function App() {
+  const [battleLog, setBattleLog] = useState<string[]>([
+    '>> 系统启动中...',
+    '>> 核心逻辑模块载入完毕',
+    '>> 正在扫描神经链路...',
+    '等待连接...'
+  ]);
+  const addLog = (msg: string) => setBattleLog(prev => [msg, ...prev].slice(0, 50));
+
   const [showcasedSkill, setShowcasedSkill] = useState<'xuneng' | 'huanying' | 'support' | null>(null);
-  // --- 调试模式：自动登录 ---
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [authForm, setAuthForm] = useState({ username: '', password: '', confirmPassword: '' });
@@ -734,12 +741,6 @@ export default function App() {
   const [isDeployed, setIsDeployed] = useState(false);
   const [gameState, setGameState] = useState<'lobby' | 'tactics' | 'battle' | 'shop' | 'victory' | 'defeat'>('lobby');
   const [round, setRound] = useState(1);
-  const [battleLog, setBattleLog] = useState<string[]>([
-    '>> 系统启动中...',
-    '>> 核心逻辑模块载入完毕',
-    '>> 正在扫描神经链路...',
-    '等待连接...'
-  ]);
   const [currentPose, setCurrentPose] = useState<{ player: any, enemy: any }>({ player: 'idle', enemy: 'idle' });
   const [confirmingItem, setConfirmingItem] = useState<{ item: Item, tab: 'weapons' | 'armors' | 'skills' } | null>(null);
   const [hoveredItem, setHoveredItem] = useState<Item | null>(null);
@@ -794,6 +795,16 @@ export default function App() {
           const res = await safeFetch('/api/load', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
+
+          // 如果服务器返回 401 或 403，说明登录已过期或 Token 失效
+          if (res.status === 401 || res.status === 403) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            setToken('');
+            addLog('>> [身份验证失败] 链路令牌已失效，请重新登录。');
+            return;
+          }
+
           const { gameData } = await res.json();
           if (gameData) {
             setPlayer(prev => ({ ...prev, ...gameData }));
@@ -804,13 +815,8 @@ export default function App() {
           hasLoaded.current = true;
         } catch (err: any) {
           addLog(`>> [同步失败] ${err.message}`);
-          // 降级使用本地存储
-          const localData = localStorage.getItem('stickman_pdata');
-          if (localData) {
-             setPlayer(prev => ({ ...prev, ...JSON.parse(localData) }));
-             addLog('>> 已降级至本地离线档案。');
-          }
-          hasLoaded.current = true;
+          // 注意：如果请求彻底失败（如 500），不设置 hasLoaded = true
+          // 这样可以防止系统立即把初始的 1 级数据覆盖到云端，保护原有存档
         }
       };
       loadRemoteData();
@@ -1549,8 +1555,9 @@ export default function App() {
                               transform: `translateY(${-wheelIndices.weapon * 48}px)`
                             }}
                           >
-                            {Array.from({ length: 120 }).map((_, vIdx) => {
+                            {items.length > 0 ? Array.from({ length: 120 }).map((_, vIdx) => {
                               const item = items[vIdx % items.length];
+                              if (!item) return null;
                               const isActive = vIdx === wheelIndices.weapon;
                               // 只渲染可见区域附近的项，性能更好
                               if (Math.abs(vIdx - wheelIndices.weapon) > 4) return <div key={vIdx} className="h-[48px]" />;
@@ -1565,7 +1572,9 @@ export default function App() {
                                   <span className={`font-black truncate cn-text ${isActive ? 'text-base' : 'text-sm'}`}>{item.name}</span>
                                 </div>
                               );
-                            })}
+                            }) : (
+                              <div className="h-full flex items-center justify-center text-slate-500 text-xs italic">同步中...</div>
+                            )}
                           </div>
                         </div>
                       );
@@ -1613,8 +1622,9 @@ export default function App() {
                               transform: `translateY(${-wheelIndices.armor * 48}px)`
                             }}
                           >
-                            {Array.from({ length: 120 }).map((_, vIdx) => {
+                            {items.length > 0 ? Array.from({ length: 120 }).map((_, vIdx) => {
                               const item = items[vIdx % items.length];
+                              if (!item) return null;
                               const isActive = vIdx === wheelIndices.armor;
                               if (Math.abs(vIdx - wheelIndices.armor) > 4) return <div key={vIdx} className="h-[48px]" />;
                               return (
@@ -1628,7 +1638,9 @@ export default function App() {
                                   <span className={`font-black truncate cn-text ${isActive ? 'text-base' : 'text-sm'}`}>{item.name}</span>
                                 </div>
                               );
-                            })}
+                            }) : (
+                              <div className="h-full flex items-center justify-center text-slate-500 text-xs italic">同步中...</div>
+                            )}
                           </div>
                         </div>
                       );
@@ -1676,8 +1688,9 @@ export default function App() {
                               transform: `translateY(${-wheelIndices.skill * 48}px)`
                             }}
                           >
-                            {Array.from({ length: 120 }).map((_, vIdx) => {
+                            {items.length > 0 ? Array.from({ length: 120 }).map((_, vIdx) => {
                               const item = items[vIdx % items.length];
+                              if (!item) return null; // 安全保障
                               const isActive = vIdx === wheelIndices.skill;
                               if (Math.abs(vIdx - wheelIndices.skill) > 4) return <div key={vIdx} className="h-[48px]" />;
                               return (
@@ -1691,7 +1704,11 @@ export default function App() {
                                   <span className={`font-black truncate cn-text ${isActive ? 'text-base' : 'text-sm'}`}>{item.name}</span>
                                 </div>
                               );
-                            })}
+                            }) : (
+                              <div className="h-full flex items-center justify-center text-slate-500 text-xs italic">
+                                正在同步核心数据...
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
