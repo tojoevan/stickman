@@ -1569,7 +1569,7 @@ export default function App() {
                             <div className="w-1 h-1 bg-cyan-400 rounded-full shadow-[0_0_10px_#22d3ee]"></div>
                           </div>
                           <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            <span className="text-[9px] text-cyan-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-cyan-500/50">ARMOR_SYSTEM</span>
+                            <span className="text-[9px] text-cyan-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-cyan-500/50">防护系统 / ARMOR_SYSTEM</span>
                             <div className="w-[1px] h-4 bg-cyan-500/50"></div>
                           </div>
                         </div>
@@ -1579,7 +1579,7 @@ export default function App() {
                           <div className="absolute inset-0 border-2 border-amber-500/10 rounded-lg animate-pulse"></div>
                           <div className="absolute -right-28 top-1/2 -translate-y-1/2 flex items-center flex-row-reverse">
                             <div className="flex flex-col items-start">
-                              <span className="text-[9px] text-amber-500 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-amber-500/50">ATK_WEAPONRY</span>
+                              <span className="text-[9px] text-amber-500 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-amber-500/50">武器系统 / ATK_WEAPONRY</span>
                               <span className="text-[8px] text-amber-500/60 font-bold mt-1">CLICK_UPGRADE</span>
                             </div>
                             <div className="w-8 h-[1px] bg-amber-500/50 mr-2"></div>
@@ -1591,7 +1591,7 @@ export default function App() {
                           <div className="absolute inset-0 bg-indigo-500/10 border-2 border-indigo-500/30 rounded-full animate-pulse shadow-[0_0_20px_rgba(99,102,241,0.4)]"></div>
                           <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex flex-col items-center">
                             <div className="w-[1px] h-6 bg-indigo-500/50 mb-1"></div>
-                            <span className="text-[9px] text-indigo-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-indigo-500/50 uppercase">Neural_Core</span>
+                            <span className="text-[9px] text-indigo-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-indigo-500/50 uppercase">神经核心 / Neural_Core</span>
                           </div>
                         </div>
                       </div>
