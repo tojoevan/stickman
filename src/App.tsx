@@ -1030,7 +1030,7 @@ export default function App() {
 
   return (
     <div className="h-screen w-full bg-slate-950 text-slate-100 font-sans overflow-hidden relative">
-      <div className="vignette-layer" />
+      <div className={`vignette-layer ${shopTab ? 'danger' : ''}`} />
       {/* 1. AUTH OVERLAY */}
       {!token && (
         <div className="absolute inset-0 z-[1000] bg-slate-950/95 flex items-center justify-center p-4">
@@ -1609,7 +1609,7 @@ export default function App() {
                           <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">
                             部位升级 / {(shopTab === 'weapons' ? '攻击链路' : (shopTab === 'armors' ? '防护链路' : '核心逻辑'))}
                           </h3>
-                          <button className="pixel-button danger !py-2 !px-6" style={{ background: 'transparent', border: 'none', color: '#94a3b8', textDecoration: 'underline' }} onClick={() => setShopTab(null as any)}>关闭终端 / CLOSE</button>
+                          <button className="pixel-button danger !py-2 !px-6 btn-close-anim" style={{ background: 'transparent', border: 'none', color: '#94a3b8', textDecoration: 'underline' }} onClick={() => setShopTab(null as any)}>关闭终端 / CLOSE</button>
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-4 gap-4 pr-4">
                           {ITEMS[shopTab].map(item => (
@@ -1775,6 +1775,28 @@ export default function App() {
           pointer-events: none;
           z-index: 10000;
           animation: vignette-breath 5s ease-in-out infinite;
+        }
+
+        @keyframes close-breath {
+          0%, 100% { opacity: 0.6; filter: brightness(0.8); }
+          50% { opacity: 1; filter: brightness(1.5); text-shadow: 0 0 10px rgba(148, 163, 184, 0.4); }
+        }
+        @keyframes close-hover-pulse {
+          0%, 100% { text-shadow: 0 0 10px #ef4444; }
+          50% { text-shadow: 0 0 25px #ef4444, 0 0 5px rgba(255,255,255,0.5); }
+        }
+        .btn-close-anim {
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          animation: close-breath 3s ease-in-out infinite;
+          display: inline-block;
+        }
+        .btn-close-anim:hover {
+          animation: close-hover-pulse 1.2s ease-in-out infinite;
+          color: #fca5a5 !important;
+          letter-spacing: 3px;
+          transform: scale(1.1);
+          opacity: 1 !important;
+          text-decoration: none !important;
         }
 
         /* HUD 文字标准化 */
