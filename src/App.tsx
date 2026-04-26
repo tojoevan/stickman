@@ -738,6 +738,7 @@ export default function App() {
   const lobbyRendererRef = useRef<StickmanRenderer | null>(null);
   const hasLoaded = useRef(false);
   const lastWheelTime = useRef(0);
+  const touchStartY = useRef(0);
   const [isIntelBlurred, setIsIntelBlurred] = useState({ weapon: false, armor: false, skill: false });
   const [wheelIndices, setWheelIndices] = useState({ weapon: 60, armor: 60, skill: 60 });
 
@@ -1540,7 +1541,30 @@ export default function App() {
                             const realIdx = (newIdx % items.length + items.length) % items.length;
                             setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[realIdx].name } }));
                           }}
-                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded"
+                          onTouchStart={(e) => {
+                            if (isDeployed) return;
+                            touchStartY.current = e.touches[0].clientY;
+                          }}
+                          onTouchMove={(e) => {
+                            if (isDeployed) return;
+                            const now = Date.now();
+                            if (now - lastWheelTime.current < 150) return;
+                            
+                            const deltaY = touchStartY.current - e.touches[0].clientY;
+                            if (Math.abs(deltaY) < 30) return;
+
+                            lastWheelTime.current = now;
+                            touchStartY.current = e.touches[0].clientY;
+
+                            const items = ITEMS.weapons.filter(i => player.unlockedItems[i.name]);
+                            const direction = deltaY > 0 ? 1 : -1;
+                            const newIdx = wheelIndices.weapon + direction;
+
+                            setWheelIndices(prev => ({ ...prev, weapon: newIdx }));
+                            const realIdx = (newIdx % items.length + items.length) % items.length;
+                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[realIdx].name } }));
+                          }}
+                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded touch-none"
                         >
                           <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
                             <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
@@ -1607,7 +1631,30 @@ export default function App() {
                             const realIdx = (newIdx % items.length + items.length) % items.length;
                             setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[realIdx].name } }));
                           }}
-                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded"
+                          onTouchStart={(e) => {
+                            if (isDeployed) return;
+                            touchStartY.current = e.touches[0].clientY;
+                          }}
+                          onTouchMove={(e) => {
+                            if (isDeployed) return;
+                            const now = Date.now();
+                            if (now - lastWheelTime.current < 150) return;
+                            
+                            const deltaY = touchStartY.current - e.touches[0].clientY;
+                            if (Math.abs(deltaY) < 30) return;
+
+                            lastWheelTime.current = now;
+                            touchStartY.current = e.touches[0].clientY;
+
+                            const items = ITEMS.armors.filter(i => player.unlockedItems[i.name]);
+                            const direction = deltaY > 0 ? 1 : -1;
+                            const newIdx = wheelIndices.armor + direction;
+
+                            setWheelIndices(prev => ({ ...prev, armor: newIdx }));
+                            const realIdx = (newIdx % items.length + items.length) % items.length;
+                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[realIdx].name } }));
+                          }}
+                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded touch-none"
                         >
                           <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
                             <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
@@ -1673,7 +1720,30 @@ export default function App() {
                             const realIdx = (newIdx % items.length + items.length) % items.length;
                             setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[realIdx].name } }));
                           }}
-                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded"
+                          onTouchStart={(e) => {
+                            if (isDeployed) return;
+                            touchStartY.current = e.touches[0].clientY;
+                          }}
+                          onTouchMove={(e) => {
+                            if (isDeployed) return;
+                            const now = Date.now();
+                            if (now - lastWheelTime.current < 150) return;
+                            
+                            const deltaY = touchStartY.current - e.touches[0].clientY;
+                            if (Math.abs(deltaY) < 30) return;
+
+                            lastWheelTime.current = now;
+                            touchStartY.current = e.touches[0].clientY;
+
+                            const items = ITEMS.skills.filter(i => player.unlockedItems[i.name]);
+                            const direction = deltaY > 0 ? 1 : -1;
+                            const newIdx = wheelIndices.skill + direction;
+
+                            setWheelIndices(prev => ({ ...prev, skill: newIdx }));
+                            const realIdx = (newIdx % items.length + items.length) % items.length;
+                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[realIdx].name } }));
+                          }}
+                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded touch-none"
                         >
                           <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
                             <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
