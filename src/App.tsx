@@ -36,6 +36,7 @@ interface Item {
   rarity: Rarity;
   levelReq?: number;
   tag: ItemTag;
+  weight?: number; // Added weight property
 }
 
 interface Battlefield {
@@ -69,46 +70,46 @@ const BATTLEFIELDS: Battlefield[] = [
 
 const ITEMS = {
   weapons: [
-    { name: '长剑', damage: 15, icon: '⚔️', desc: '基础近战武器', story: '旧时代的钢刃，虽已锈迹斑斑，但其冰冷的触感依然能唤醒战士的本能。', cost: 50, rarity: 'common', tag: 'slashing' },
-    { name: '名刀', damage: 30, icon: '🎋', desc: '锋利的特制刀具', story: '由深山隐士打造，刀身覆盖着纳米级的锋利涂层，挥动时仿佛能切断风的声音。', cost: 150, rarity: 'novel', levelReq: 3, tag: 'slashing' },
-    { name: '影刃', damage: 75, icon: '🔪', desc: '无视防御的次元武器', story: '从虚空裂缝中提取的物质锻造而成，它不切割肉体，而是直接撕裂目标的现实存在感。', cost: 8500, rarity: 'epic', levelReq: 40, tag: 'slashing' },
+    { name: '长剑', damage: 15, icon: '⚔️', desc: '基础近战武器', story: '旧时代的钢刃，虽已锈迹斑斑，但其冰冷的触感依然能唤醒战士的本能。', cost: 50, rarity: 'common', tag: 'slashing', weight: 5 },
+    { name: '名刀', damage: 30, icon: '🎋', desc: '锋利的特制刀具', story: '由深山隐士打造，刀身覆盖着纳米级的锋利涂层，挥动时仿佛能切断风的声音。', cost: 150, rarity: 'novel', levelReq: 3, tag: 'slashing', weight: 4 },
+    { name: '影刃', damage: 75, icon: '🔪', desc: '无视防御的次元武器', story: '从虚空裂缝中提取的物质锻造而成，它不切割肉体，而是直接撕裂目标的现实存在感。', cost: 8500, rarity: 'epic', levelReq: 40, tag: 'slashing', weight: 2 },
 
-    { name: '长弓', damage: 12, icon: '🏹', desc: '基础远程武器', story: '复合碳纤维材质，轻盈而强韧，是荒野猎人在静谧夜晚最可靠的伙伴。', cost: 50, rarity: 'common', tag: 'piercing' },
-    { name: '战术弩', damage: 25, icon: '🎯', desc: '带辅助瞄准的连发弩', story: '黑市中流通的高级货，配备了简易的弹道辅助芯片，即使是新手也能打出精准的齐射。', cost: 200, rarity: 'novel', levelReq: 5, tag: 'piercing' },
-    { name: '神龙弓', damage: 45, icon: '🐉', desc: '附带能量冲击的强弓', story: '传闻弓身封印了上古数字生命的意识，每一支射出的箭矢都带着震慑灵魂的咆哮。', cost: 600, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
+    { name: '长弓', damage: 12, icon: '🏹', desc: '基础远程武器', story: '复合碳纤维材质，轻盈而强韧，是荒野猎人在静谧夜晚最可靠的伙伴。', cost: 50, rarity: 'common', tag: 'piercing', weight: 3 },
+    { name: '战术弩', damage: 25, icon: '🎯', desc: '带辅助瞄准的连发弩', story: '黑市中流通的高级货，配备了简易的弹道辅助芯片，即使是新手也能打出精准的齐射。', cost: 200, rarity: 'novel', levelReq: 5, tag: 'piercing', weight: 6 },
+    { name: '神龙弓', damage: 45, icon: '🐉', desc: '附带能量冲击的强弓', story: '传闻弓身封印了上古数字生命的意识，每一支射出的箭矢都带着震慑灵魂的咆哮。', cost: 600, rarity: 'perfect', levelReq: 12, tag: 'piercing', weight: 8 },
 
-    { name: '重锤', damage: 22, icon: '🔨', desc: '沉重的破坏武器', story: '纯粹的质量，纯粹的破坏。在它面前，任何精密的防御结构都显得滑稽可笑。', cost: 60, rarity: 'common', tag: 'crushing' },
-    { name: '动力锤', damage: 42, icon: '🚜', desc: '附带震荡波的动力锤', story: '内置了液压增压系统，击中目标的瞬间会释放出强烈的震荡波，粉碎一切阻碍。', cost: 450, rarity: 'novel', levelReq: 8, tag: 'crushing' },
-    { name: '雷神锤', damage: 85, icon: '⚡', desc: '附带雷电伤害的终极巨锤', story: '众神之怒的数字化体现。挥动它时，空气中会充满电离的焦灼味，将敌人化为焦炭。', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing' },
+    { name: '重锤', damage: 22, icon: '🔨', desc: '沉重的破坏武器', story: '纯粹的质量，纯粹的破坏。在它面前，任何精密的防御结构都显得滑稽可笑。', cost: 60, rarity: 'common', tag: 'crushing', weight: 15 },
+    { name: '动力锤', damage: 42, icon: '🚜', desc: '附带震荡波的动力锤', story: '内置了液压增压系统，击中目标的瞬间会释放出强烈的震荡波，粉碎一切阻碍。', cost: 450, rarity: 'novel', levelReq: 8, tag: 'crushing', weight: 20 },
+    { name: '雷神锤', damage: 85, icon: '⚡', desc: '附带雷电伤害的终极巨锤', story: '众神之怒的数字化体现. 挥动它时，空气中会充满电离的焦灼味，将敌人化为焦炭。', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing', weight: 25 },
 
-    { name: '热能刀', damage: 18, icon: '🔥', desc: '高温切割武器', story: '刀刃边缘维持着千度高温，能够像切黄油一样切开最坚固的复合装甲。', cost: 80, rarity: 'common', tag: 'energy' },
-    { name: '等离子炮', damage: 55, icon: '🎇', desc: '微型黑洞发生器', story: '手持式核聚变发生器，发射出的等离子团会在触敌瞬间引发微型黑洞坍缩。', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy' },
-    { name: '激光剑', damage: 100, icon: '🔦', desc: '无视物理防御的光束剑', story: '纯净的能量凝聚成束。它没有实体，却能跨越物理世界的限制，斩断因果。', cost: 12000, rarity: 'epic', levelReq: 30, tag: 'energy' },
+    { name: '热能刀', damage: 18, icon: '🔥', desc: '高温切割武器', story: '刀刃边缘维持着千度高温，能够像切黄油一样切开最坚固的复合装甲。', cost: 80, rarity: 'common', tag: 'energy', weight: 3 },
+    { name: '等离子炮', damage: 55, icon: '🎇', desc: '微型黑洞发生器', story: '手持式核聚变发生器，发射出的等离子团会在触敌瞬间引发微型黑洞坍缩。', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy', weight: 12 },
+    { name: '激光剑', damage: 100, icon: '🔦', desc: '无视物理防御的光束剑', story: '纯净的能量凝聚成束。它没有实体，却能跨越物理世界的限制，斩断因果。', cost: 12000, rarity: 'epic', levelReq: 30, tag: 'energy', weight: 1 },
   ] as Item[],
   armors: [
-    { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '无任何防护效果', story: '在这个钢铁森林里，这层薄薄的纤维更像是一种心理安慰，而非实际保护。', cost: 40, rarity: 'common', tag: 'light' },
-    { name: '披风', defense: 3, evasion: 20, icon: '🧥', desc: '轻微防御，较高闪避', story: '特种纤维织就，能在高速移动时产生视觉残影，让敌人的准星永远慢你一步。', cost: 60, rarity: 'common', tag: 'light' },
-    { name: '潜行隐装', defense: 15, evasion: 45, icon: '🕴️', desc: '极高闪避，中等防御', story: '整合了最新的多光谱折射单元，只要你不主动现身，你就是夜色本身。', cost: 800, rarity: 'novel', levelReq: 4, tag: 'light' },
+    { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '无任何防护效果', story: '在这个钢铁森林里，这层薄薄的纤维更像是一种心理安慰，而非实际保护。', cost: 40, rarity: 'common', tag: 'light', weight: 1 },
+    { name: '披风', defense: 3, evasion: 20, icon: '🧥', desc: '轻微防御，较高闪避', story: '特种纤维织就，能在高速移动时产生视觉残影，让敌人的准星永远慢你一步。', cost: 60, rarity: 'common', tag: 'light', weight: 2 },
+    { name: '潜行隐装', defense: 15, evasion: 45, icon: '🕴️', desc: '极高闪避，中等防御', story: '整合了最新的多光谱折射单元，只要你不主动现身，你就是夜色本身。', cost: 800, rarity: 'novel', levelReq: 4, tag: 'light', weight: 3 },
 
-    { name: '凯夫拉', defense: 8, evasion: 0, icon: '🥋', desc: '基础物理防御', story: '经典的防御方案，可靠且坚韧。它曾无数次在致命伤前挽救了佣兵的性命。', cost: 50, rarity: 'common', tag: 'medium' },
-    { name: '动力装甲', defense: 45, evasion: 5, icon: '🤖', desc: '提供护甲和轻微闪避', story: '沉重的外骨骼不仅能吸收伤害，更赋予了穿戴者超越凡人的怪力。', cost: 500, rarity: 'novel', levelReq: 5, tag: 'medium' },
-    { name: '虚空甲', defense: 95, evasion: 10, icon: '🌌', desc: '极高护甲与中等闪避', story: '表面覆盖着一层活动的暗物质，能将物理打击转变为无害的引力波发散。', cost: 2000, rarity: 'perfect', levelReq: 15, tag: 'medium' },
+    { name: '凯夫拉', defense: 8, evasion: 0, icon: '🥋', desc: '基础物理防御', story: '经典的防御方案，可靠且坚韧。它曾无数次在致命伤前挽救了佣兵的性命。', cost: 50, rarity: 'common', tag: 'medium', weight: 8 },
+    { name: '动力装甲', defense: 45, evasion: 5, icon: '🤖', desc: '提供护甲和轻微闪避', story: '沉重的外骨骼不仅能吸收伤害，更赋予了穿戴者超越凡人的怪力。', cost: 500, rarity: 'novel', levelReq: 5, tag: 'medium', weight: 35 },
+    { name: '虚空甲', defense: 95, evasion: 10, icon: '🌌', desc: '极高护甲与中等闪避', story: '表面覆盖着一层活动的暗物质，能将物理打击转变为无害的引力波发散。', cost: 2000, rarity: 'perfect', levelReq: 15, tag: 'medium', weight: 20 },
 
-    { name: '铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '降低少许闪避以换取防御', story: '朴实无华的铁板，但在绝望的战场上，它是生与死之间最后的一道界限。', cost: 60, rarity: 'common', tag: 'heavy' },
-    { name: '合金护板', defense: 35, evasion: -10, icon: '⛓️', desc: '高强度防弹挡板', story: '实验室合成的高强度钢材，即使面对反器材狙击枪的攒射也依然屹立不倒。', cost: 400, rarity: 'novel', levelReq: 7, tag: 'heavy' },
-    { name: '复合重装', defense: 220, evasion: -20, icon: '🚜', desc: '牺牲大量闪避换取绝对防御', story: '一整套移动防御系统，穿戴它意味着你放弃了灵活，换取了绝对的生存。', cost: 8000, rarity: 'perfect', levelReq: 22, tag: 'heavy' },
+    { name: '铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '降低少许闪避以换取防御', story: '朴实无华的铁板，但在绝望的战场上，它是生与死之间最后的一道界限。', cost: 60, rarity: 'common', tag: 'heavy', weight: 12 },
+    { name: '合金护板', defense: 35, evasion: -10, icon: '⛓️', desc: '高强度防弹挡板', story: '实验室合成的高强度钢材，即使面对反器材狙击枪的攒射也依然屹立不倒。', cost: 400, rarity: 'novel', levelReq: 7, tag: 'heavy', weight: 25 },
+    { name: '复合重装', defense: 220, evasion: -20, icon: '🚜', desc: '牺牲大量闪避换取绝对防御', story: '一整套移动防御 system，穿戴它意味着你放弃了灵活，换取了绝对的生存。', cost: 8000, rarity: 'perfect', levelReq: 22, tag: 'heavy', weight: 80 },
 
-    { name: '干扰烟幕', defense: 5, evasion: 15, icon: '💨', desc: '战术掩体装备', story: '释放出的纳米云雾会干扰所有的雷达与视讯探测，创造出混乱的生存空间。', cost: 70, rarity: 'common', tag: 'field' },
-    { name: '纳米蜂群', defense: 50, evasion: 60, icon: '🐝', desc: '自动拦截飞行物', story: '数以亿计的微型机器人围绕着你飞行，它们会自动寻找并摧毁飞来的投射物。', cost: 6500, rarity: 'epic', levelReq: 35, tag: 'field' },
-    { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极力场防护', story: '通过消耗反物质电池产生的排斥力场，是人类技术能够达到的防御巅峰。', cost: 15000, rarity: 'epic', levelReq: 60, tag: 'field' },
+    { name: '干扰烟幕', defense: 5, evasion: 15, icon: '💨', desc: '战术掩体装备', story: '释放出的纳米云雾会干扰所有的雷达与视讯探测，创造出混乱的生存空间。', cost: 70, rarity: 'common', tag: 'field', weight: 2 },
+    { name: '纳米蜂群', defense: 50, evasion: 60, icon: '🐝', desc: '自动拦截飞行物', story: '数以亿计的微型机器人围绕着你飞行，它们会自动寻找并摧毁飞来的投射物。', cost: 6500, rarity: 'epic', levelReq: 35, tag: 'field', weight: 5 },
+    { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极力场防护', story: '通过消耗反物质电池产生的排斥力场，是人类技术能够达到的防御巅峰。', cost: 15000, rarity: 'epic', levelReq: 60, tag: 'field', weight: 15 },
   ] as Item[],
   skills: [
-    { name: '蓄能重击', mult: 1.5, icon: '💥', desc: '牺牲攻速换取爆发，附加100%力量伤害', story: '引导全身的生物能量于一瞬爆发。这一拳，包含了对命运所有的愤怒。', cost: 100, rarity: 'common', tag: 'crushing' },
-    { name: '幻影连击', mult: 0.8, icon: '⚡', desc: '极速二次打击，敏捷大幅增幅伤害', story: '通过超频神经突触，让肌肉在极短时间内完成两次打击，速度之快肉眼难辨。', cost: 300, rarity: 'novel', levelReq: 5, tag: 'slashing' },
-    { name: '弱点扫描', mult: 1.2, icon: '🔍', desc: '解析对手防御，强制无视抗性修正', story: '开启眼部的扫描阵列，实时计算对手装甲的最薄弱点，执行精准的打击。', cost: 800, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
-    { name: '神经修复', mult: 0, icon: '✨', desc: '生物纳米修复，基于体质大量回血', story: '注射纳米医疗凝胶，这些微小的医生会自动修复受损的器官与回路，带你重返巅峰。', cost: 500, rarity: 'novel', levelReq: 8, tag: 'light' },
-    { name: '动能反射', mult: 0.5, icon: '🛡️', desc: '构建反击护盾，反弹受到的50%伤害', story: '利用能量守恒原理，将受到的冲击力储存并反弹，让敌人品尝自己的力量。', cost: 2000, rarity: 'perfect', levelReq: 20, tag: 'heavy' },
-    { name: '系统过载', mult: 2.2, icon: '☢️', desc: '极限超频，极高伤害但会反噬自身', story: '撤除所有的安全限制，释放核心全部的原始能量。这是最后的孤注一掷。', cost: 10000, rarity: 'epic', levelReq: 45, tag: 'energy' },
+    { name: '蓄能重击', mult: 1.5, icon: '💥', desc: '牺牲攻速换取爆发，附加100%力量伤害', story: '引导全身的生物能量于一瞬爆发。这一拳，包含了对命运所有的愤怒。', cost: 100, rarity: 'common', tag: 'crushing', weight: 0 },
+    { name: '幻影连击', mult: 0.8, icon: '⚡', desc: '极速二次打击，敏捷大幅增幅伤害', story: '通过超频神经突触，让肌肉在极短时间内完成两次打击，速度之快肉眼难辨。', cost: 300, rarity: 'novel', levelReq: 5, tag: 'slashing', weight: 0 },
+    { name: '弱点扫描', mult: 1.2, icon: '🔍', desc: '解析对手防御，强制无视抗性修正', story: '开启眼部的扫描阵列，实时计算对手装甲的最薄弱点，执行精准的打击。', cost: 800, rarity: 'perfect', levelReq: 12, tag: 'piercing', weight: 0 },
+    { name: '神经修复', mult: 0, icon: '✨', desc: '生物纳米修复，基于体质大量回血', story: '注射纳米医疗凝胶，这些微小的医生会自动修复受损的器官与回路，带你重返巅峰。', cost: 500, rarity: 'novel', levelReq: 8, tag: 'light', weight: 0 },
+    { name: '动能反射', mult: 0.5, icon: '🛡️', desc: '构建反击护盾，反弹受到的50%伤害', story: '利用能量守恒原理，将受到的冲击力储存并反弹，让敌人品尝自己的力量。', cost: 2000, rarity: 'perfect', levelReq: 20, tag: 'heavy', weight: 0 },
+    { name: '系统过载', mult: 2.2, icon: '☢️', desc: '极限超频，极高伤害但会反噬自身', story: '撤除所有的安全限制，释放核心全部的原始能量。这是最后的孤注一掷。', cost: 10000, rarity: 'epic', levelReq: 45, tag: 'energy', weight: 0 },
   ] as Item[]
 };
 const INITIAL_CHAR: Character = {
@@ -1641,19 +1642,28 @@ export default function App() {
                       <div className="flex justify-between items-end border-b-2 border-slate-800 pb-2 mb-4">
                         <h2 className="text-sm font-black italic text-slate-400 uppercase tracking-widest">当前载荷 / LOADOUT</h2>
                       </div>
-                      <div className="space-y-6 overflow-y-auto custom-scrollbar pr-2">
+                      <div className="space-y-3 overflow-y-auto custom-scrollbar pr-2">
                         {/* 武器槽位 */}
                         {(shopTab === 'weapons' || !shopTab) && (() => {
                           const isPreview = hoveredItem && shopTab === 'weapons';
                           const item = isPreview ? hoveredItem : ITEMS.weapons.find(w => w.name === player.equipment.weapon);
                           if (!item) return null;
+                          const tagLabel = {
+                            'slashing': '斩击', 'crushing': '打击', 'piercing': '穿刺', 'energy': '能量',
+                            'light': '轻型', 'medium': '中型', 'heavy': '重型', 'field': '力场'
+                          }[item.tag] || item.tag;
+
                           return (
-                            <div className={`border-l-4 border-amber-500 pl-4 py-1 transition-all ${isPreview ? 'bg-amber-500/20 scale-[1.02]' : 'bg-amber-500/5'}`}>
-                              <div className="flex justify-between items-center">
-                                <p className="text-base font-black text-amber-500">{item.name}</p>
+                            <div className={`border-l-4 border-amber-500 pl-4 py-2 transition-all ${isPreview ? 'bg-amber-500/20 scale-[1.02]' : 'bg-amber-500/5'}`}>
+                              <div className="flex justify-between items-center mb-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-base font-black text-amber-500">{item.name}</p>
+                                  <span className="text-[9px] bg-amber-500/20 text-amber-500 px-1.5 py-0.5 border border-amber-500/30 font-bold">{tagLabel}</span>
+                                </div>
                                 {isPreview && <span className="text-[8px] font-black bg-amber-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
-                              <p className="text-sm text-amber-500/80 font-bold mt-0.5">攻击: {(item.damage || 0) >= 0 ? '+' : ''}{item.damage} | 需求等级: {item.levelReq || 1}</p>
+                              <p className="text-sm text-amber-500/80 font-bold">攻击: {(item.damage || 0) >= 0 ? '+' : ''}{item.damage} | 载荷: {item.weight}kg</p>
+                              {shopTab && item.story && <p className="text-[10px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
                             </div>
                           );
                         })()}
@@ -1663,13 +1673,22 @@ export default function App() {
                           const isPreview = hoveredItem && shopTab === 'armors';
                           const item = isPreview ? hoveredItem : ITEMS.armors.find(a => a.name === player.equipment.armor);
                           if (!item) return null;
+                          const tagLabel = {
+                            'slashing': '斩击', 'crushing': '打击', 'piercing': '穿刺', 'energy': '能量',
+                            'light': '轻型', 'medium': '中型', 'heavy': '重型', 'field': '力场'
+                          }[item.tag] || item.tag;
+
                           return (
-                            <div className={`border-l-4 border-indigo-500 pl-4 py-1 transition-all ${isPreview ? 'bg-indigo-500/20 scale-[1.02]' : 'bg-indigo-500/5'}`}>
-                              <div className="flex justify-between items-center">
-                                <p className="text-base font-black text-indigo-500">{item.name}</p>
+                            <div className={`border-l-4 border-indigo-500 pl-4 py-2 transition-all ${isPreview ? 'bg-indigo-500/20 scale-[1.02]' : 'bg-indigo-500/5'}`}>
+                              <div className="flex justify-between items-center mb-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-base font-black text-indigo-500">{item.name}</p>
+                                  <span className="text-[9px] bg-indigo-500/20 text-indigo-500 px-1.5 py-0.5 border border-indigo-500/30 font-bold">{tagLabel}</span>
+                                </div>
                                 {isPreview && <span className="text-[8px] font-black bg-indigo-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
-                              <p className="text-sm text-indigo-400/80 font-bold mt-0.5">防御: {(item.defense || 0) >= 0 ? '+' : ''}{item.defense} | 闪避: {(item.evasion || 0) >= 0 ? '+' : ''}{item.evasion}%</p>
+                              <p className="text-sm text-indigo-400/80 font-bold">防御: {(item.defense || 0) >= 0 ? '+' : ''}{item.defense} | 载荷: {item.weight}kg</p>
+                              {shopTab && item.story && <p className="text-[10px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
                             </div>
                           );
                         })()}
@@ -1679,13 +1698,22 @@ export default function App() {
                           const isPreview = hoveredItem && shopTab === 'skills';
                           const item = isPreview ? hoveredItem : ITEMS.skills.find(s => s.name === player.equipment.skill);
                           if (!item) return null;
+                          const tagLabel = {
+                            'slashing': '斩击', 'crushing': '打击', 'piercing': '穿刺', 'energy': '能量',
+                            'light': '轻型', 'medium': '中型', 'heavy': '重型', 'field': '力场'
+                          }[item.tag] || item.tag;
+
                           return (
-                            <div className={`border-l-4 border-cyan-500 pl-4 py-1 transition-all ${isPreview ? 'bg-cyan-500/20 scale-[1.02]' : 'bg-cyan-500/5'}`}>
-                              <div className="flex justify-between items-center">
-                                <p className="text-base font-black text-cyan-500">{item.name}</p>
+                            <div className={`border-l-4 border-cyan-500 pl-4 py-2 transition-all ${isPreview ? 'bg-cyan-500/20 scale-[1.02]' : 'bg-cyan-500/5'}`}>
+                              <div className="flex justify-between items-center mb-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-base font-black text-cyan-500">{item.name}</p>
+                                  <span className="text-[9px] bg-cyan-500/20 text-cyan-500 px-1.5 py-0.5 border border-cyan-500/30 font-bold">{tagLabel}</span>
+                                </div>
                                 {isPreview && <span className="text-[8px] font-black bg-cyan-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
-                              <p className="text-sm text-cyan-400/80 font-bold mt-0.5">伤害倍率: x{item.mult} | 核心等级: {player.unlockedItems[item.name] || 1}</p>
+                              <p className="text-sm text-cyan-400/80 font-bold">倍率: x{item.mult} | 核心: Lv.{player.unlockedItems[item.name] || 1}</p>
+                              {shopTab && item.story && <p className="text-[10px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
                             </div>
                           );
                         })()}
@@ -1798,10 +1826,23 @@ export default function App() {
                         {confirmingItem && (
                           <div className="absolute inset-0 z-[1100] bg-slate-950/90 flex items-center justify-center p-8 backdrop-blur-md">
                             <div className="w-full max-w-sm pixel-card p-8 bg-slate-900 border-indigo-500 shadow-[0_0_50px_rgba(99,102,241,0.2)]">
-                              <div className="text-center mb-8">
+                              <div className="text-center mb-6">
                                 <span className="text-5xl block mb-4">{confirmingItem.item.icon}</span>
-                                <h4 className="text-xl font-black text-white italic mb-1">{confirmingItem.item.name}</h4>
-                                <p className="text-xs text-slate-500 uppercase tracking-widest">当前等级: Lv.{player.unlockedItems[confirmingItem.item.name] || 0}</p>
+                                <div className="flex flex-col items-center gap-1 mb-2">
+                                  <h4 className="text-xl font-black text-white italic">{confirmingItem.item.name}</h4>
+                                  <span className="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 border border-indigo-500/30 font-black tracking-widest uppercase">
+                                    {{
+                                      'slashing': '斩击 / SLASH', 'crushing': '打击 / CRUSH', 'piercing': '穿刺 / PIERCE', 'energy': '能量 / ENERGY',
+                                      'light': '轻型 / LIGHT', 'medium': '中型 / MEDIUM', 'heavy': '重型 / HEAVY', 'field': '力场 / FIELD'
+                                    }[confirmingItem.item.tag] || confirmingItem.item.tag}
+                                  </span>
+                                </div>
+                                <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-4">当前等级: Lv.{player.unlockedItems[confirmingItem.item.name] || 0}</p>
+                                {confirmingItem.item.story && (
+                                  <div className="px-4 py-3 bg-slate-950/50 border border-slate-800 rounded-lg mb-4">
+                                    <p className="text-[11px] text-slate-400 leading-relaxed italic cn-text">“{confirmingItem.item.story}”</p>
+                                  </div>
+                                )}
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, false)} className="py-4 bg-slate-800 border-2 border-slate-700 text-sm font-black hover:bg-slate-700 transition-all cn-text">
