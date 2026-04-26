@@ -1182,11 +1182,11 @@ export default function App() {
             {/* MISSION RESULT OVERLAY */}
             {(gameState === 'victory' || gameState === 'defeat') && (
               <div className="absolute inset-0 z-[400] bg-slate-950/80 flex items-center justify-center animate-in zoom-in-95">
-                <div className={`p-12 border-4 ${gameState === 'victory' ? 'border-emerald-500 bg-emerald-950/50' : 'border-rose-500 bg-rose-950/50'} text-center shadow-[0_0_100px_rgba(0,0,0,1)]`}>
+                <div className={`p-12 border-4 ${gameState === 'victory' ? 'border-emerald-500 bg-emerald-950/50 victory-stripes' : 'border-rose-500 bg-rose-950/50 defeat-stripes'} text-center shadow-[0_0_100px_rgba(0,0,0,1)] relative overflow-hidden`}>
                   <h2 className={`text-6xl font-black italic mb-4 ${gameState === 'victory' ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {gameState === 'victory' ? 'MISSION COMPLETE' : 'CONNECTION LOST'}
                   </h2>
-                  <p className="text-white pixel-font text-sm mb-10 tracking-[0.2em] cn-text">{gameState === 'victory' ? '目标已被彻底清除' : '严重损伤，被迫断开连接'}</p>
+                  <p className="text-white text-sm mb-10 tracking-[0.2em] cn-text">{gameState === 'victory' ? '目标已被彻底清除' : '严重损伤，被迫断开连接'}</p>
                   <button onClick={() => { setGameState('lobby'); resetGame(); }} className="px-12 py-4 bg-white text-black font-bold pixel-font text-xs hover:bg-indigo-500 hover:text-white transition-all cn-text">RETURN TO BASE [ESC]</button>
                 </div>
               </div>
@@ -1897,6 +1897,46 @@ export default function App() {
         .animate-in { animation-fill-mode: forwards; }
         .fade-in { animation: fade-in 0.5s ease-out; }
         .zoom-in-95 { animation: zoom-in-95 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes slide-stripes {
+          0% { background-position: 0 0; }
+          100% { background-position: 60px 0; }
+        }
+        .victory-stripes, .defeat-stripes {
+          position: relative;
+          z-index: 0;
+        }
+        .victory-stripes::before, .defeat-stripes::before {
+          content: "";
+          position: absolute;
+          inset: 0;
+          z-index: -1;
+          background-size: 60px 60px;
+          animation: slide-stripes 2s linear infinite;
+        }
+        .victory-stripes::before {
+          background-image: linear-gradient(
+            45deg,
+            rgba(16, 185, 129, 0.2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(16, 185, 129, 0.2) 50%,
+            rgba(16, 185, 129, 0.2) 75%,
+            transparent 75%,
+            transparent
+          );
+        }
+        .defeat-stripes::before {
+          background-image: linear-gradient(
+            45deg,
+            rgba(244, 63, 94, 0.2) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(244, 63, 94, 0.2) 50%,
+            rgba(244, 63, 94, 0.2) 75%,
+            transparent 75%,
+            transparent
+          );
+        }
       `}</style>
     </div>
   );
