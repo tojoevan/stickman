@@ -17,6 +17,17 @@ const db = {
   progress: Datastore.create({ filename: path.join(dbDir, 'progress.db'), autoload: true })
 };
 
+// 数据库性能优化：建立唯一索引
+const setupIndices = async () => {
+  try {
+    await db.users.ensureIndex({ fieldName: 'username', unique: true });
+    console.log('🚀 数据库索引优化完成: username');
+  } catch (e) {
+    console.error('⚠️ 索引建立失败:', e.message);
+  }
+};
+setupIndices();
+
 // 一次性迁移逻辑：将旧的 JSON 数据导入到 DB
 const migrateData = async () => {
   const OLD_DB_PATH = path.join(__dirname, 'game_storage.json');
