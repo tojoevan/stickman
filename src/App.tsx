@@ -264,6 +264,7 @@ class StickmanRenderer {
 
     const load = (name: string, url: string) => {
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.src = url;
       img.onload = () => {
         this.assets[name] = img;
