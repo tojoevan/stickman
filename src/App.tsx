@@ -88,7 +88,7 @@ const ITEMS = {
   armors: [
     { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '轻便无负重', cost: 40, rarity: 'common', tag: 'light' },
     { name: '披风', defense: 3, evasion: 20, icon: '🧥', desc: '幻影闪避', cost: 60, rarity: 'common', tag: 'light' },
-    { name: '潜行特工服', defense: 15, evasion: 45, icon: '🕴️', desc: '光学迷彩', cost: 800, rarity: 'novel', levelReq: 4, tag: 'light' },
+    { name: '潜行隐装', defense: 15, evasion: 45, icon: '🕴️', desc: '光学迷彩', cost: 800, rarity: 'novel', levelReq: 4, tag: 'light' },
 
     { name: '凯夫拉', defense: 8, evasion: 0, icon: '🥋', desc: '防弹纤维', cost: 50, rarity: 'common', tag: 'medium' },
     { name: '动力装甲', defense: 45, evasion: 5, icon: '🤖', desc: '外骨骼增强', cost: 500, rarity: 'novel', levelReq: 5, tag: 'medium' },
@@ -116,7 +116,7 @@ const INITIAL_CHAR: Character = {
   username: 'Unknown',
   level: 1, xp: 0, gold: 100,
   stats: { strength: 10, agility: 10, constitution: 12 },
-  statPoints: 8, health: 120, maxHealth: 120,
+  statPoints: 8, health: 180, maxHealth: 180,
   equipment: { weapon: '长剑', armor: '布衣', skill: '斩击' },
   unlockedItems: { '长剑': 1, '长弓': 1, '重锤': 1, '热能刀': 1, '布衣': 1, '铁盾': 1, '披风': 1, '凯夫拉': 1, '干扰烟幕': 1, '斩击': 1, '治疗': 1, '连击': 1 },
   defeatCount: 0
@@ -490,14 +490,17 @@ class StickmanRenderer {
 
   drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️', hasGhost: boolean = false, isElite: boolean = false) {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45);
+    
+    // 动态修正：由于素材 s_idle(右) 和 s_atk(左) 基础朝向相反，进攻时需要自动反转 flip 逻辑
+    const finalFlip = pose === 'attack' ? !flip : flip;
 
     // --- 精英特效：呼吸光晕 ---
     if (isElite && pose !== 'dead') {
-      ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
+      ctx.save(); ctx.translate(x, y); if (finalFlip) ctx.scale(-1, 1);
       ctx.globalAlpha = 0.15 + Math.abs(Math.sin(this.time * 3)) * 0.25;
       ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 20; ctx.lineCap = 'round';
       ctx.shadowBlur = 15; ctx.shadowColor = '#f43f5e';
-      this.drawStickmanPath(pose, t, '', isElite, !flip);
+      this.drawStickmanPath(pose, t, '', isElite, !finalFlip);
       ctx.stroke(); ctx.restore();
     }
 
@@ -505,20 +508,20 @@ class StickmanRenderer {
     if (hasGhost) {
       for (let i = 1; i <= 5; i++) {
         ctx.save();
-        const ghostX = x + (flip ? i * 40 : -i * 40) * Math.sin(t * 3);
-        ctx.translate(ghostX, y); if (flip) ctx.scale(-1, 1);
+        const ghostX = x + (finalFlip ? i * 40 : -i * 40) * Math.sin(t * 3);
+        ctx.translate(ghostX, y); if (finalFlip) ctx.scale(-1, 1);
         ctx.globalAlpha = 0.5 / i;
 
         const tGhost = this.time * (1 + agility * 0.02);
-        this.drawStickmanPath(pose, tGhost - i * 0.12, weaponIcon, isElite, !flip);
+        this.drawStickmanPath(pose, tGhost - i * 0.12, weaponIcon, isElite, !finalFlip);
         ctx.restore();
       }
     }
 
     // --- 绘制本体 ---
-    ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
+    ctx.save(); ctx.translate(x, y); if (finalFlip) ctx.scale(-1, 1);
     if (isElite && pose !== 'dead') { ctx.shadowBlur = 10; ctx.shadowColor = '#f43f5e'; }
-    this.drawStickmanPath(pose, t, weaponIcon, isElite, !flip);
+    this.drawStickmanPath(pose, t, weaponIcon, isElite, !finalFlip);
     ctx.restore();
   }
 
@@ -642,7 +645,7 @@ export default function App() {
       ...INITIAL_CHAR,
       username: eName,
       stats: { strength: 8, agility: 7, constitution: 8 },
-      health: 90, maxHealth: 90
+      health: 140, maxHealth: 140
     };
   });
   const [isDeployed, setIsDeployed] = useState(false);
@@ -780,7 +783,8 @@ export default function App() {
         r.advance(); r.drawBackground(field);
         
         // 调用升级：x, y, pose, isFlip, agility, weaponIcon, hasGhost, isElite
-        // 修正：根据新素材朝向(右)，玩家(左)不翻转(false)面向右侧，对手(右)翻转(true)面向左侧
+        // 修正：当前素材(s_idle, s_atk)均默认面向右侧
+        // 玩家(左)不翻转(false)以面向右侧对手，对手(右)翻转(true)以面向左侧玩家
         r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility || 10, player.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && activeSkill.isP));
         r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility || 10, enemy.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && !activeSkill.isP));
         r.renderEffects();
@@ -845,7 +849,7 @@ export default function App() {
     });
   };
 
-  const handleLevelUp = (stat: Stat) => { if (player.statPoints > 0) setPlayer(prev => { const nMax = stat === 'constitution' ? Math.floor(prev.maxHealth + 15) : prev.maxHealth; return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax }; }); };
+  const handleLevelUp = (stat: Stat) => { if (player.statPoints > 0) setPlayer(prev => { const nMax = stat === 'constitution' ? Math.floor(prev.maxHealth + 25) : prev.maxHealth; return { ...prev, stats: { ...prev.stats, [stat]: prev.stats[stat] + 1 }, statPoints: prev.statPoints - 1, maxHealth: nMax, health: nMax }; }); };
 
   const startRound = async () => {
     setIsDeployed(true);
@@ -1431,11 +1435,17 @@ export default function App() {
           {/* HEADER */}
           <div className="flex justify-between items-center bg-slate-900 border-4 border-slate-800 px-8 py-5 shadow-lg flex-none">
             <div className="flex items-center gap-16">
-              <div className="flex flex-col"><span className="text-xs font-bold text-slate-500 uppercase mb-1 tracking-tighter">档案代号 / PROFILE</span><span className="text-xl font-black tracking-widest">{player.username}</span></div>
+              <div className="flex flex-col"><span className="text-xs font-bold text-slate-400 uppercase mb-1 tracking-tighter">档案代号 / PROFILE</span><span className="text-xl font-black tracking-widest">{player.username}</span></div>
               <div className="flex flex-col items-center"><span className="text-xs text-slate-400 font-bold uppercase mb-1 tracking-tighter">同步等级 / LINK LEVEL</span><span className="text-2xl font-black text-indigo-500">LV.{player.level}</span></div>
               <div className="text-right"><span className="text-xs text-slate-400 font-bold uppercase block mb-1 tracking-tighter">信用余额 / CREDITS</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div>
             </div>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-8">
+              <div className="flex flex-col items-end">
+                <span className="text-2xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 tracking-tighter drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+                  神经链路：赛博进化
+                </span>
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] -mt-1">Neural Link: Cyber Evolution</span>
+              </div>
               <button onClick={() => {
                 resetGame();
                 setGameState('battle');
@@ -1581,13 +1591,13 @@ export default function App() {
                           </h3>
                           <button className="pixel-button danger !py-2 !px-6" style={{ background: 'transparent', border: 'none', color: '#94a3b8', textDecoration: 'underline' }} onClick={() => setShopTab(null as any)}>关闭终端 / CLOSE</button>
                         </div>
-                        <div className="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-3 gap-6 pr-4">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-4 gap-4 pr-4">
                           {ITEMS[shopTab].map(item => (
-                            <div key={item.name} className="pixel-card bg-slate-900 p-6 hover:border-indigo-500 transition-all group flex flex-col items-center">
-                              <span className="text-6xl mb-6 group-hover:scale-110 transition-transform">{item.icon}</span>
-                              <p className="text-lg font-black text-white mb-1 cn-text">{item.name}</p>
-                              <p className="text-[10px] text-slate-500 uppercase mb-6 tracking-widest">{item.rarity}</p>
-                              <button onClick={() => buyItem(item, shopTab as 'weapons' | 'armors' | 'skills')} className="w-full py-4 bg-indigo-600 text-sm font-black hover:bg-indigo-500 transition-colors shadow-lg cn-text">升级强化 / ₿{item.cost}</button>
+                            <div key={item.name} className="pixel-card bg-slate-900 p-4 hover:border-indigo-500 transition-all group flex flex-col items-center">
+                              <span className="text-4xl mb-4 group-hover:scale-110 transition-transform">{item.icon}</span>
+                              <p className="text-base font-black text-white mb-1 cn-text">{item.name}</p>
+                              <p className="text-[9px] text-slate-500 uppercase mb-4 tracking-widest">{item.rarity}</p>
+                              <button onClick={() => buyItem(item, shopTab as 'weapons' | 'armors' | 'skills')} className="w-full py-2.5 bg-indigo-600 text-xs font-black hover:bg-indigo-500 transition-colors shadow-lg cn-text">↑ ₿{item.cost}</button>
                             </div>
                           ))}
                         </div>
