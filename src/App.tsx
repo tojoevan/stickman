@@ -209,7 +209,12 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
           ref={scrollRef}
           onScroll={handleScroll}
           className="relative z-10 h-full overflow-y-auto overflow-x-hidden custom-scrollbar snap-y snap-mandatory"
-          style={{ scrollbarWidth: 'none' }}
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none', 
+            WebkitOverflowScrolling: 'touch',
+            touchAction: 'pan-y'
+          }}
         >
           {/* 上部占位 */}
           <div style={{ height: spacerHeight }} />
