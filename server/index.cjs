@@ -106,19 +106,31 @@ app.post('/api/register', async (req, res) => {
 
 // 2. 登录
 app.post('/api/login', async (req, res) => {
+  const start = Date.now();
   try {
     const { username, password } = req.body;
+    
+    // 1. 极速查询
     const user = await db.users.findOne({ username });
-    if (!user) return res.status(400).json({ error: '档案不存在' });
+    console.log(`⏱️ [DB Lookup]: ${Date.now() - start}ms`);
 
+    if (!user) {
+      return res.status(400).json({ error: '档案不存在' });
+    }
+
+    // 2. 密码校验
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(400).json({ error: '密钥错误' });
+    console.log(`⏱️ [Bcrypt Compare]: ${Date.now() - start}ms`);
+
+    if (!valid) {
+      return res.status(400).json({ error: '密钥错误' });
+    }
 
     const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '7d' });
     res.json({ token, username: user.username });
   } catch (e) {
     console.error('❌ [Login Error]:', e);
-    res.status(500).json({ error: '登录验证失败' });
+    res.status(500).json({ error: '系统链路故障' });
   }
 });
 
