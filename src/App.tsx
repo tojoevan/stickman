@@ -1216,7 +1216,7 @@ export default function App() {
                 <p className="text-xs font-black text-rose-400 cn-text italic">
                   {">> [接入拒绝] "}{authError}
                 </p>
-                {authError === '密钥错误' && (
+                {(authError === '密钥错误' || authError === '档案不存在') && (
                   <p className="text-[14px] text-rose-400/70 cn-text mt-2 leading-relaxed font-bold">
                     如果您是新指挥官，请点击下方“申请新档案入口”进行注册。
                   </p>
