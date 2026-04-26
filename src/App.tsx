@@ -758,10 +758,9 @@ export default function App() {
       if (e.code === 'Space') {
         if (gameState === 'victory' || gameState === 'defeat') {
           e.preventDefault();
-          setIsDeployed(false);
           setGameState('lobby');
           resetGame();
-        } else if (gameState === 'tactics') {
+        } else if ((gameState === 'tactics' || gameState === 'battle') && !isDeployed) {
           e.preventDefault();
           startRound();
         } else if (gameState === 'lobby') {
@@ -772,7 +771,7 @@ export default function App() {
     };
     window.addEventListener('keydown', handleSpace);
     return () => window.removeEventListener('keydown', handleSpace);
-  }, [gameState]);
+  }, [gameState, isDeployed]);
 
   useEffect(() => {
     let frame: number;
