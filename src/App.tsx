@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // --- 配置 ---
 const API_URL = '/api';
+const CDN_BASE = 'https://cdn.oahubs.com';
 
 // --- 辅助：处理请求报错 ---
 const safeFetch = async (url: string, options: any) => {
@@ -1281,7 +1282,7 @@ export default function App() {
               onCanPlay={(e) => (e.currentTarget.playbackRate = showcasedSkill === 'xuneng' ? 1.5 : 1)}
               key={showcasedSkill}
             >
-              <source src={showcasedSkill === 'xuneng' ? "/01-xunengzhongji.mp4" : showcasedSkill === 'huanying' ? "/02-huanyinglianji.mp4" : "/03-shenjingxiufu-ruodiansaomiao.mp4"} type="video/mp4" />
+              <source src={showcasedSkill === 'xuneng' ? `${CDN_BASE}/01-xunengzhongji.mp4` : showcasedSkill === 'huanying' ? `${CDN_BASE}/02-huanyinglianji.mp4` : `${CDN_BASE}/03-shenjingxiufu-ruodiansaomiao.mp4`} type="video/mp4" />
             </video>
 
             {/* 电影感遮罩 */}
