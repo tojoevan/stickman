@@ -277,21 +277,21 @@ class StickmanRenderer {
     };
 
     // 加载精美外部资产
-    load('cyborg_ninja', '/cyborg_ninja_clean.png');
-    load('cyborg_ninja_laser', '/cyborg_ninja_laser.png');
-    load('cyborg_ninja_bow', '/cyborg_ninja_bow.png');
-    load('cyborg_ninja_hammer', '/cyborg_ninja_hammer.png');
-    load('m_idle', '/assets/m_idle.png');
-    load('h_idle', '/assets/h_idle.png');
-    load('b_idle', '/assets/b_idle.png');
-    load('l_idle', '/assets/l_idle.png');
-    load('m_atk', '/assets/m_atk.png');
-    load('h_atk', '/assets/h_atk.png');
-    load('b_atk', '/assets/b_atk.png');
-    load('l_atk', '/assets/l_atk.png');
-    load('s_idle_0', '/assets/s_idle.png');
-    load('s_idle_1', '/assets/s_idle.png'); // 暂时复用同一张，也可后期补齐
-    load('s_atk', '/assets/s_atk.png');
+    load('cyborg_ninja', `${CDN_BASE}/cyborg_ninja_clean.png`);
+    load('cyborg_ninja_laser', `${CDN_BASE}/cyborg_ninja_laser.png`);
+    load('cyborg_ninja_bow', `${CDN_BASE}/cyborg_ninja_bow.png`);
+    load('cyborg_ninja_hammer', `${CDN_BASE}/cyborg_ninja_hammer.png`);
+    load('m_idle', `${CDN_BASE}/assets/m_idle.png`);
+    load('h_idle', `${CDN_BASE}/assets/h_idle.png`);
+    load('b_idle', `${CDN_BASE}/assets/b_idle.png`);
+    load('l_idle', `${CDN_BASE}/assets/l_idle.png`);
+    load('m_atk', `${CDN_BASE}/assets/m_atk.png`);
+    load('h_atk', `${CDN_BASE}/assets/h_atk.png`);
+    load('b_atk', `${CDN_BASE}/assets/b_atk.png`);
+    load('l_atk', `${CDN_BASE}/assets/l_atk.png`);
+    load('s_idle_0', `${CDN_BASE}/assets/s_idle.png`);
+    load('s_idle_1', `${CDN_BASE}/assets/s_idle.png`);
+    load('s_atk', `${CDN_BASE}/assets/s_atk.png`);
 
     // 背景资产保持现状 (程序化生成)
     const generateBG = (name: string, color: string) => {
@@ -334,46 +334,33 @@ class StickmanRenderer {
     }
 
     const img = this.assets[frameName];
-    // 确保 img 已加载且有实际尺寸
     if (img && img.width > 0) {
-      // 呼吸感逻辑：首页慢速平稳，战场根据敏捷略微加快
       const baseFreq = (isP && this.gameState === 'lobby') ? 0.84 : 2.1;
       const breathFreq = pose === 'idle' ? baseFreq : 3;
       const breathIntensity = isP ? 0.0054 : 0.012;
       const breath = (pose === 'idle') ? Math.sin(t * breathFreq) * breathIntensity : 0;
 
       ctx.save();
-      // 绘制带呼吸效果的资产
-      // 调整显示尺寸：增加100%（从48恢复至96）
       const baseSize = isP ? 162 : 169;
       const w = baseSize * (1 - breath * 0.5);
       const h = baseSize * (1 + breath);
 
       const offsetX = -w / 2;
-      const offsetY = -h + (baseSize * 0.85) - 50; // 整体向上移动 50px (累计)
+      const offsetY = -h + (baseSize * 0.85) - 50;
 
       ctx.drawImage(img, offsetX, offsetY, w, h);
-
       ctx.restore();
     } else {
-      // Fallback: 如果图片未加载或加载失败，绘制一个显眼的占位符火柴人
       ctx.save();
       if (!isP) ctx.scale(-1, 1);
-
-      // 躯干
       ctx.fillStyle = isElite ? '#f43f5e' : '#6366f1';
       ctx.fillRect(-15, -60, 30, 60);
-
-      // 头部
       ctx.beginPath();
       ctx.arc(0, -75, 15, 0, Math.PI * 2);
       ctx.fill();
-
-      // 提示文字
       ctx.fillStyle = '#ffffff';
       ctx.font = '10px sans-serif';
       ctx.fillText('LOADING', -20, -100);
-
       ctx.restore();
     }
   }
@@ -385,10 +372,10 @@ class StickmanRenderer {
         const dist = 120 + Math.random() * 80;
         this.effects.push({
           id: this.nextEffectId++, type,
-          tx: x, ty: y - 45, // 手部目标点
+          tx: x, ty: y - 45,
           x: x + Math.cos(angle) * dist,
           y: (y - 45) + Math.sin(angle) * dist,
-          vx: -Math.cos(angle) * 8, // 向中心加速
+          vx: -Math.cos(angle) * 8,
           vy: -Math.sin(angle) * 8,
           life: 1.0, color, size: Math.random() * 4 + 2
         });
@@ -426,8 +413,6 @@ class StickmanRenderer {
   drawBackground(field: Battlefield) {
     const ctx = this.ctx;
     ctx.save();
-
-    // 1. 基础底色
     ctx.fillStyle = field.bgColor;
     ctx.fillRect(0, 0, 800, 400);
 
@@ -436,9 +421,6 @@ class StickmanRenderer {
       return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '255, 255, 255';
     };
     const accentRgb = hexToRgb(field.accentColor);
-
-    // --- 2. 远景层 (Speed: 5) ---
-    // 远景微粒
     const drawFarEnv = (count: number, speed: number, opacity: number) => {
       for (let i = 0; i < count; i++) {
         ctx.fillStyle = `rgba(255, 255, 255, ${opacity * (0.5 + Math.random() * 0.5)})`;
@@ -462,24 +444,19 @@ class StickmanRenderer {
       }
     }
 
-    // --- 3. 中景层 (Speed: 7.5) ---
     const midSpeed = 7.5;
     const midXBase = (this.time * midSpeed) % 1600;
 
-    // 建筑物设为不透明，以遮挡远景
     for (let i = 0; i < 25; i++) {
       const bW = 40 + Math.abs(Math.sin(i * 456)) * 60;
       const bH = 100 + Math.abs(Math.cos(i * 789)) * 150;
       const bX = (i * 100 - midXBase + 1600) % 1600 - 400;
 
       if (bX > -200 && bX < 1000) {
-        // 使用实色填充
-        ctx.fillStyle = `rgb(${hexToRgb(field.bgColor)})`; // 先涂一层背景色底
+        ctx.fillStyle = `rgb(${hexToRgb(field.bgColor)})`;
         ctx.fillRect(bX, 320 - bH, bW, bH);
-        ctx.fillStyle = `rgba(${accentRgb}, 0.2)`; // 再叠一层环境强调色
+        ctx.fillStyle = `rgba(${accentRgb}, 0.2)`;
         ctx.fillRect(bX, 320 - bH, bW, bH);
-
-        // 建筑窗户
         ctx.fillStyle = `rgba(${accentRgb}, 0.5)`;
         ctx.fillRect(bX + 10, 320 - bH + 20, 10, 10);
       }
@@ -498,7 +475,6 @@ class StickmanRenderer {
       }
     }
 
-    // --- 4. 近景层 (Speed: 10) ---
     if (this.assetsLoaded) {
       if (this.assets.bg_floor) {
         const pattern = ctx.createPattern(this.assets.bg_floor, 'repeat');
@@ -530,17 +506,13 @@ class StickmanRenderer {
       ctx.fillStyle = `rgba(244, 63, 94, ${0.1 + Math.sin(this.time * 2) * 0.05})`;
       ctx.fillRect(0, 0, 800, 400);
     }
-
     ctx.restore();
   }
 
   drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponTag: string = '', hasGhost: boolean = false, isElite: boolean = false, isP: boolean = true) {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45);
-
-    // 动态修正：由于素材 s_idle(右) 和 s_atk(左) 基础朝向相反，进攻时需要自动反转 flip 逻辑
     const finalFlip = pose === 'attack' ? !flip : flip;
 
-    // --- 精英特效：呼吸光晕 ---
     if (isElite && pose !== 'dead') {
       ctx.save(); ctx.translate(x, y); if (finalFlip) ctx.scale(-1, 1);
       ctx.globalAlpha = 0.15 + Math.abs(Math.sin(this.time * 3)) * 0.25;
@@ -550,37 +522,29 @@ class StickmanRenderer {
       ctx.stroke(); ctx.restore();
     }
 
-    // --- 绘制残影 (Ghost Afterimages) ---
     if (hasGhost) {
       for (let i = 1; i <= 5; i++) {
         ctx.save();
         const ghostX = x + (finalFlip ? i * 40 : -i * 40) * Math.sin(t * 3);
         ctx.translate(ghostX, y); if (finalFlip) ctx.scale(-1, 1);
         ctx.globalAlpha = 0.5 / i;
-
         const tGhost = this.time * (1 + agility * 0.02);
         this.drawStickmanPath(pose, tGhost - i * 0.12, weaponTag, isElite, isP);
         ctx.restore();
       }
     }
 
-    // --- 绘制本体 ---
     ctx.save(); ctx.translate(x, y); if (finalFlip) ctx.scale(-1, 1);
     if (isElite && pose !== 'dead') { ctx.shadowBlur = 10; ctx.shadowColor = '#f43f5e'; }
     this.drawStickmanPath(pose, t, weaponTag, isElite, isP);
     ctx.restore();
   }
 
-  // --- 首页专用：高阶全息绘制 (Procedural Drawing) ---
   drawLobbyHero(x: number, y: number, agility: number, equipment: { weapon: string, armor: string, skill: string }) {
     const ctx = this.ctx;
-    const t = this.time * 1.5;
-    const breath = 0; // 取消上下移动起伏
-
     ctx.save();
-    ctx.translate(x, y + breath - 15);
+    ctx.translate(x, y - 15);
 
-    // 根据装备动态切换主角贴图
     const wObj = ITEMS.weapons.find(w => w.name === equipment.weapon);
     let imgKey = 'cyborg_ninja';
     if (wObj?.tag === 'piercing') imgKey = 'cyborg_ninja_bow';
@@ -1816,7 +1780,7 @@ export default function App() {
             <div className="flex-1 pixel-card flex flex-col gap-6 overflow-hidden relative">
               {/* 放大模糊的主角背影背景 */}
               <div className="absolute inset-0 pointer-events-none opacity-80" style={{
-                backgroundImage: "url(" + (player.equipment.weapon.includes('锤') ? '/cyborg_ninja_hammer.png' : '/cyborg_ninja_clean_bg.png') + ")",
+                backgroundImage: "url(" + (player.equipment.weapon.includes('锤') ? `${CDN_BASE}/cyborg_ninja_hammer.png` : `${CDN_BASE}/cyborg_ninja_clean_bg.png`) + ")",
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 filter: 'blur(10px)',
