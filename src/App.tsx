@@ -683,6 +683,7 @@ export default function App() {
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [authForm, setAuthForm] = useState({ username: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const [player, setPlayer] = useState<Character>(() => {
     const saved = localStorage.getItem('username');
     return {
@@ -696,6 +697,7 @@ export default function App() {
     const endpoint = authView === 'register' ? '/api/register' : '/api/login';
     
     try {
+      setAuthError(null);
       if (authView === 'register') {
         if (authForm.password !== authForm.confirmPassword) {
           addLog(`>> [错误] 密钥确认不匹配`);
@@ -725,7 +727,9 @@ export default function App() {
         hasLoaded.current = false; // 标记需要重新加载数据
       }
     } catch (err: any) {
-      addLog(`>> [系统错误] ${err.message}`);
+      const errorMsg = err.message || '系统链路中断';
+      addLog(`>> [系统错误] ${errorMsg}`);
+      setAuthError(errorMsg);
     }
   };
   const [enemy, setEnemy] = useState<Character>(() => {
@@ -1207,6 +1211,18 @@ export default function App() {
               <h1 className="text-2xl font-black italic text-white mb-2 cn-text tracking-tighter glow-pixel">神经链路：赛博进化</h1>
               <h2 className="text-[10px] pixel-font text-indigo-500 mb-2 tracking-widest uppercase opacity-80">NEURAL LINK / {authView === 'login' ? 'ACCESS' : 'INITIALIZE'}</h2>
             </div>
+            {authError && (
+              <div className="mb-6 p-4 bg-rose-500/10 border-l-4 border-rose-500 animate-in slide-in-from-left-2 duration-300">
+                <p className="text-xs font-black text-rose-400 cn-text italic">
+                  {">> [接入拒绝] "}{authError}
+                </p>
+                {authError === '密钥错误' && (
+                  <p className="text-[14px] text-rose-400/70 cn-text mt-2 leading-relaxed font-bold">
+                    如果您是新指挥官，请点击下方“申请新档案入口”进行注册。
+                  </p>
+                )}
+              </div>
+            )}
             <form onSubmit={handleAuth} className="space-y-6">
               <div className="space-y-1">
                 <label className="text-[16px] font-black text-slate-500 ml-1 tracking-widest uppercase flex items-center gap-1.5">

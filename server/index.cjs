@@ -88,6 +88,7 @@ app.post('/api/register', async (req, res) => {
     await db.users.insert(newUser);
     res.json({ message: '档案建立成功' });
   } catch (e) {
+    console.error('❌ [Register Error]:', e);
     res.status(500).json({ error: '系统内部故障' });
   }
 });
@@ -105,6 +106,7 @@ app.post('/api/login', async (req, res) => {
     const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '7d' });
     res.json({ token, username: user.username });
   } catch (e) {
+    console.error('❌ [Login Error]:', e);
     res.status(500).json({ error: '登录验证失败' });
   }
 });
