@@ -1821,7 +1821,7 @@ export default function App() {
                                 {isPreview && <span className="text-[8px] font-black bg-amber-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
                               <p className="text-sm text-amber-500/80 font-bold">攻击: {(item.damage || 0) >= 0 ? '+' : ''}{item.damage} | 载荷: {item.weight}kg</p>
-                              {shopTab && item.story && <p className="text-[12px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
+                              {shopTab && item.story && <p className="text-[14px] text-slate-300 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
                             </div>
                           );
                         })()}
@@ -1846,7 +1846,7 @@ export default function App() {
                                 {isPreview && <span className="text-[8px] font-black bg-indigo-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
                               <p className="text-sm text-indigo-400/80 font-bold">防御: {(item.defense || 0) >= 0 ? '+' : ''}{item.defense} | 载荷: {item.weight}kg</p>
-                              {shopTab && item.story && <p className="text-[12px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
+                              {shopTab && item.story && <p className="text-[14px] text-slate-300 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
                             </div>
                           );
                         })()}
@@ -1871,7 +1871,7 @@ export default function App() {
                                 {isPreview && <span className="text-[8px] font-black bg-cyan-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
                               <p className="text-sm text-cyan-400/80 font-bold">倍率: x{item.mult} | 核心: Lv.{player.unlockedItems[item.name] || 1}</p>
-                              {shopTab && item.story && <p className="text-[12px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
+                              {shopTab && item.story && <p className="text-[14px] text-slate-300 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
                             </div>
                           );
                         })()}
