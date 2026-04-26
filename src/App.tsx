@@ -1440,16 +1440,18 @@ export default function App() {
             {/* 操作控制 (右侧) */}
             <div className="w-[300px] flex flex-col gap-2">
               {!isDeployed ? (
-                <button onClick={startRound} className="flex-1 pixel-button success !p-0 text-lg shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                  执行任务部署 / START
+                <button onClick={startRound} className="flex-1 pixel-button success btn-deploy-anim !p-0 shadow-[0_0_20px_rgba(16,185,129,0.2)] flex flex-col items-center justify-center leading-tight py-2">
+                  <span className="text-xl font-black cn-text">执行任务部署</span>
+                  <span className="text-xs font-bold opacity-70 tracking-widest">DEPLOY MISSION</span>
                 </button>
               ) : (
                 <div className="flex-1 pixel-card bg-slate-900 flex items-center justify-center text-slate-400 font-bold italic animate-pulse border-indigo-500/30 text-sm cn-text">
                   同步中... SYNCING
                 </div>
               )}
-              <button onClick={() => { setGameState('lobby'); resetGame(); }} className="flex-1 text-xs font-black text-rose-400 hover:text-white hover:bg-rose-500/20 border border-rose-500/30 transition-all uppercase tracking-wide cn-text">
-                中止任务 / ABORT
+              <button onClick={() => { setGameState('lobby'); resetGame(); }} className="flex-1 flex flex-col items-center justify-center leading-tight py-2 text-rose-400 hover:text-white hover:bg-rose-500/20 border border-rose-500/30 transition-all cn-text">
+                <span className="text-base font-black">终止任务</span>
+                <span className="text-[10px] font-bold opacity-60 tracking-wider">TERMINATE MISSION</span>
               </button>
             </div>
           </div>
