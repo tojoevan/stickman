@@ -2061,7 +2061,7 @@ export default function App() {
 
       {/* 3. GLOBAL STYLES */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;700;900&display=swap');
+        @import url('https://fonts.loli.net/css2?family=Press+Start+2P&family=Outfit:wght@400;700;900&display=swap');
 
         /* 全局字体标准化 */
         :root {
