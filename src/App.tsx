@@ -1442,7 +1442,7 @@ export default function App() {
               )}
 
               {coinToss.active && (
-                <div className="absolute inset-0 z-[500] bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in">
+                <div className="absolute inset-0 z-[500] bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in" style={{ perspective: '1200px' }}>
                   <div className={`coin-container ${!coinToss.result ? 'flipping' : ''} ${coinToss.result === 'enemy' ? 'show-tails' : 'show-heads'}`}>
                     <div className="coin-face heads" style={{ backgroundImage: `url(${CDN_BASE}/assets/coin_heads.png)`, backgroundSize: 'cover' }}></div>
                     <div className="coin-face tails" style={{ backgroundImage: `url(${CDN_BASE}/assets/coin_tails.png)`, backgroundSize: 'cover' }}></div>
@@ -2202,6 +2202,8 @@ export default function App() {
           position: relative;
           transform-style: preserve-3d;
           transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+          transform-origin: center center;
+          transform: rotateX(0deg);
         }
         .coin-container.flipping {
           animation: coin-flip-loop 0.8s infinite linear;
@@ -2217,14 +2219,15 @@ export default function App() {
           box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.2);
           background-size: cover;
           background-position: center;
+          /* 确保面部也居中 */
+          top: 0; left: 0;
         }
         .coin-face.heads { z-index: 2; transform: rotateX(0deg); }
         .coin-face.tails { transform: rotateX(180deg); }
 
         @keyframes coin-flip-loop {
-          0% { transform: rotateX(0deg) translateY(0) scale(1); }
-          50% { transform: rotateX(720deg) translateY(-80px) scale(1.4); }
-          100% { transform: rotateX(1440deg) translateY(0) scale(1); }
+          0% { transform: rotateX(0deg); }
+          100% { transform: rotateX(1440deg); }
         }
 
         @keyframes loading {
