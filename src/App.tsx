@@ -2,7 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 
 // --- 配置 ---
 const API_URL = '/api';
-const CDN_BASE = 'https://cdn.oahubs.com';
+
+// 优化：本地开发优先使用本地资源，避免 CDN 无法下载导致页面白屏
+const getCdnBase = () => {
+  if (import.meta.env.DEV) return ''; 
+  return 'https://cdn.oahubs.com';
+};
+
+const CDN_BASE = getCdnBase();
 
 // --- 辅助：处理请求报错 ---
 const safeFetch = async (url: string, options: any) => {
@@ -999,13 +1006,14 @@ export default function App() {
     const resultStr = playerFirst ? 'player' : 'enemy';
 
     setCoinToss({ active: true, result: null });
-    await new Promise(r => setTimeout(r, 1000)); // 旋转时间
+    await new Promise(r => setTimeout(r, 2000)); // 翻转 2s
     setCoinToss({ active: true, result: resultStr });
-    await new Promise(r => setTimeout(r, 1500)); // 展示结果时间
+    await new Promise(r => setTimeout(r, 1500)); // 停顿展示
     setCoinToss({ active: false, result: null });
 
-    setGameState('battle'); addLog(`>>> 神经链路第 ${round} 轮同步`);
-    addLog(`[掷币] 结果: ${playerFirst ? '你' : '目标'} 获得优先行动权`);
+    setGameState('battle'); 
+    addLog(`>>> 神经链路第 ${round} 轮同步`);
+    addLog(`[投币结果] ${playerFirst ? '正面 (PLAYER)' : '反面 (ENEMY)'} - ${playerFirst ? '优先同步' : '延迟切入'}`);
 
     let pHP = Math.floor(player.health); let eHP = Math.floor(enemy.health);
     let curP_Dmg = 0; let curE_Dmg = 0;
@@ -1236,6 +1244,7 @@ export default function App() {
         </div>
       )}
 
+
       {/* 5s 震撼技能动画叠加层 */}
       {showcasedSkill && (
         <div className="fixed inset-0 z-[999] bg-black/95 flex items-center justify-center animate-in fade-in duration-500">
@@ -1433,11 +1442,14 @@ export default function App() {
               )}
 
               {coinToss.active && (
-                <div className="absolute inset-0 z-[300] bg-slate-950/80 flex flex-col items-center justify-center animate-in fade-in">
-                  <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-3xl font-black shadow-2xl transition-all duration-700 cn-text ${!coinToss.result ? 'animate-spin border-slate-400 bg-slate-800' : coinToss.result === 'player' ? 'border-emerald-500 bg-emerald-600 scale-125' : 'border-rose-500 bg-rose-600 scale-125'}`}>
-                    {!coinToss.result ? '🪙' : coinToss.result === 'player' ? '玩家' : '对手'}
+                <div className="absolute inset-0 z-[500] bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in">
+                  <div className={`coin-container ${!coinToss.result ? 'flipping' : ''} ${coinToss.result === 'enemy' ? 'show-tails' : 'show-heads'}`}>
+                    <div className="coin-face heads" style={{ backgroundImage: `url(${CDN_BASE}/assets/coin_heads.png)`, backgroundSize: 'cover' }}></div>
+                    <div className="coin-face tails" style={{ backgroundImage: `url(${CDN_BASE}/assets/coin_tails.png)`, backgroundSize: 'cover' }}></div>
                   </div>
-                  <p className="mt-8 text-2xl font-black text-white uppercase text-center tracking-widest cn-text">判定行动顺序 . . .</p>
+                  <p className="mt-12 text-2xl font-black text-white italic tracking-[0.3em] uppercase cn-text animate-pulse">
+                    {!coinToss.result ? '同步协议优先级计算中...' : (coinToss.result === 'player' ? '正面：指挥官取得优先权' : '反面：敌方占据主动')}
+                  </p>
                 </div>
               )}
 
@@ -2091,7 +2103,8 @@ export default function App() {
 
       {/* 3. GLOBAL STYLES */}
       <style>{`
-        @import url('https://fonts.loli.net/css2?family=Press+Start+2P&family=Outfit:wght@400;700;900&display=swap');
+        /* 更换为更稳定的字体 CDN 镜像 */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;700;900&display=swap');
 
         /* 全局字体标准化 */
         :root {
@@ -2182,6 +2195,42 @@ export default function App() {
         }
         
         .pixel-button.danger { background: #ef4444; box-shadow: 4px 4px 0px #991b1b; }
+
+        /* 硬币 3D 翻转动画 */
+        .coin-container {
+          width: 160px; height: 160px;
+          position: relative;
+          transform-style: preserve-3d;
+          transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+        }
+        .coin-container.flipping {
+          animation: coin-flip-loop 0.8s infinite linear;
+        }
+        .coin-container.show-heads { transform: rotateX(0deg); }
+        .coin-container.show-tails { transform: rotateX(180deg); }
+
+        .coin-face {
+          position: absolute;
+          width: 100%; height: 100%;
+          backface-visibility: hidden;
+          border-radius: 50%;
+          box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.2);
+          background-size: cover;
+          background-position: center;
+        }
+        .coin-face.heads { z-index: 2; transform: rotateX(0deg); }
+        .coin-face.tails { transform: rotateX(180deg); }
+
+        @keyframes coin-flip-loop {
+          0% { transform: rotateX(0deg) translateY(0) scale(1); }
+          50% { transform: rotateX(720deg) translateY(-80px) scale(1.4); }
+          100% { transform: rotateX(1440deg) translateY(0) scale(1); }
+        }
+
+        @keyframes loading {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
 
         /* 全局沉浸式呼吸阴影 */
         @keyframes vignette-breath {
