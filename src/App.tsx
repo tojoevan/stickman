@@ -670,6 +670,7 @@ interface Character {
 }
 
 export default function App() {
+  const [showSkillVideo, setShowSkillVideo] = useState(false);
   // --- 调试模式：自动登录 ---
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
@@ -1016,7 +1017,10 @@ export default function App() {
       if (s.name === '弱点扫描') rendererRef.current?.addEffect('scan', x, 200, '#818cf8', 1);
       if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
       if (s.name === '系统过载') rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20);
-      if (s.name === '蓄能重击') rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40);
+      if (s.name === '蓄能重击') {
+          rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40);
+          setShowSkillVideo(true);
+      }
       if (s.name === '幻影连击') rendererRef.current?.addEffect('speed', x, 280, '#6366f1', 15);
       if (s.name === '神经修复') {
         const atk = isP ? player : enemy;
@@ -1206,6 +1210,72 @@ export default function App() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 5s 震撼技能动画叠加层 */}
+      {showSkillVideo && (
+        <div className="fixed inset-0 z-[999] bg-black/95 flex items-center justify-center animate-in fade-in duration-500">
+          <div className="relative w-full h-full max-w-5xl max-h-[85vh] border-2 border-indigo-500/30 overflow-hidden shadow-[0_0_150px_rgba(99,102,241,0.3)] bg-slate-950">
+            <video
+              autoPlay
+              loop
+              className="w-full h-full object-cover"
+            >
+              <source src="/assets/charged_strike.mp4" type="video/mp4" />
+            </video>
+            
+            {/* 电影感遮罩 */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60 pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_30%,_rgba(0,0,0,0.8)_100%)] pointer-events-none"></div>
+            
+            {/* 战术 UI 装饰 */}
+            <div className="absolute top-12 left-12 border-l-4 border-indigo-500 pl-6 animate-in slide-in-from-left-8 duration-700">
+              <p className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 tracking-[0.3em] uppercase italic">蓄能重击</p>
+              <p className="text-xl font-black text-white/40 tracking-[0.4em] uppercase mt-1">CHARGED STRIKE</p>
+              <div className="flex items-center gap-3 mt-4">
+                <div className="h-[2px] w-24 bg-indigo-500/50"></div>
+                <p className="text-[10px] text-indigo-400 font-mono tracking-widest">DIGITAL CORE OVERLOAD: SYSTEM STABILIZING...</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowSkillVideo(false)}
+              className="absolute top-12 right-12 text-white bg-white/5 hover:bg-white/10 px-8 py-3 border border-white/20 backdrop-blur-xl transition-all font-black text-xs cn-text group"
+            >
+              <span className="group-hover:tracking-widest transition-all">切断链路 / TERMINATE</span>
+            </button>
+
+            {/* 底部装饰 */}
+            <div className="absolute bottom-12 left-12 right-12 flex justify-between items-end border-t border-white/10 pt-6">
+              <div className="flex gap-8">
+                <div>
+                  <p className="text-[8px] text-slate-500 uppercase font-bold tracking-tighter">Sync Rate</p>
+                  <p className="text-lg font-mono text-cyan-400 font-black">99.8%</p>
+                </div>
+                <div>
+                  <p className="text-[8px] text-slate-500 uppercase font-bold tracking-tighter">Energy Level</p>
+                  <p className="text-lg font-mono text-indigo-400 font-black">MAX</p>
+                </div>
+              </div>
+              <div className="flex gap-1 h-12 items-end">
+                {[1,2,3,4,5,6,7,8].map(i => (
+                  <div 
+                    key={i} 
+                    className="w-1 bg-indigo-500/40 animate-pulse" 
+                    style={{
+                      height: `${Math.random() * 100}%`,
+                      animationDelay: `${i*0.1}s`,
+                      animationDuration: '0.5s'
+                    }}
+                  ></div>
+                ))}
+              </div>
+            </div>
+
+            {/* 扫描线动画 */}
+            <div className="absolute inset-0 pointer-events-none opacity-10 bg-[linear-gradient(transparent_0%,rgba(99,102,241,0.2)_50%,transparent_100%)] bg-[length:100%_4px] animate-scan"></div>
           </div>
         </div>
       )}
@@ -1805,7 +1875,13 @@ export default function App() {
 
                     {/* 实时渲染 Canvas */}
                     <div className="relative z-10 animate-in zoom-in-90 duration-700 mt-[100px]">
-                      <canvas ref={lobbyCanvasRef} width={600} height={700} className="drop-shadow-[0_0_25px_rgba(99,102,241,0.4)]" />
+                      <canvas
+                        ref={lobbyCanvasRef}
+                        width={600}
+                        height={700}
+                        onClick={() => setShowSkillVideo(true)}
+                        className="drop-shadow-[0_0_25px_rgba(99,102,241,0.4)] cursor-pointer hover:scale-[1.02] transition-transform"
+                      />
 
                       {/* 浮动交互节点 (Hotspots) - 强化引导 */}
                       <div className="absolute inset-0 pointer-events-none">
