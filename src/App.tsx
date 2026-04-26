@@ -1460,10 +1460,34 @@ export default function App() {
         <div className="flex flex-col h-full p-4 gap-4 animate-in fade-in duration-500">
           {/* HEADER */}
           <div className="flex justify-between items-center bg-slate-900 border-4 border-slate-800 px-8 py-5 shadow-lg flex-none">
-            <div className="flex items-center gap-16">
-              <div className="flex flex-col"><span className="text-xs font-bold text-slate-400 uppercase mb-1 tracking-tighter">档案代号 / PROFILE</span><span className="text-xl font-black tracking-widest">{player.username}</span></div>
-              <div className="flex flex-col items-center"><span className="text-xs text-slate-400 font-bold uppercase mb-1 tracking-tighter">同步等级 / LINK LEVEL</span><span className="text-2xl font-black text-indigo-500">等级 {player.level}</span></div>
-              <div className="text-right"><span className="text-xs text-slate-400 font-bold uppercase block mb-1 tracking-tighter">信用余额 / CREDITS</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div>
+            <div className="flex items-end gap-16">
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-slate-400 uppercase mb-1 tracking-tighter">档案代号 / PROFILE</span>
+                <span className="text-2xl font-black tracking-widest leading-none">{player.username}</span>
+              </div>
+              
+              <div className="flex flex-col">
+                <span className="text-xs text-slate-400 font-bold uppercase mb-1 tracking-tighter">同步等级 / LINK LEVEL</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-2xl font-black text-indigo-500 leading-none">等级 {player.level}</span>
+                  <div className="flex flex-col pt-1">
+                    <div className="h-2 w-40 bg-slate-800 rounded-full overflow-hidden border border-slate-700/30">
+                      <div 
+                        className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] transition-all duration-1000 ease-out" 
+                        style={{ width: `${Math.min(100, (player.xp / (player.level * 100)) * 100)}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-1 px-0.5">
+                      <span className="text-[8px] text-indigo-400 font-black tracking-tighter leading-none">{player.xp} / {player.level * 100} EXP</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col text-right">
+                <span className="text-xs text-slate-400 font-bold uppercase mb-1 tracking-tighter">信用余额 / CREDITS</span>
+                <span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span>
+              </div>
             </div>
             <div className="flex items-center gap-8">
               <div className="flex flex-col items-end">
