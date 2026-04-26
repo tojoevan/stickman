@@ -1176,11 +1176,11 @@ export default function App() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative w-fit mx-auto">
               <canvas ref={canvasRef} width={800} height={400} className="max-w-full h-auto border-4 border-slate-800 shadow-2xl bg-black image-pixelated" />
 
             {activeSkill && (
-              <div className="absolute top-1/4 text-5xl font-black italic text-cyan-400 drop-shadow-[0_0_15px_#00f2ff] animate-bounce">
+              <div className="absolute top-1/4 left-0 right-0 text-center -ml-24 whitespace-nowrap z-50 text-5xl font-black italic text-cyan-400 drop-shadow-[0_0_15px_#00f2ff] animate-bounce">
                 {activeSkill.name}!!
               </div>
             )}
