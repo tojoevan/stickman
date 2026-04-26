@@ -1522,65 +1522,53 @@ export default function App() {
                         <h2 className="text-sm font-black italic text-slate-400 uppercase tracking-widest">当前载荷 / LOADOUT</h2>
                       </div>
                       <div className="space-y-6 overflow-y-auto custom-scrollbar pr-2">
-                        {/* 武器槽位：仅在浏览武器或未开启商店时显示 */}
-                        {(shopTab === 'weapons' || !shopTab) && (
-                          <div className={`border-l-4 border-amber-500 pl-4 py-2 transition-all ${hoveredItem && shopTab === 'weapons' ? 'bg-amber-500/20 scale-[1.02] shadow-[0_0_20px_rgba(245,158,11,0.2)]' : 'bg-amber-500/5'}`}>
-                            <div className="flex justify-between items-center">
-                              <p className="text-[10px] text-slate-500 uppercase font-bold">攻击链路 / WEAPON</p>
-                              {hoveredItem && shopTab === 'weapons' && <span className="text-[8px] font-black bg-amber-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW_LINK</span>}
-                            </div>
-                            <p className="text-lg font-black text-amber-500 mt-1">
-                              {hoveredItem && shopTab === 'weapons' ? hoveredItem.name : (player.equipment.weapon || '未装载')}
-                            </p>
-                            {hoveredItem && shopTab === 'weapons' && (
-                              <div className="mt-2 text-sm text-slate-400 leading-tight border-t border-amber-500/30 pt-2 animate-in fade-in duration-300">
-                                <p className="mb-1 font-bold">{hoveredItem.desc}</p>
-                                <p className="italic text-slate-500 mb-1 text-xs">"{hoveredItem.story}"</p>
-                                <p className="text-amber-500 font-black">攻击: {(hoveredItem.damage || 0) >= 0 ? '+' : ''}{hoveredItem.damage} | 需求等级: {hoveredItem.levelReq || 1}</p>
+                        {/* 武器槽位 */}
+                        {(shopTab === 'weapons' || !shopTab) && (() => {
+                          const isPreview = hoveredItem && shopTab === 'weapons';
+                          const item = isPreview ? hoveredItem : ITEMS.weapons.find(w => w.name === player.equipment.weapon);
+                          if (!item) return null;
+                          return (
+                            <div className={`border-l-4 border-amber-500 pl-4 py-1 transition-all ${isPreview ? 'bg-amber-500/20 scale-[1.02]' : 'bg-amber-500/5'}`}>
+                              <div className="flex justify-between items-center">
+                                <p className="text-base font-black text-amber-500">{item.name}</p>
+                                {isPreview && <span className="text-[8px] font-black bg-amber-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
-                            )}
-                          </div>
-                        )}
+                              <p className="text-sm text-amber-500/80 font-bold mt-0.5">攻击: {(item.damage || 0) >= 0 ? '+' : ''}{item.damage} | 需求等级: {item.levelReq || 1}</p>
+                            </div>
+                          );
+                        })()}
 
-                        {/* 防具槽位：仅在浏览防具或未开启商店时显示 */}
-                        {(shopTab === 'armors' || !shopTab) && (
-                          <div className={`border-l-4 border-indigo-500 pl-4 py-2 transition-all ${hoveredItem && shopTab === 'armors' ? 'bg-indigo-500/20 scale-[1.02] shadow-[0_0_20px_rgba(99,102,241,0.2)]' : 'bg-indigo-500/5'}`}>
-                            <div className="flex justify-between items-center">
-                              <p className="text-[10px] text-slate-500 uppercase font-bold">防护链路 / ARMOR</p>
-                              {hoveredItem && shopTab === 'armors' && <span className="text-[8px] font-black bg-indigo-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW_LINK</span>}
-                            </div>
-                            <p className="text-lg font-black text-indigo-500 mt-1">
-                              {hoveredItem && shopTab === 'armors' ? hoveredItem.name : (player.equipment.armor || '未装载')}
-                            </p>
-                            {hoveredItem && shopTab === 'armors' && (
-                              <div className="mt-2 text-sm text-slate-400 leading-tight border-t border-indigo-500/30 pt-2 animate-in fade-in duration-300">
-                                <p className="mb-1 font-bold">{hoveredItem.desc}</p>
-                                <p className="italic text-slate-500 mb-1 text-xs">"{hoveredItem.story}"</p>
-                                <p className="text-indigo-400 font-black">防御: {(hoveredItem.defense || 0) >= 0 ? '+' : ''}{hoveredItem.defense} | 闪避: {(hoveredItem.evasion || 0) >= 0 ? '+' : ''}{hoveredItem.evasion}%</p>
+                        {/* 防具槽位 */}
+                        {(shopTab === 'armors' || !shopTab) && (() => {
+                          const isPreview = hoveredItem && shopTab === 'armors';
+                          const item = isPreview ? hoveredItem : ITEMS.armors.find(a => a.name === player.equipment.armor);
+                          if (!item) return null;
+                          return (
+                            <div className={`border-l-4 border-indigo-500 pl-4 py-1 transition-all ${isPreview ? 'bg-indigo-500/20 scale-[1.02]' : 'bg-indigo-500/5'}`}>
+                              <div className="flex justify-between items-center">
+                                <p className="text-base font-black text-indigo-500">{item.name}</p>
+                                {isPreview && <span className="text-[8px] font-black bg-indigo-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
-                            )}
-                          </div>
-                        )}
+                              <p className="text-sm text-indigo-400/80 font-bold mt-0.5">防御: {(item.defense || 0) >= 0 ? '+' : ''}{item.defense} | 闪避: {(item.evasion || 0) >= 0 ? '+' : ''}{item.evasion}%</p>
+                            </div>
+                          );
+                        })()}
 
-                        {/* 技能槽位：仅在浏览技能或未开启商店时显示 */}
-                        {(shopTab === 'skills' || !shopTab) && (
-                          <div className={`border-l-4 border-cyan-500 pl-4 py-2 transition-all ${hoveredItem && shopTab === 'skills' ? 'bg-cyan-500/20 scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.2)]' : 'bg-cyan-500/5'}`}>
-                            <div className="flex justify-between items-center">
-                              <p className="text-[10px] text-slate-500 uppercase font-bold">核心逻辑 / SKILL</p>
-                              {hoveredItem && shopTab === 'skills' && <span className="text-[8px] font-black bg-cyan-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW_LINK</span>}
-                            </div>
-                            <p className="text-lg font-black text-cyan-500 mt-1">
-                              {hoveredItem && shopTab === 'skills' ? hoveredItem.name : (player.equipment.skill || '未装载')}
-                            </p>
-                            {hoveredItem && shopTab === 'skills' && (
-                              <div className="mt-2 text-sm text-slate-400 leading-tight border-t border-cyan-500/30 pt-2 animate-in fade-in duration-300">
-                                <p className="mb-1 font-bold">{hoveredItem.desc}</p>
-                                <p className="italic text-slate-500 mb-1 text-xs">"{hoveredItem.story}"</p>
-                                <p className="text-cyan-400 font-black">伤害倍率: x{hoveredItem.mult} | 核心等级: {player.unlockedItems[hoveredItem.name] || 0}</p>
+                        {/* 技能槽位 */}
+                        {(shopTab === 'skills' || !shopTab) && (() => {
+                          const isPreview = hoveredItem && shopTab === 'skills';
+                          const item = isPreview ? hoveredItem : ITEMS.skills.find(s => s.name === player.equipment.skill);
+                          if (!item) return null;
+                          return (
+                            <div className={`border-l-4 border-cyan-500 pl-4 py-1 transition-all ${isPreview ? 'bg-cyan-500/20 scale-[1.02]' : 'bg-cyan-500/5'}`}>
+                              <div className="flex justify-between items-center">
+                                <p className="text-base font-black text-cyan-500">{item.name}</p>
+                                {isPreview && <span className="text-[8px] font-black bg-cyan-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
-                            )}
-                          </div>
-                        )}
+                              <p className="text-sm text-cyan-400/80 font-bold mt-0.5">伤害倍率: x{item.mult} | 核心等级: {player.unlockedItems[item.name] || 1}</p>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
