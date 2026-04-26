@@ -1765,9 +1765,9 @@ export default function App() {
 
         /* 全局沉浸式呼吸阴影 */
         @keyframes vignette-breath {
-          0% { box-shadow: inset 0 0 60px rgba(79, 70, 229, 0.15); }
-          50% { box-shadow: inset 0 0 120px rgba(79, 70, 229, 0.3); }
-          100% { box-shadow: inset 0 0 60px rgba(79, 70, 229, 0.15); }
+          0% { box-shadow: inset 0 0 80px rgba(34, 211, 238, 0.1); }
+          50% { box-shadow: inset 0 0 200px rgba(34, 211, 238, 0.4); }
+          100% { box-shadow: inset 0 0 80px rgba(34, 211, 238, 0.1); }
         }
         .vignette-layer {
           position: fixed;
