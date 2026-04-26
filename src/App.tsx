@@ -1464,7 +1464,7 @@ export default function App() {
               <button onClick={() => {
                 resetGame();
                 setGameState('battle');
-              }} className="pixel-button success text-lg px-16 shadow-[0_0_40px_rgba(16,185,129,0.3)]">执行任务部署 / DEPLOY</button>
+              }} className="pixel-button success btn-deploy-anim text-lg px-16">执行任务部署 / DEPLOY</button>
             </div>
           </div>
 
@@ -1735,7 +1735,27 @@ export default function App() {
           justify-content: center;
         }
         .pixel-button:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #312e81; }
-        .pixel-button.success { background: #10b981; box-shadow: 4px 4px 0px #065f46; }
+        .pixel-button.success { 
+          background: #10b981; 
+          box-shadow: 4px 4px 0px #065f46; 
+        }
+        
+        @keyframes deploy-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @keyframes deploy-pulse {
+          0% { transform: scale(1); box-shadow: 4px 4px 0px #065f46, 0 0 20px rgba(16,185,129,0.4); }
+          50% { transform: scale(1.03); box-shadow: 4px 4px 0px #065f46, 0 0 40px rgba(16,185,129,0.7); }
+          100% { transform: scale(1); box-shadow: 4px 4px 0px #065f46, 0 0 20px rgba(16,185,129,0.4); }
+        }
+        .btn-deploy-anim {
+          background: linear-gradient(90deg, #10b981 0%, #34d399 45%, #10b981 55%, #10b981 100%);
+          background-size: 200% 100%;
+          animation: deploy-shimmer 3s infinite linear, deploy-pulse 2s ease-in-out infinite;
+          border-color: #34d399;
+        }
+        
         .pixel-button.danger { background: #ef4444; box-shadow: 4px 4px 0px #991b1b; }
 
         /* HUD 文字标准化 */
