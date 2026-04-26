@@ -702,7 +702,7 @@ export default function App() {
   const lobbyRendererRef = useRef<StickmanRenderer | null>(null);
   const hasLoaded = useRef(false);
   const lastWheelTime = useRef(0);
-  const [isIntelBlurred, setIsIntelBlurred] = useState(false);
+  const [isIntelBlurred, setIsIntelBlurred] = useState({ weapon: false, armor: false, skill: false });
   const [wheelIndices, setWheelIndices] = useState({ weapon: 60, armor: 60, skill: 60 });
 
   // 确保在切换到调整页面时，拨轮位置与当前装备匹配
@@ -890,13 +890,19 @@ export default function App() {
     const randomField = BATTLEFIELDS[Math.floor(Math.random() * BATTLEFIELDS.length)];
     setField(randomField);
 
-    // 情报探测：20% 概率出现模糊
-    const blurred = Math.random() < 0.2;
-    setIsIntelBlurred(blurred);
-
-    addLog(`>> 系统重置就绪，当前作战环境：[${randomField.name}]`);
-    if (blurred) {
-      addLog(`>> [警告] 环境干扰严重，情报终端探测模糊，无法获取精确目标情报`);
+    // 情报探测：强磁雷暴区 (EMP) 必然模糊，其他环境 30% 概率
+    const isFailure = randomField.id === 'emp' ? true : Math.random() < 0.3;
+    
+    if (isFailure) {
+      const keys: ('weapon' | 'armor' | 'skill')[] = ['weapon', 'armor', 'skill'];
+      const shuffled = keys.sort(() => 0.5 - Math.random());
+      const count = Math.floor(Math.random() * 3) + 1; // 1-3个失败
+      const newBlurred = { weapon: false, armor: false, skill: false };
+      shuffled.slice(0, count).forEach(k => newBlurred[k] = true);
+      setIsIntelBlurred(newBlurred);
+      addLog(`>> [警告] 环境干扰严重，部分情报探测失败 (${count}/3)`);
+    } else {
+      setIsIntelBlurred({ weapon: false, armor: false, skill: false });
     }
 
     setPlayer(prev => ({ ...prev, health: prev.maxHealth }));
@@ -1192,11 +1198,11 @@ export default function App() {
                 <div className="unit-name text-rose-400 cn-text">目标 / {enemy.username}</div>
                 {/* 敌人当前装备展示 (提供博弈信息) */}
                 <div className="flex justify-end gap-2 text-xs text-slate-500 font-bold mb-1 cn-text">
-                  <span className="text-rose-400">{isIntelBlurred ? '???' : enemy.equipment.weapon}</span>
+                  <span className="text-rose-400">{isIntelBlurred.weapon ? '???' : enemy.equipment.weapon}</span>
                   <span className="opacity-30">|</span>
-                  <span className="text-rose-400">{isIntelBlurred ? '???' : enemy.equipment.armor}</span>
+                  <span className="text-rose-400">{isIntelBlurred.armor ? '???' : enemy.equipment.armor}</span>
                   <span className="opacity-30">|</span>
-                  <span className="text-rose-400">{isIntelBlurred ? '???' : enemy.equipment.skill}</span>
+                  <span className="text-rose-400">{isIntelBlurred.skill ? '???' : enemy.equipment.skill}</span>
                 </div>
                 <div className="flex flex-row-reverse gap-2 w-[400px]">
                   <div className="flex-1 pixel-bar-container !mb-0">
@@ -1230,15 +1236,15 @@ export default function App() {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
                         <span className="text-xs text-slate-400 font-bold cn-text">武器</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred ? '数据无法精确解析' : enemy.equipment.weapon}</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.weapon ? '数据无法精确解析' : enemy.equipment.weapon}</span>
                       </div>
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
                         <span className="text-xs text-slate-400 font-bold cn-text">防具</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred ? '数据无法精确解析' : enemy.equipment.armor}</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.armor ? '数据无法精确解析' : enemy.equipment.armor}</span>
                       </div>
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
                         <span className="text-xs text-slate-400 font-bold cn-text">技能</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred ? '无法准确获取情报' : enemy.equipment.skill}</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.skill ? '无法准确获取情报' : enemy.equipment.skill}</span>
                       </div>
                     </div>
                   </div>
@@ -1246,9 +1252,9 @@ export default function App() {
               </div>
               <div className="mt-auto pt-4 border-t border-slate-800">
                 <div className="flex items-center gap-2 animate-pulse">
-                  <div className={`w-2 h-2 rounded-full ${isIntelBlurred ? 'bg-rose-500 shadow-[0_0_10px_#f43f5e]' : 'bg-emerald-500 shadow-[0_0_10px_#10b981]'}`}></div>
-                  <span className={`text-xs ${isIntelBlurred ? 'text-rose-500' : 'text-emerald-500'} font-black tracking-wide cn-text`}>
-                    {isIntelBlurred ? '信号干扰 INTERFERENCE' : '终端在线 ONLINE'}
+                  <div className={`w-2 h-2 rounded-full ${Object.values(isIntelBlurred).some(v => v) ? 'bg-rose-500 shadow-[0_0_10px_#f43f5e]' : 'bg-emerald-500 shadow-[0_0_10px_#10b981]'}`}></div>
+                  <span className={`text-xs ${Object.values(isIntelBlurred).some(v => v) ? 'text-rose-500' : 'text-emerald-500'} font-black tracking-wide cn-text`}>
+                    {Object.values(isIntelBlurred).some(v => v) ? `信号干扰 INTERFERENCE (${Object.values(isIntelBlurred).filter(v => v).length}/3)` : '终端在线 ONLINE'}
                   </span>
                 </div>
               </div>
