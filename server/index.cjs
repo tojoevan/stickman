@@ -61,11 +61,20 @@ const migrateData = async () => {
 };
 migrateData();
 
-app.use(cors());
-app.use(express.json());
+// 采用原生中间件处理 CORS，彻底避开 Express 5 的路径解析 Bug
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  
+  // 极速响应预检请求
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
-// 极速响应 CORS 预检请求，解决生产环境 5s 延迟
-app.options(/.*/, cors());
+app.use(express.json());
 
 // 静态文件服务 (生产环境)
 // 假设前端 build 后的文件在根目录的 dist 文件夹中
