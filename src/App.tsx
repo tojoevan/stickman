@@ -1338,7 +1338,7 @@ export default function App() {
           {/* TOP HUD */}
           <div className="cyber-hud border-b-4 border-slate-900">
             <div className="hud-unit pl-4">
-              <img src="/assets/p_port.png" className="portrait-box" alt="P" />
+              <img src={`${CDN_BASE}/assets/p_port.png`} className="portrait-box" alt="P" />
               <div className="bar-stack">
                 <div className="unit-name text-cyan-400 cn-text">玩家 / {player.username}</div>
                 {/* 玩家当前装备展示 */}
@@ -1371,7 +1371,7 @@ export default function App() {
             </div>
 
             <div className="hud-unit flex-row-reverse pr-4">
-              <img src="/assets/e_port.png" className="portrait-box border-rose-900" alt="E" />
+              <img src={`${CDN_BASE}/assets/e_port.png`} className="portrait-box border-rose-900" alt="E" />
               <div className="bar-stack text-right">
                 <div className="unit-name text-rose-400 cn-text">目标 / {enemy.username}</div>
                 {/* 敌人当前装备展示 (提供博弈信息) */}
