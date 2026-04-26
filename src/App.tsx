@@ -2038,15 +2038,15 @@ export default function App() {
                             </linearGradient>
                           </defs>
                           {/* Armor (Back): Indigo */}
-                          <path d="M 120 150 L 260 220" stroke="url(#lineGradIndigo)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
+                          <path d="M 180 150 L 320 220" stroke="url(#lineGradIndigo)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
                           {/* Weapon (Left Hand): Orange */}
-                          <path d="M 360 400 L 310 430" stroke="url(#lineGradRev)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
+                          <path d="M 330 400 L 280 430" stroke="url(#lineGradRev)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
                           {/* Skill (Core): Cyan */}
-                          <path d="M 100 480 L 290 350" stroke="url(#lineGradCyan)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
+                          <path d="M 170 480 L 360 350" stroke="url(#lineGradCyan)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
                         </svg>
 
                         {/* 头部：防护 (后背位置) */}
-                        <div onClick={() => setShopTab('armors')} className="pointer-events-auto absolute top-[100px] left-[60px] w-24 h-24 rounded-full cursor-pointer group/h">
+                        <div onClick={() => setShopTab('armors')} className="pointer-events-auto absolute top-[100px] left-[120px] w-24 h-24 rounded-full cursor-pointer group/h">
                           <div className="absolute inset-0 border border-indigo-500/30 rounded-full animate-[ping_3s_linear_infinite]"></div>
                           <div className="absolute inset-0 border-2 border-indigo-500/20 rounded-full flex items-center justify-center">
                             <div className="w-1 h-1 bg-indigo-400 rounded-full shadow-[0_0_10px_#6366f1]"></div>
@@ -2057,8 +2057,8 @@ export default function App() {
                           </div>
                         </div>
 
-                        {/* 手臂：武器 (再左移20px -> right 从 140 增加到 160) */}
-                        <div onClick={() => setShopTab('weapons')} className="pointer-events-auto absolute top-[300px] right-[160px] w-32 h-48 cursor-pointer group/w">
+                        {/* 手臂：武器 */}
+                        <div onClick={() => setShopTab('weapons')} className="pointer-events-auto absolute top-[300px] right-[190px] w-32 h-48 cursor-pointer group/w">
                           <div className="absolute inset-0 border-2 border-amber-500/10 rounded-lg animate-pulse"></div>
                           <div className="absolute -right-28 top-1/2 -translate-y-1/2 flex items-center flex-row-reverse">
                             <div className="flex flex-col items-start">
@@ -2069,8 +2069,8 @@ export default function App() {
                           </div>
                         </div>
 
-                        {/* 核心：技能 (上移40px -> top 从 480 减到 440) */}
-                        <div onClick={() => setShopTab('skills')} className="pointer-events-auto absolute top-[440px] left-[60px] w-16 h-16 cursor-pointer group/s">
+                        {/* 核心：技能 */}
+                        <div onClick={() => setShopTab('skills')} className="pointer-events-auto absolute top-[440px] left-[130px] w-16 h-16 cursor-pointer group/s">
                           <div className="absolute inset-0 bg-cyan-500/10 border-2 border-cyan-500/30 rounded-full animate-pulse shadow-[0_0_20px_rgba(34,211,238,0.4)]"></div>
                           <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex flex-col items-center">
                             <div className="w-[1px] h-6 bg-cyan-500/50 mb-1"></div>
