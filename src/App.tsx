@@ -735,7 +735,17 @@ export default function App() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    // 纯本地 Mock 逻辑：跳过 fetch，直接登录
+    
+    if (authView === 'register') {
+      if (authForm.password !== authForm.confirmPassword) {
+        addLog(`>> [错误] 密钥确认不匹配，请重新输入`);
+        alert('密钥确认不匹配');
+        return;
+      }
+      addLog(`>> 正在创建新档案: ${authForm.username}...`);
+    }
+
+    // 纯本地 Mock 逻辑：跳过 fetch，直接登录/注册
     const mockToken = `local_token_${Date.now()}`;
     localStorage.setItem('token', mockToken);
     localStorage.setItem('username', authForm.username);
@@ -744,9 +754,10 @@ export default function App() {
 
     // 模拟系统初始化序列
     setTimeout(() => addLog(`>> 神经链路建立成功`), 100);
-    setTimeout(() => addLog(`>> 权限验证通过: ${authForm.username}`), 300);
+    const welcomeMsg = authView === 'register' ? `>> 欢迎加入，新晋指挥官: ${authForm.username}` : `>> 权限验证通过: ${authForm.username}`;
+    setTimeout(() => addLog(welcomeMsg), 300);
     setTimeout(() => addLog(`>> 正在拉取最新的作战指令...`), 500);
-    setTimeout(() => addLog(`>> 系统已就绪，欢迎回来，指挥官。`), 700);
+    setTimeout(() => addLog(`>> 系统已就绪，欢迎回来。`), 700);
 
     hasLoaded.current = true;
   };
@@ -858,10 +869,10 @@ export default function App() {
     const curLvl = player.unlockedItems[item.name] || 0;
     const cost = isUpgrade ? (item.cost || 0) : 0;
 
-    // if (isUpgrade && player.gold < cost) {
-    //   addLog(`❌ 信用点不足! 需要 ₿${cost}`);
-    //   return;
-    // }
+    if (isUpgrade && player.gold < cost) {
+      addLog(`❌ 信用点不足! 需要 ₿${cost}`);
+      return;
+    }
 
     setPlayer(prev => {
       const eqKey = tab === 'weapons' ? 'weapon' : tab === 'armors' ? 'armor' : 'skill';
@@ -1134,7 +1145,7 @@ export default function App() {
           <div className="w-full max-w-md pixel-card p-10 animate-in zoom-in-95 duration-300">
             <div className="text-center mb-8 border-b-4 border-slate-800 pb-6">
               <h1 className="text-2xl font-black italic text-white mb-2 cn-text tracking-tighter glow-pixel">神经链路：赛博进化</h1>
-              <h2 className="text-[10px] pixel-font text-indigo-500 mb-2 tracking-widest uppercase opacity-80">NEURAL LINK / SYSTEM_ACCESS</h2>
+              <h2 className="text-[10px] pixel-font text-indigo-500 mb-2 tracking-widest uppercase opacity-80">NEURAL LINK / {authView === 'login' ? 'ACCESS' : 'INITIALIZE'}</h2>
             </div>
             <form onSubmit={handleAuth} className="space-y-6">
               <div className="space-y-1">
@@ -1151,7 +1162,32 @@ export default function App() {
                 </label>
                 <input type="password" required className="w-full bg-slate-900 border-4 border-slate-800 p-4 text-white font-bold outline-none focus:border-indigo-500 transition-colors" value={authForm.password} onChange={e => setAuthForm(p => ({ ...p, password: e.target.value }))} />
               </div>
-              <button type="submit" className="w-full py-5 pixel-button text-[12px] mt-4">建立连接 / ESTABLISH CONNECTION</button>
+              {authView === 'register' && (
+                <div className="space-y-1 animate-in slide-in-from-top-2">
+                  <label className="text-[16px] font-black text-slate-500 ml-1 tracking-widest uppercase flex items-center gap-1.5">
+                    <span className="cn-text">重复密钥</span>
+                    <span className="pixel-font opacity-60">/ CONFIRM</span>
+                  </label>
+                  <input type="password" required className="w-full bg-slate-900 border-4 border-slate-800 p-4 text-white font-bold outline-none focus:border-indigo-500 transition-colors" value={authForm.confirmPassword} onChange={e => setAuthForm(p => ({ ...p, confirmPassword: e.target.value }))} />
+                </div>
+              )}
+              <button type="submit" className="w-full py-5 pixel-button text-[12px] mt-4">
+                {authView === 'login' ? '建立连接 / ESTABLISH CONNECTION' : '初始化档案 / INITIALIZE PROFILE'}
+              </button>
+              <div className="text-center mt-8 border-t-2 border-slate-800 pt-6">
+                <button 
+                  type="button"
+                  onClick={() => setAuthView(authView === 'login' ? 'register' : 'login')}
+                  className="w-full flex items-center justify-center gap-2 hover:opacity-80 transition-all group"
+                >
+                  <span className="text-[16px] font-black text-slate-500 cn-text group-hover:text-indigo-400 transition-colors">
+                    {authView === 'login' ? '申请新档案入口' : '已有档案？返回接入'}
+                  </span>
+                  <span className="text-[10px] pixel-font text-slate-500/60 uppercase tracking-tighter">
+                    / {authView === 'login' ? 'REQUEST NEW PROFILE' : 'RETURN TO LOGIN'}
+                  </span>
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -1683,7 +1719,7 @@ export default function App() {
                                 {isPreview && <span className="text-[8px] font-black bg-amber-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
                               <p className="text-sm text-amber-500/80 font-bold">攻击: {(item.damage || 0) >= 0 ? '+' : ''}{item.damage} | 载荷: {item.weight}kg</p>
-                              {shopTab && item.story && <p className="text-[10px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
+                              {shopTab && item.story && <p className="text-[12px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
                             </div>
                           );
                         })()}
@@ -1708,7 +1744,7 @@ export default function App() {
                                 {isPreview && <span className="text-[8px] font-black bg-indigo-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
                               <p className="text-sm text-indigo-400/80 font-bold">防御: {(item.defense || 0) >= 0 ? '+' : ''}{item.defense} | 载荷: {item.weight}kg</p>
-                              {shopTab && item.story && <p className="text-[10px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
+                              {shopTab && item.story && <p className="text-[12px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
                             </div>
                           );
                         })()}
@@ -1733,7 +1769,7 @@ export default function App() {
                                 {isPreview && <span className="text-[8px] font-black bg-cyan-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW</span>}
                               </div>
                               <p className="text-sm text-cyan-400/80 font-bold">倍率: x{item.mult} | 核心: Lv.{player.unlockedItems[item.name] || 1}</p>
-                              {shopTab && item.story && <p className="text-[10px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
+                              {shopTab && item.story && <p className="text-[12px] text-slate-500 mt-2 italic leading-relaxed cn-text">“{item.story}”</p>}
                             </div>
                           );
                         })()}
@@ -1869,9 +1905,15 @@ export default function App() {
                                   仅装备 / EQUIP<br />
                                   <span className="text-[10px] text-emerald-400 font-bold">FREE / 免费</span>
                                 </button>
-                                <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, true)} className="py-4 bg-indigo-600 border-2 border-indigo-400 text-sm font-black hover:bg-indigo-500 transition-all cn-text">
+                                <button 
+                                  onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, true)} 
+                                  disabled={player.gold < (confirmingItem.item.cost || 0)}
+                                  className={`py-4 border-2 text-sm font-black transition-all cn-text ${player.gold < (confirmingItem.item.cost || 0) ? 'bg-slate-800 border-slate-700 opacity-50 cursor-not-allowed' : 'bg-indigo-600 border-indigo-400 hover:bg-indigo-500'}`}
+                                >
                                   升级 / UPGRADE<br />
-                                  <span className="text-[10px] text-amber-300 font-bold">₿{confirmingItem.item.cost}</span>
+                                  <span className={`text-[10px] font-bold ${player.gold < (confirmingItem.item.cost || 0) ? 'text-rose-500' : 'text-amber-300'}`}>
+                                    {player.gold < (confirmingItem.item.cost || 0) ? '信用点不足' : `₿${confirmingItem.item.cost}`}
+                                  </span>
                                 </button>
                               </div>
                               <button onClick={() => setConfirmingItem(null)} className="w-full mt-6 text-xs text-slate-500 underline hover:text-white transition-colors">取消操作 / CANCEL</button>
