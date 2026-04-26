@@ -1138,11 +1138,17 @@ export default function App() {
             </div>
             <form onSubmit={handleAuth} className="space-y-6">
               <div className="space-y-1">
-                <label className="text-xs pixel-font text-slate-500 ml-1">档案代号 / USERNAME</label>
+                <label className="text-[16px] font-black text-slate-500 ml-1 tracking-widest uppercase flex items-center gap-1.5">
+                  <span className="cn-text">档案代号</span>
+                  <span className="pixel-font opacity-60">/ USERNAME</span>
+                </label>
                 <input type="text" required className="w-full bg-slate-900 border-4 border-slate-800 p-4 text-white font-bold outline-none focus:border-indigo-500 transition-colors" value={authForm.username} onChange={e => setAuthForm(p => ({ ...p, username: e.target.value }))} />
               </div>
               <div className="space-y-1">
-                <label className="text-xs pixel-font text-slate-500 ml-1">接入密钥 / PASSWORD</label>
+                <label className="text-[16px] font-black text-slate-500 ml-1 tracking-widest uppercase flex items-center gap-1.5">
+                  <span className="cn-text">接入密钥</span>
+                  <span className="pixel-font opacity-60">/ PASSWORD</span>
+                </label>
                 <input type="password" required className="w-full bg-slate-900 border-4 border-slate-800 p-4 text-white font-bold outline-none focus:border-indigo-500 transition-colors" value={authForm.password} onChange={e => setAuthForm(p => ({ ...p, password: e.target.value }))} />
               </div>
               <button type="submit" className="w-full py-5 pixel-button text-[12px] mt-4">建立连接 / ESTABLISH CONNECTION</button>
