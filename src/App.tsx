@@ -86,24 +86,24 @@ const ITEMS = {
     { name: '战术弩', damage: 25, icon: '🎯', desc: '带辅助瞄准的连发弩', story: '黑市中流通的高级货，配备了简易的弹道辅助芯片，即使是新手也能打出精准的齐射。', cost: 200, rarity: 'novel', levelReq: 5, tag: 'piercing', weight: 6 },
     { name: '神龙弓', damage: 45, icon: '🐉', desc: '附带能量冲击的强弓', story: '传闻弓身封印了上古数字生命的意识，每一支射出的箭矢都带着震慑灵魂的咆哮。', cost: 600, rarity: 'perfect', levelReq: 12, tag: 'piercing', weight: 8 },
 
-    { name: '重锤', damage: 22, icon: '🔨', desc: '沉重的破坏武器', story: '纯粹的质量，纯粹的破坏。在它面前，任何精密的防御结构都显得滑稽可笑。', cost: 60, rarity: 'common', tag: 'crushing', weight: 15 },
+    { name: '碎星锤', damage: 22, icon: '🔨', desc: '沉重的破坏武器', story: '纯粹的质量，纯粹的破坏。在它面前，任何精密的防御结构都显得滑稽可笑。', cost: 60, rarity: 'common', tag: 'crushing', weight: 15 },
     { name: '动力锤', damage: 42, icon: '🚜', desc: '附带震荡波的动力锤', story: '内置了液压增压系统，击中目标的瞬间会释放出强烈的震荡波，粉碎一切阻碍。', cost: 450, rarity: 'novel', levelReq: 8, tag: 'crushing', weight: 20 },
     { name: '雷神锤', damage: 85, icon: '⚡', desc: '附带雷电伤害的终极巨锤', story: '众神之怒的数字化体现. 挥动它时，空气中会充满电离的焦灼味，将敌人化为焦炭。', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing', weight: 25 },
 
     { name: '热能刀', damage: 18, icon: '🔥', desc: '高温切割武器', story: '刀刃边缘维持着千度高温，能够像切黄油一样切开最坚固的复合装甲。', cost: 80, rarity: 'common', tag: 'energy', weight: 3 },
-    { name: '等离子炮', damage: 55, icon: '🎇', desc: '微型黑洞发生器', story: '手持式核聚变发生器，发射出的等离子团会在触敌瞬间引发微型黑洞坍缩。', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy', weight: 12 },
+    { name: '离子炮', damage: 55, icon: '🎇', desc: '微型黑洞发生器', story: '手持式核聚变发生器，发射出的等离子团会在触敌瞬间引发微型黑洞坍缩。', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy', weight: 12 },
     { name: '激光剑', damage: 100, icon: '🔦', desc: '无视物理防御的光束剑', story: '纯净的能量凝聚成束。它没有实体，却能跨越物理世界的限制，斩断因果。', cost: 12000, rarity: 'epic', levelReq: 30, tag: 'energy', weight: 1 },
   ] as Item[],
   armors: [
-    { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '无任何防护效果', story: '在这个钢铁森林里，这层薄薄的纤维更像是一种心理安慰，而非实际保护。', cost: 40, rarity: 'common', tag: 'light', weight: 1 },
-    { name: '披风', defense: 3, evasion: 20, icon: '🧥', desc: '轻微防御，较高闪避', story: '特种纤维织就，能在高速移动时产生视觉残影，让敌人的准星永远慢你一步。', cost: 60, rarity: 'common', tag: 'light', weight: 2 },
+    { name: '基础布甲', defense: 0, evasion: 0, icon: '👕', desc: '无任何防护效果', story: '在这个钢铁森林里，这层薄薄的纤维更像是一种心理安慰，而非实际保护。', cost: 40, rarity: 'common', tag: 'light', weight: 1 },
+    { name: '战术披风', defense: 3, evasion: 20, icon: '🧥', desc: '轻微防御，较高闪避', story: '特种纤维织就，能在高速移动时产生视觉残影，让敌人的准星永远慢你一步。', cost: 60, rarity: 'common', tag: 'light', weight: 2 },
     { name: '潜行隐装', defense: 15, evasion: 45, icon: '🕴️', desc: '极高闪避，中等防御', story: '整合了最新的多光谱折射单元，只要你不主动现身，你就是夜色本身。', cost: 800, rarity: 'novel', levelReq: 4, tag: 'light', weight: 3 },
 
-    { name: '凯夫拉', defense: 8, evasion: 0, icon: '🥋', desc: '基础物理防御', story: '经典的防御方案，可靠且坚韧。它曾无数次在致命伤前挽救了佣兵的性命。', cost: 50, rarity: 'common', tag: 'medium', weight: 8 },
+    { name: '凯夫拉甲', defense: 8, evasion: 0, icon: '🥋', desc: '基础物理防御', story: '经典的防御方案，可靠且坚韧。它曾无数次在致命伤前挽救了佣兵的性命。', cost: 50, rarity: 'common', tag: 'medium', weight: 8 },
     { name: '动力装甲', defense: 45, evasion: 5, icon: '🤖', desc: '提供护甲和轻微闪避', story: '沉重的外骨骼不仅能吸收伤害，更赋予了穿戴者超越凡人的怪力。', cost: 500, rarity: 'novel', levelReq: 5, tag: 'medium', weight: 35 },
-    { name: '虚空甲', defense: 95, evasion: 10, icon: '🌌', desc: '极高护甲与中等闪避', story: '表面覆盖着一层活动的暗物质，能将物理打击转变为无害的引力波发散。', cost: 2000, rarity: 'perfect', levelReq: 15, tag: 'medium', weight: 20 },
+    { name: '虚空装甲', defense: 95, evasion: 10, icon: '🌌', desc: '极高护甲与中等闪避', story: '表面覆盖着一层活动的暗物质，能将物理打击转变为无害的引力波发散。', cost: 2000, rarity: 'perfect', levelReq: 15, tag: 'medium', weight: 20 },
 
-    { name: '铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '降低少许闪避以换取防御', story: '朴实无华的铁板，但在绝望的战场上，它是生与死之间最后的一道界限。', cost: 60, rarity: 'common', tag: 'heavy', weight: 12 },
+    { name: '战术铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '降低少许闪避以换取防御', story: '朴实无华的铁板，但在绝望的战场上，它是生与死之间最后的一道界限。', cost: 60, rarity: 'common', tag: 'heavy', weight: 12 },
     { name: '合金护板', defense: 35, evasion: -10, icon: '⛓️', desc: '高强度防弹挡板', story: '实验室合成的高强度钢材，即使面对反器材狙击枪的攒射也依然屹立不倒。', cost: 400, rarity: 'novel', levelReq: 7, tag: 'heavy', weight: 25 },
     { name: '复合重装', defense: 220, evasion: -20, icon: '🚜', desc: '牺牲大量闪避换取绝对防御', story: '一整套移动防御 system，穿戴它意味着你放弃了灵活，换取了绝对的生存。', cost: 8000, rarity: 'perfect', levelReq: 22, tag: 'heavy', weight: 80 },
 
@@ -125,8 +125,8 @@ const INITIAL_CHAR: Character = {
   level: 1, xp: 0, gold: 100,
   stats: { strength: 10, agility: 10, constitution: 12 },
   statPoints: 8, health: 250, maxHealth: 250,
-  equipment: { weapon: '长剑', armor: '布衣', skill: '蓄能重击' },
-  unlockedItems: { '长剑': 1, '长弓': 1, '重锤': 1, '热能刀': 1, '布衣': 1, '铁盾': 1, '披风': 1, '凯夫拉': 1, '干扰烟幕': 1, '蓄能重击': 1, '神经修复': 1, '幻影连击': 1 },
+  equipment: { weapon: '长剑', armor: '基础布甲', skill: '蓄能重击' },
+  unlockedItems: { '长剑': 1, '长弓': 1, '碎星锤': 1, '热能刀': 1, '基础布甲': 1, '战术铁盾': 1, '战术披风': 1, '凯夫拉甲': 1, '干扰烟幕': 1, '蓄能重击': 1, '神经修复': 1, '幻影连击': 1 },
   defeatCount: 0
 };
 
