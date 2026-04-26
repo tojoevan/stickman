@@ -670,7 +670,7 @@ interface Character {
 }
 
 export default function App() {
-  const [showSkillVideo, setShowSkillVideo] = useState(false);
+  const [showcasedSkill, setShowcasedSkill] = useState<'xuneng' | 'huanying' | 'support' | null>(null);
   // --- 调试模式：自动登录 ---
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [authView, setAuthView] = useState<'login' | 'register'>('login');
@@ -1019,9 +1019,12 @@ export default function App() {
       if (s.name === '系统过载') rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20);
       if (s.name === '蓄能重击') {
         rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40);
-        setShowSkillVideo(true);
+        setShowcasedSkill('xuneng');
       }
-      if (s.name === '幻影连击') rendererRef.current?.addEffect('speed', x, 280, '#6366f1', 15);
+      if (s.name === '幻影连击') {
+        rendererRef.current?.addEffect('speed', x, 280, '#6366f1', 15);
+        setShowcasedSkill('huanying');
+      }
       if (s.name === '神经修复') {
         const atk = isP ? player : enemy;
         const sL = isP ? (player.unlockedItems[s.name] || 1) : (enemy.unlockedItems[s.name] || 1);
@@ -1215,16 +1218,17 @@ export default function App() {
       )}
 
       {/* 5s 震撼技能动画叠加层 */}
-      {showSkillVideo && (
+      {showcasedSkill && (
         <div className="fixed inset-0 z-[999] bg-black/95 flex items-center justify-center animate-in fade-in duration-500">
           <div className="relative w-full h-full max-w-5xl max-h-[85vh] border-2 border-indigo-500/30 overflow-hidden shadow-[0_0_150px_rgba(99,102,241,0.3)] bg-slate-950">
             <video
               autoPlay
               loop
               className="w-full h-full object-cover"
-              onCanPlay={(e) => (e.currentTarget.playbackRate = 2)}
+              onCanPlay={(e) => (e.currentTarget.playbackRate = showcasedSkill === 'xuneng' ? 1.5 : 1)}
+              key={showcasedSkill}
             >
-              <source src="/01-xunengzhongji.mp4" type="video/mp4" />
+              <source src={showcasedSkill === 'xuneng' ? "/01-xunengzhongji.mp4" : showcasedSkill === 'huanying' ? "/02-huanyinglianji.mp4" : "/03-shenjingxiufu-ruodiansaomiao.mp4"} type="video/mp4" />
             </video>
 
             {/* 电影感遮罩 */}
@@ -1233,16 +1237,26 @@ export default function App() {
 
             {/* 战术 UI 装饰 */}
             <div className="absolute top-12 left-12 border-l-4 border-indigo-500 pl-6 animate-in slide-in-from-left-8 duration-700">
-              <p className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 tracking-[0.3em] uppercase italic">蓄能重击</p>
-              <p className="text-xl font-black text-white/40 tracking-[0.4em] uppercase mt-1">CHARGED STRIKE</p>
+              <p className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 tracking-[0.3em] uppercase italic">
+                {showcasedSkill === 'xuneng' ? '蓄能重击' : showcasedSkill === 'huanying' ? '幻影连击' : '神经修复 & 弱点扫描'}
+              </p>
+              <p className="text-xl font-black text-white/40 tracking-[0.4em] uppercase mt-1">
+                {showcasedSkill === 'xuneng' ? 'CHARGED STRIKE' : showcasedSkill === 'huanying' ? 'PHANTOM COMBO' : 'NEURAL REPAIR & SCAN'}
+              </p>
               <div className="flex items-center gap-3 mt-4">
                 <div className="h-[2px] w-24 bg-indigo-500/50"></div>
-                <p className="text-[10px] text-indigo-400 font-mono tracking-widest">DIGITAL CORE OVERLOAD: SYSTEM STABILIZING...</p>
+                <p className="text-[10px] text-indigo-400 font-mono tracking-widest">
+                  {showcasedSkill === 'xuneng' 
+                    ? 'DIGITAL CORE OVERLOAD: SYSTEM STABILIZING...' 
+                    : showcasedSkill === 'huanying'
+                      ? 'QUANTUM POSITION OVERLAP: MULTIPLE SIGNALS DETECTED...'
+                      : 'BIO-DIGITAL SYNCHRONIZATION: OPTIMIZING VIABILITY & TACTICAL ANALYSIS...'}
+                </p>
               </div>
             </div>
 
             <button
-              onClick={() => setShowSkillVideo(false)}
+              onClick={() => setShowcasedSkill(null)}
               className="absolute top-12 right-12 text-white bg-white/5 hover:bg-white/10 px-8 py-3 border border-white/20 backdrop-blur-xl transition-all font-black text-xs cn-text group"
             >
               <span className="group-hover:tracking-widest transition-all">切断链路 / TERMINATE</span>
@@ -1880,7 +1894,11 @@ export default function App() {
                         ref={lobbyCanvasRef}
                         width={600}
                         height={700}
-                        onClick={() => setShowSkillVideo(true)}
+                        onClick={() => {
+                          const skills: ('xuneng' | 'huanying' | 'support')[] = ['xuneng', 'huanying', 'support'];
+                          const rand = skills[Math.floor(Math.random() * skills.length)];
+                          setShowcasedSkill(rand);
+                        }}
                         className="drop-shadow-[0_0_25px_rgba(99,102,241,0.4)] cursor-pointer hover:scale-[1.02] transition-transform"
                       />
 
