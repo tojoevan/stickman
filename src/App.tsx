@@ -1030,6 +1030,7 @@ export default function App() {
 
   return (
     <div className="h-screen w-full bg-slate-950 text-slate-100 font-sans overflow-hidden relative">
+      <div className="vignette-layer" />
       {/* 1. AUTH OVERLAY */}
       {!token && (
         <div className="absolute inset-0 z-[1000] bg-slate-950/95 flex items-center justify-center p-4">
@@ -1515,13 +1516,13 @@ export default function App() {
                           <p className="text-[10px] text-slate-500 uppercase font-bold">攻击链路 / WEAPON</p>
                           <p className="text-lg font-black text-amber-500">{player.equipment.weapon || '空'}</p>
                         </div>
-                        <div className="border-l-4 border-cyan-500 pl-4 py-2 bg-cyan-500/5">
-                          <p className="text-[10px] text-slate-500 uppercase font-bold">防护链路 / ARMOR</p>
-                          <p className="text-lg font-black text-cyan-500">{player.equipment.armor || '空'}</p>
-                        </div>
                         <div className="border-l-4 border-indigo-500 pl-4 py-2 bg-indigo-500/5">
+                          <p className="text-[10px] text-slate-500 uppercase font-bold">防护链路 / ARMOR</p>
+                          <p className="text-lg font-black text-indigo-500">{player.equipment.armor || '空'}</p>
+                        </div>
+                        <div className="border-l-4 border-cyan-500 pl-4 py-2 bg-cyan-500/5">
                           <p className="text-[10px] text-slate-500 uppercase font-bold">核心逻辑 / SKILL</p>
-                          <p className="text-lg font-black text-indigo-500">{player.equipment.skill || '空'}</p>
+                          <p className="text-lg font-black text-cyan-500">{player.equipment.skill || '空'}</p>
                         </div>
                       </div>
                     </div>
@@ -1545,7 +1546,11 @@ export default function App() {
                         {/* 动态精准引导线 */}
                         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
                           <defs>
-                            <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <linearGradient id="lineGradCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.8" />
+                              <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.1" />
+                            </linearGradient>
+                            <linearGradient id="lineGradIndigo" x1="0%" y1="0%" x2="100%" y2="0%">
                               <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
                               <stop offset="100%" stopColor="#6366f1" stopOpacity="0.1" />
                             </linearGradient>
@@ -1554,23 +1559,23 @@ export default function App() {
                               <stop offset="100%" stopColor="#f97316" stopOpacity="0.1" />
                             </linearGradient>
                           </defs>
-                          {/* Armor (Back): 从左上角指向后背区域 */}
-                          <path d="M 120 150 L 260 220" stroke="url(#lineGrad)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
-                          {/* Weapon (Left Hand): 再左移20px */}
+                          {/* Armor (Back): Indigo */}
+                          <path d="M 120 150 L 260 220" stroke="url(#lineGradIndigo)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
+                          {/* Weapon (Left Hand): Orange */}
                           <path d="M 360 400 L 310 430" stroke="url(#lineGradRev)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
-                          {/* Skill (Core): 上移40px */}
-                          <path d="M 100 480 L 290 350" stroke="url(#lineGrad)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
+                          {/* Skill (Core): Cyan */}
+                          <path d="M 100 480 L 290 350" stroke="url(#lineGradCyan)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
                         </svg>
 
                         {/* 头部：防护 (后背位置) */}
                         <div onClick={() => setShopTab('armors')} className="pointer-events-auto absolute top-[100px] left-[60px] w-24 h-24 rounded-full cursor-pointer group/h">
-                          <div className="absolute inset-0 border border-cyan-500/30 rounded-full animate-[ping_3s_linear_infinite]"></div>
-                          <div className="absolute inset-0 border-2 border-cyan-500/20 rounded-full flex items-center justify-center">
-                            <div className="w-1 h-1 bg-cyan-400 rounded-full shadow-[0_0_10px_#22d3ee]"></div>
+                          <div className="absolute inset-0 border border-indigo-500/30 rounded-full animate-[ping_3s_linear_infinite]"></div>
+                          <div className="absolute inset-0 border-2 border-indigo-500/20 rounded-full flex items-center justify-center">
+                            <div className="w-1 h-1 bg-indigo-400 rounded-full shadow-[0_0_10px_#6366f1]"></div>
                           </div>
                           <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            <span className="text-[9px] text-cyan-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-cyan-500/50">防护系统 / ARMOR_SYSTEM</span>
-                            <div className="w-[1px] h-4 bg-cyan-500/50"></div>
+                            <span className="text-[9px] text-indigo-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-indigo-500/50">防护系统 / ARMOR_SYSTEM</span>
+                            <div className="w-[1px] h-4 bg-indigo-500/50"></div>
                           </div>
                         </div>
 
@@ -1588,10 +1593,10 @@ export default function App() {
 
                         {/* 核心：技能 (上移40px -> top 从 480 减到 440) */}
                         <div onClick={() => setShopTab('skills')} className="pointer-events-auto absolute top-[440px] left-[60px] w-16 h-16 cursor-pointer group/s">
-                          <div className="absolute inset-0 bg-indigo-500/10 border-2 border-indigo-500/30 rounded-full animate-pulse shadow-[0_0_20px_rgba(99,102,241,0.4)]"></div>
+                          <div className="absolute inset-0 bg-cyan-500/10 border-2 border-cyan-500/30 rounded-full animate-pulse shadow-[0_0_20px_rgba(34,211,238,0.4)]"></div>
                           <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            <div className="w-[1px] h-6 bg-indigo-500/50 mb-1"></div>
-                            <span className="text-[9px] text-indigo-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-indigo-500/50 uppercase">神经核心 / Neural_Core</span>
+                            <div className="w-[1px] h-6 bg-cyan-500/50 mb-1"></div>
+                            <span className="text-[9px] text-cyan-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-cyan-500/50 uppercase">神经核心 / Neural_Core</span>
                           </div>
                         </div>
                       </div>
@@ -1757,6 +1762,20 @@ export default function App() {
         }
         
         .pixel-button.danger { background: #ef4444; box-shadow: 4px 4px 0px #991b1b; }
+
+        /* 全局沉浸式呼吸阴影 */
+        @keyframes vignette-breath {
+          0% { box-shadow: inset 0 0 60px rgba(79, 70, 229, 0.15); }
+          50% { box-shadow: inset 0 0 120px rgba(79, 70, 229, 0.3); }
+          100% { box-shadow: inset 0 0 60px rgba(79, 70, 229, 0.15); }
+        }
+        .vignette-layer {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 10000;
+          animation: vignette-breath 5s ease-in-out infinite;
+        }
 
         /* HUD 文字标准化 */
         .cyber-hud { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.5rem 3.5rem; gap: 2rem; background: linear-gradient(to bottom, #020617, transparent); }
