@@ -1253,7 +1253,10 @@ export default function App() {
               <div className="text-center mt-8 border-t-2 border-slate-800 pt-6">
                 <button
                   type="button"
-                  onClick={() => setAuthView(authView === 'login' ? 'register' : 'login')}
+                  onClick={() => {
+                    setAuthError(null);
+                    setAuthView(authView === 'login' ? 'register' : 'login');
+                  }}
                   className="w-full flex items-center justify-center gap-2 hover:opacity-80 transition-all group"
                 >
                   <span className="text-[16px] font-black text-slate-500 cn-text group-hover:text-indigo-400 transition-colors">
