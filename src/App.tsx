@@ -1018,8 +1018,8 @@ export default function App() {
       if (s.name === '动能反射') rendererRef.current?.addEffect('shield', x, 280, '#ef4444', 1);
       if (s.name === '系统过载') rendererRef.current?.addEffect('spark', x, 250, '#f43f5e', 20);
       if (s.name === '蓄能重击') {
-          rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40);
-          setShowSkillVideo(true);
+        rendererRef.current?.addEffect('charge', x, 280, '#f59e0b', 40);
+        setShowSkillVideo(true);
       }
       if (s.name === '幻影连击') rendererRef.current?.addEffect('speed', x, 280, '#6366f1', 15);
       if (s.name === '神经修复') {
@@ -1222,14 +1222,15 @@ export default function App() {
               autoPlay
               loop
               className="w-full h-full object-cover"
+              onCanPlay={(e) => (e.currentTarget.playbackRate = 2)}
             >
               <source src="/01-xunengzhongji.mp4" type="video/mp4" />
             </video>
-            
+
             {/* 电影感遮罩 */}
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60 pointer-events-none"></div>
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_30%,_rgba(0,0,0,0.8)_100%)] pointer-events-none"></div>
-            
+
             {/* 战术 UI 装饰 */}
             <div className="absolute top-12 left-12 border-l-4 border-indigo-500 pl-6 animate-in slide-in-from-left-8 duration-700">
               <p className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 tracking-[0.3em] uppercase italic">蓄能重击</p>
@@ -1260,13 +1261,13 @@ export default function App() {
                 </div>
               </div>
               <div className="flex gap-1 h-12 items-end">
-                {[1,2,3,4,5,6,7,8].map(i => (
-                  <div 
-                    key={i} 
-                    className="w-1 bg-indigo-500/40 animate-pulse" 
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                  <div
+                    key={i}
+                    className="w-1 bg-indigo-500/40 animate-pulse"
                     style={{
                       height: `${Math.random() * 100}%`,
-                      animationDelay: `${i*0.1}s`,
+                      animationDelay: `${i * 0.1}s`,
                       animationDuration: '0.5s'
                     }}
                   ></div>
