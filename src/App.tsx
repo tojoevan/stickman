@@ -31,6 +31,7 @@ interface Item {
   mult?: number;
   icon: string;
   desc: string;
+  story?: string;
   cost?: number;
   rarity: Rarity;
   levelReq?: number;
@@ -63,55 +64,53 @@ const BATTLEFIELDS: Battlefield[] = [
   { id: 'neutral', name: '虚拟训练场', desc: '标准的模拟战斗环境。', effect: '无特殊修正。', bgColor: '#0f172a', accentColor: '#38bdf8' },
   { id: 'emp', name: '强磁雷暴区', desc: '强磁场使精密设备失灵。', effect: '史诗装备 -40%，普通装备 +60%。', bgColor: '#1e1b4b', accentColor: '#818cf8' },
   { id: 'narrow', name: '暗影狭廊', desc: '极度狭窄，施展不开重型武器。', effect: '重型武器 -50%，轻捷武器 +40%。', bgColor: '#18181b', accentColor: '#52525b' },
-  { id: 'desert', name: '荒漠戈壁', desc: '视野开阔，风速稳定。', effect: '弓类武器 +60%，闪避率 +10%。', bgColor: '#451a03', accentColor: '#f59e0b' },
-  { id: 'overload', name: '能源核心', desc: '空气中充斥着高能粒子。', effect: '技能倍率 +100%，受创 +30%。', bgColor: '#4c0519', accentColor: '#f43f5e' },
+  { id: 'desert', name: '荒漠戈壁', desc: '黄沙漫天，视野极度受限。', effect: '远程武器 -30%，能量武器 +20%。', bgColor: '#451a03', accentColor: '#fbbf24' }
 ];
 
 const ITEMS = {
   weapons: [
-    { name: '长剑', damage: 15, icon: '⚔️', desc: '新手利刃', cost: 50, rarity: 'common', tag: 'slashing' },
-    { name: '名刀', damage: 32, icon: '🎋', desc: '迅捷致命', cost: 150, rarity: 'novel', levelReq: 3, tag: 'slashing' },
-    { name: '影刃', damage: 130, icon: '🔪', desc: '虚空之遗', cost: 8500, rarity: 'epic', levelReq: 40, tag: 'slashing' },
+    { name: '长剑', damage: 15, icon: '⚔️', desc: '基础近战武器', story: '旧时代的钢刃，虽已锈迹斑斑，但其冰冷的触感依然能唤醒战士的本能。', cost: 50, rarity: 'common', tag: 'slashing' },
+    { name: '名刀', damage: 32, icon: '🎋', desc: '锋利的特制刀具', story: '由深山隐士打造，刀身覆盖着纳米级的锋利涂层，挥动时仿佛能切断风的声音。', cost: 150, rarity: 'novel', levelReq: 3, tag: 'slashing' },
+    { name: '影刃', damage: 130, icon: '🔪', desc: '无视防御的次元武器', story: '从虚空裂缝中提取的物质锻造而成，它不切割肉体，而是直接撕裂目标的现实存在感。', cost: 8500, rarity: 'epic', levelReq: 40, tag: 'slashing' },
 
-    { name: '长弓', damage: 12, icon: '🏹', desc: '远程精准', cost: 50, rarity: 'common', tag: 'piercing' },
-    { name: '战术弩', damage: 28, icon: '🎯', desc: '半自动连发', cost: 200, rarity: 'novel', levelReq: 5, tag: 'piercing' },
-    { name: '神龙弓', damage: 55, icon: '🐉', desc: '破空之箭', cost: 600, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
+    { name: '长弓', damage: 12, icon: '🏹', desc: '基础远程武器', story: '复合碳纤维材质，轻盈而强韧，是荒野猎人在静谧夜晚最可靠的伙伴。', cost: 50, rarity: 'common', tag: 'piercing' },
+    { name: '战术弩', damage: 28, icon: '🎯', desc: '带辅助瞄准的连发弩', story: '黑市中流通的高级货，配备了简易的弹道辅助芯片，即使是新手也能打出精准的齐射。', cost: 200, rarity: 'novel', levelReq: 5, tag: 'piercing' },
+    { name: '神龙弓', damage: 55, icon: '🐉', desc: '附带能量冲击的强弓', story: '传闻弓身封印了上古数字生命的意识，每一支射出的箭矢都带着震慑灵魂的咆哮。', cost: 600, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
 
-    { name: '重锤', damage: 25, icon: '🔨', desc: '势大力沉', cost: 60, rarity: 'common', tag: 'crushing' },
-    { name: '动力锤', damage: 48, icon: '🚜', desc: '工业级粉碎', cost: 450, rarity: 'novel', levelReq: 8, tag: 'crushing' },
-    { name: '雷神锤', damage: 150, icon: '⚡', desc: '众神之怒', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing' },
+    { name: '重锤', damage: 25, icon: '🔨', desc: '沉重的破坏武器', story: '纯粹的质量，纯粹的破坏。在它面前，任何精密的防御结构都显得滑稽可笑。', cost: 60, rarity: 'common', tag: 'crushing' },
+    { name: '动力锤', damage: 48, icon: '🚜', desc: '附带震荡波的动力锤', story: '内置了液压增压系统，击中目标的瞬间会释放出强烈的震荡波，粉碎一切阻碍。', cost: 450, rarity: 'novel', levelReq: 8, tag: 'crushing' },
+    { name: '雷神锤', damage: 150, icon: '⚡', desc: '附带雷电伤害的终极巨锤', story: '众神之怒的数字化体现。挥动它时，空气中会充满电离的焦灼味，将敌人化为焦炭。', cost: 4500, rarity: 'epic', levelReq: 25, tag: 'crushing' },
 
-    { name: '热能刀', damage: 18, icon: '🔥', desc: '分子切割', cost: 80, rarity: 'common', tag: 'energy' },
-    { name: '等离子炮', damage: 75, icon: '🎇', desc: '高能聚合', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy' },
-    { name: '激光剑', damage: 180, icon: '🔦', desc: '等离子刃', cost: 12000, rarity: 'epic', levelReq: 30, tag: 'energy' },
+    { name: '热能刀', damage: 18, icon: '🔥', desc: '高温切割武器', story: '刀刃边缘维持着千度高温，能够像切黄油一样切开最坚固的复合装甲。', cost: 80, rarity: 'common', tag: 'energy' },
+    { name: '等离子炮', damage: 75, icon: '🎇', desc: '微型黑洞发生器', story: '手持式核聚变发生器，发射出的等离子团会在触敌瞬间引发微型黑洞坍缩。', cost: 1200, rarity: 'perfect', levelReq: 18, tag: 'energy' },
+    { name: '激光剑', damage: 180, icon: '🔦', desc: '无视物理防御的光束剑', story: '纯净的能量凝聚成束。它没有实体，却能跨越物理世界的限制，斩断因果。', cost: 12000, rarity: 'epic', levelReq: 30, tag: 'energy' },
   ] as Item[],
   armors: [
-    { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '轻便无负重', cost: 40, rarity: 'common', tag: 'light' },
-    { name: '披风', defense: 3, evasion: 20, icon: '🧥', desc: '幻影闪避', cost: 60, rarity: 'common', tag: 'light' },
-    { name: '潜行隐装', defense: 15, evasion: 45, icon: '🕴️', desc: '光学迷彩', cost: 800, rarity: 'novel', levelReq: 4, tag: 'light' },
+    { name: '布衣', defense: 0, evasion: 0, icon: '👕', desc: '无任何防护效果', story: '在这个钢铁森林里，这层薄薄的纤维更像是一种心理安慰，而非实际保护。', cost: 40, rarity: 'common', tag: 'light' },
+    { name: '披风', defense: 3, evasion: 20, icon: '🧥', desc: '轻微防御，较高闪避', story: '特种纤维织就，能在高速移动时产生视觉残影，让敌人的准星永远慢你一步。', cost: 60, rarity: 'common', tag: 'light' },
+    { name: '潜行隐装', defense: 15, evasion: 45, icon: '🕴️', desc: '极高闪避，中等防御', story: '整合了最新的多光谱折射单元，只要你不主动现身，你就是夜色本身。', cost: 800, rarity: 'novel', levelReq: 4, tag: 'light' },
 
-    { name: '凯夫拉', defense: 8, evasion: 0, icon: '🥋', desc: '防弹纤维', cost: 50, rarity: 'common', tag: 'medium' },
-    { name: '动力装甲', defense: 45, evasion: 5, icon: '🤖', desc: '外骨骼增强', cost: 500, rarity: 'novel', levelReq: 5, tag: 'medium' },
-    { name: '虚空甲', defense: 95, evasion: 10, icon: '🌌', desc: '暗物质抵挡', cost: 2000, rarity: 'perfect', levelReq: 15, tag: 'medium' },
+    { name: '凯夫拉', defense: 8, evasion: 0, icon: '🥋', desc: '基础物理防御', story: '经典的防御方案，可靠且坚韧。它曾无数次在致命伤前挽救了佣兵的性命。', cost: 50, rarity: 'common', tag: 'medium' },
+    { name: '动力装甲', defense: 45, evasion: 5, icon: '🤖', desc: '提供护甲和轻微闪避', story: '沉重的外骨骼不仅能吸收伤害，更赋予了穿戴者超越凡人的怪力。', cost: 500, rarity: 'novel', levelReq: 5, tag: 'medium' },
+    { name: '虚空甲', defense: 95, evasion: 10, icon: '🌌', desc: '极高护甲与中等闪避', story: '表面覆盖着一层活动的暗物质，能将物理打击转变为无害的引力波发散。', cost: 2000, rarity: 'perfect', levelReq: 15, tag: 'medium' },
 
-    { name: '铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '稳固防御', cost: 60, rarity: 'common', tag: 'heavy' },
-    { name: '合金护板', defense: 35, evasion: -10, icon: '⛓️', desc: '强化钢材', cost: 400, rarity: 'novel', levelReq: 7, tag: 'heavy' },
-    { name: '复合重装', defense: 220, evasion: -20, icon: '🚜', desc: '移动堡垒', cost: 8000, rarity: 'perfect', levelReq: 22, tag: 'heavy' },
+    { name: '铁盾', defense: 12, evasion: -5, icon: '🛡️', desc: '降低少许闪避以换取防御', story: '朴实无华的铁板，但在绝望的战场上，它是生与死之间最后的一道界限。', cost: 60, rarity: 'common', tag: 'heavy' },
+    { name: '合金护板', defense: 35, evasion: -10, icon: '⛓️', desc: '高强度防弹挡板', story: '实验室合成的高强度钢材，即使面对反器材狙击枪的攒射也依然屹立不倒。', cost: 400, rarity: 'novel', levelReq: 7, tag: 'heavy' },
+    { name: '复合重装', defense: 220, evasion: -20, icon: '🚜', desc: '牺牲大量闪避换取绝对防御', story: '一整套移动防御系统，穿戴它意味着你放弃了灵活，换取了绝对的生存。', cost: 8000, rarity: 'perfect', levelReq: 22, tag: 'heavy' },
 
-    { name: '干扰烟幕', defense: 5, evasion: 15, icon: '💨', desc: '电子波干扰', cost: 70, rarity: 'common', tag: 'field' },
-    { name: '纳米蜂群', defense: 50, evasion: 60, icon: '🐝', desc: '微型机器人拦截', cost: 6500, rarity: 'epic', levelReq: 35, tag: 'field' },
-    { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极防御屏障', cost: 15000, rarity: 'epic', levelReq: 60, tag: 'field' },
+    { name: '干扰烟幕', defense: 5, evasion: 15, icon: '💨', desc: '战术掩体装备', story: '释放出的纳米云雾会干扰所有的雷达与视讯探测，创造出混乱的生存空间。', cost: 70, rarity: 'common', tag: 'field' },
+    { name: '纳米蜂群', defense: 50, evasion: 60, icon: '🐝', desc: '自动拦截飞行物', story: '数以亿计的微型机器人围绕着你飞行，它们会自动寻找并摧毁飞来的投射物。', cost: 6500, rarity: 'epic', levelReq: 35, tag: 'field' },
+    { name: '反物质盾', defense: 350, evasion: -15, icon: '💠', desc: '终极力场防护', story: '通过消耗反物质电池产生的排斥力场，是人类技术能够达到的防御巅峰。', cost: 15000, rarity: 'epic', levelReq: 60, tag: 'field' },
   ] as Item[],
   skills: [
-    { name: '蓄能重击', mult: 1.8, icon: '💥', desc: '牺牲攻速换取爆发，附加100%力量伤害', cost: 100, rarity: 'common', tag: 'crushing' },
-    { name: '幻影连击', mult: 0.8, icon: '⚡', desc: '极速二次打击，敏捷大幅增幅伤害', cost: 300, rarity: 'novel', levelReq: 5, tag: 'slashing' },
-    { name: '弱点扫描', mult: 1.2, icon: '🔍', desc: '解析对手防御，强制无视抗性修正', cost: 800, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
-    { name: '神经修复', mult: 0, icon: '✨', desc: '生物纳米修复，基于体质大量回血', cost: 500, rarity: 'novel', levelReq: 8, tag: 'light' },
-    { name: '动能反射', mult: 0.5, icon: '🛡️', desc: '构建反击护盾，反弹受到的50%伤害', cost: 2000, rarity: 'perfect', levelReq: 20, tag: 'heavy' },
-    { name: '系统过载', mult: 3.5, icon: '☢️', desc: '极限超频，极高伤害但会反噬自身', cost: 10000, rarity: 'epic', levelReq: 45, tag: 'energy' },
+    { name: '蓄能重击', mult: 1.8, icon: '💥', desc: '牺牲攻速换取爆发，附加100%力量伤害', story: '引导全身的生物能量于一瞬爆发。这一拳，包含了对命运所有的愤怒。', cost: 100, rarity: 'common', tag: 'crushing' },
+    { name: '幻影连击', mult: 0.8, icon: '⚡', desc: '极速二次打击，敏捷大幅增幅伤害', story: '通过超频神经突触，让肌肉在极短时间内完成两次打击，速度之快肉眼难辨。', cost: 300, rarity: 'novel', levelReq: 5, tag: 'slashing' },
+    { name: '弱点扫描', mult: 1.2, icon: '🔍', desc: '解析对手防御，强制无视抗性修正', story: '开启眼部的扫描阵列，实时计算对手装甲的最薄弱点，执行精准的打击。', cost: 800, rarity: 'perfect', levelReq: 12, tag: 'piercing' },
+    { name: '神经修复', mult: 0, icon: '✨', desc: '生物纳米修复，基于体质大量回血', story: '注射纳米医疗凝胶，这些微小的医生会自动修复受损的器官与回路，带你重返巅峰。', cost: 500, rarity: 'novel', levelReq: 8, tag: 'light' },
+    { name: '动能反射', mult: 0.5, icon: '🛡️', desc: '构建反击护盾，反弹受到的50%伤害', story: '利用能量守恒原理，将受到的冲击力储存并反弹，让敌人品尝自己的力量。', cost: 2000, rarity: 'perfect', levelReq: 20, tag: 'heavy' },
+    { name: '系统过载', mult: 3.5, icon: '☢️', desc: '极限超频，极高伤害但会反噬自身', story: '撤除所有的安全限制，释放核心全部的原始能量。这是最后的孤注一掷。', cost: 10000, rarity: 'epic', levelReq: 45, tag: 'energy' },
   ] as Item[]
 };
-
 const INITIAL_CHAR: Character = {
   username: 'Unknown',
   level: 1, xp: 0, gold: 100,
@@ -219,7 +218,7 @@ const NeuralPicker = ({ label, items, selected, onSelect, unlockedItems }: { lab
                     {item.name}
                   </span>
                   <span className={`text-[8px] pixel-font ${isMatch ? 'text-indigo-500' : 'text-slate-300'}`}>
-                    LV.{unlockedItems[item.name] || 1}
+                    等级 {unlockedItems[item.name] || 1}
                   </span>
                 </div>
               </div>
@@ -659,6 +658,7 @@ export default function App() {
   ]);
   const [currentPose, setCurrentPose] = useState<{ player: any, enemy: any }>({ player: 'idle', enemy: 'idle' });
   const [confirmingItem, setConfirmingItem] = useState<{ item: Item, tab: 'weapons' | 'armors' | 'skills' } | null>(null);
+  const [hoveredItem, setHoveredItem] = useState<Item | null>(null);
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [field, setField] = useState<Battlefield>(BATTLEFIELDS[0]);
   const [battleHistory, setBattleHistory] = useState<BattleRoundRecord[]>([]);
@@ -818,7 +818,7 @@ export default function App() {
 
   const buyItem = (item: Item, tab: 'weapons' | 'armors' | 'skills', isUpgrade: boolean) => {
     const curLvl = player.unlockedItems[item.name] || 0;
-    const cost = isUpgrade ? item.cost : 0;
+    const cost = isUpgrade ? (item.cost || 0) : 0;
     
     if (isUpgrade && player.gold < cost) {
       addLog(`❌ 信用点不足! 需要 ₿${cost}`);
@@ -1452,7 +1452,7 @@ export default function App() {
           <div className="flex justify-between items-center bg-slate-900 border-4 border-slate-800 px-8 py-5 shadow-lg flex-none">
             <div className="flex items-center gap-16">
               <div className="flex flex-col"><span className="text-xs font-bold text-slate-400 uppercase mb-1 tracking-tighter">档案代号 / PROFILE</span><span className="text-xl font-black tracking-widest">{player.username}</span></div>
-              <div className="flex flex-col items-center"><span className="text-xs text-slate-400 font-bold uppercase mb-1 tracking-tighter">同步等级 / LINK LEVEL</span><span className="text-2xl font-black text-indigo-500">LV.{player.level}</span></div>
+              <div className="flex flex-col items-center"><span className="text-xs text-slate-400 font-bold uppercase mb-1 tracking-tighter">同步等级 / LINK LEVEL</span><span className="text-2xl font-black text-indigo-500">等级 {player.level}</span></div>
               <div className="text-right"><span className="text-xs text-slate-400 font-bold uppercase block mb-1 tracking-tighter">信用余额 / CREDITS</span><span className="text-2xl font-black text-amber-500 leading-none">₿ {player.gold}</span></div>
             </div>
             <div className="flex items-center gap-8">
@@ -1512,18 +1512,65 @@ export default function App() {
                         <h2 className="text-sm font-black italic text-slate-400 uppercase tracking-widest">当前载荷 / LOADOUT</h2>
                       </div>
                       <div className="space-y-6 overflow-y-auto custom-scrollbar pr-2">
-                        <div className="border-l-4 border-amber-500 pl-4 py-2 bg-amber-500/5">
-                          <p className="text-[10px] text-slate-500 uppercase font-bold">攻击链路 / WEAPON</p>
-                          <p className="text-lg font-black text-amber-500">{player.equipment.weapon || '空'}</p>
-                        </div>
-                        <div className="border-l-4 border-indigo-500 pl-4 py-2 bg-indigo-500/5">
-                          <p className="text-[10px] text-slate-500 uppercase font-bold">防护链路 / ARMOR</p>
-                          <p className="text-lg font-black text-indigo-500">{player.equipment.armor || '空'}</p>
-                        </div>
-                        <div className="border-l-4 border-cyan-500 pl-4 py-2 bg-cyan-500/5">
-                          <p className="text-[10px] text-slate-500 uppercase font-bold">核心逻辑 / SKILL</p>
-                          <p className="text-lg font-black text-cyan-500">{player.equipment.skill || '空'}</p>
-                        </div>
+                        {/* 武器槽位：仅在浏览武器或未开启商店时显示 */}
+                        {(shopTab === 'weapons' || !shopTab) && (
+                          <div className={`border-l-4 border-amber-500 pl-4 py-2 transition-all ${hoveredItem && shopTab === 'weapons' ? 'bg-amber-500/20 scale-[1.02] shadow-[0_0_20px_rgba(245,158,11,0.2)]' : 'bg-amber-500/5'}`}>
+                            <div className="flex justify-between items-center">
+                              <p className="text-[10px] text-slate-500 uppercase font-bold">攻击链路 / WEAPON</p>
+                              {hoveredItem && shopTab === 'weapons' && <span className="text-[8px] font-black bg-amber-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW_LINK</span>}
+                            </div>
+                            <p className="text-lg font-black text-amber-500 mt-1">
+                              {hoveredItem && shopTab === 'weapons' ? hoveredItem.name : (player.equipment.weapon || '未装载')}
+                            </p>
+                            {hoveredItem && shopTab === 'weapons' && (
+                              <div className="mt-2 text-sm text-slate-400 leading-tight border-t border-amber-500/30 pt-2 animate-in fade-in duration-300">
+                                <p className="mb-1 font-bold">{hoveredItem.desc}</p>
+                                <p className="italic text-slate-500 mb-1 text-xs">"{hoveredItem.story}"</p>
+                                <p className="text-amber-500 font-black">攻击: {(hoveredItem.damage || 0) >= 0 ? '+' : ''}{hoveredItem.damage} | 需求等级: {hoveredItem.levelReq || 1}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 防具槽位：仅在浏览防具或未开启商店时显示 */}
+                        {(shopTab === 'armors' || !shopTab) && (
+                          <div className={`border-l-4 border-indigo-500 pl-4 py-2 transition-all ${hoveredItem && shopTab === 'armors' ? 'bg-indigo-500/20 scale-[1.02] shadow-[0_0_20px_rgba(99,102,241,0.2)]' : 'bg-indigo-500/5'}`}>
+                            <div className="flex justify-between items-center">
+                              <p className="text-[10px] text-slate-500 uppercase font-bold">防护链路 / ARMOR</p>
+                              {hoveredItem && shopTab === 'armors' && <span className="text-[8px] font-black bg-indigo-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW_LINK</span>}
+                            </div>
+                            <p className="text-lg font-black text-indigo-500 mt-1">
+                              {hoveredItem && shopTab === 'armors' ? hoveredItem.name : (player.equipment.armor || '未装载')}
+                            </p>
+                            {hoveredItem && shopTab === 'armors' && (
+                              <div className="mt-2 text-sm text-slate-400 leading-tight border-t border-indigo-500/30 pt-2 animate-in fade-in duration-300">
+                                <p className="mb-1 font-bold">{hoveredItem.desc}</p>
+                                <p className="italic text-slate-500 mb-1 text-xs">"{hoveredItem.story}"</p>
+                                <p className="text-indigo-400 font-black">防御: {(hoveredItem.defense || 0) >= 0 ? '+' : ''}{hoveredItem.defense} | 闪避: {(hoveredItem.evasion || 0) >= 0 ? '+' : ''}{hoveredItem.evasion}%</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 技能槽位：仅在浏览技能或未开启商店时显示 */}
+                        {(shopTab === 'skills' || !shopTab) && (
+                          <div className={`border-l-4 border-cyan-500 pl-4 py-2 transition-all ${hoveredItem && shopTab === 'skills' ? 'bg-cyan-500/20 scale-[1.02] shadow-[0_0_20px_rgba(34,211,238,0.2)]' : 'bg-cyan-500/5'}`}>
+                            <div className="flex justify-between items-center">
+                              <p className="text-[10px] text-slate-500 uppercase font-bold">核心逻辑 / SKILL</p>
+                              {hoveredItem && shopTab === 'skills' && <span className="text-[8px] font-black bg-cyan-500 text-black px-1.5 py-0.5 rounded-sm animate-pulse">PREVIEW_LINK</span>}
+                            </div>
+                            <p className="text-lg font-black text-cyan-500 mt-1">
+                              {hoveredItem && shopTab === 'skills' ? hoveredItem.name : (player.equipment.skill || '未装载')}
+                            </p>
+                            {hoveredItem && shopTab === 'skills' && (
+                              <div className="mt-2 text-sm text-slate-400 leading-tight border-t border-cyan-500/30 pt-2 animate-in fade-in duration-300">
+                                <p className="mb-1 font-bold">{hoveredItem.desc}</p>
+                                <p className="italic text-slate-500 mb-1 text-xs">"{hoveredItem.story}"</p>
+                                <p className="text-cyan-400 font-black">伤害倍率: x{hoveredItem.mult} | 核心等级: {player.unlockedItems[hoveredItem.name] || 0}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1613,37 +1660,45 @@ export default function App() {
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar grid grid-cols-4 gap-4 pr-4">
                           {ITEMS[shopTab].map(item => (
-                            <div key={item.name} className="pixel-card bg-slate-900 p-4 hover:border-indigo-500 transition-all group flex flex-col items-center">
+                            <div 
+                              key={item.name} 
+                              onMouseEnter={() => setHoveredItem(item)}
+                              onMouseLeave={() => setHoveredItem(null)}
+                              className="pixel-card bg-slate-900 p-4 hover:border-indigo-500 transition-all group flex flex-col items-center relative"
+                            >
                               <span className="text-4xl mb-4 group-hover:scale-110 transition-transform">{item.icon}</span>
                               <p className="text-base font-black text-white mb-1 cn-text">{item.name}</p>
                               <p className="text-[9px] text-slate-500 uppercase mb-4 tracking-widest">{item.rarity}</p>
                               <button onClick={() => setConfirmingItem({ item, tab: shopTab as any })} className="w-full py-2.5 bg-indigo-600 text-xs font-black hover:bg-indigo-500 transition-colors shadow-lg cn-text">↑ ₿{item.cost}</button>
                             </div>
                           ))}
-                          {/* 确认操作弹窗 */}
-                          {confirmingItem && (
-                            <div className="absolute inset-0 z-[1100] bg-slate-950/90 flex items-center justify-center p-8 backdrop-blur-md">
-                              <div className="w-full max-w-sm pixel-card p-8 bg-slate-900 border-indigo-500 shadow-[0_0_50px_rgba(99,102,241,0.2)]">
-                                <div className="text-center mb-8">
-                                  <span className="text-5xl block mb-4">{confirmingItem.item.icon}</span>
-                                  <h4 className="text-xl font-black text-white italic mb-1">{confirmingItem.item.name}</h4>
-                                  <p className="text-xs text-slate-500 uppercase tracking-widest">当前等级: Lv.{player.unlockedItems[confirmingItem.item.name] || 0}</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                  <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, false)} className="py-4 bg-slate-800 border-2 border-slate-700 text-sm font-black hover:bg-slate-700 transition-all cn-text">
-                                    仅装备 / EQUIP<br/>
-                                    <span className="text-[10px] text-emerald-400 font-bold">FREE / 免费</span>
-                                  </button>
-                                  <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, true)} className="py-4 bg-indigo-600 border-2 border-indigo-400 text-sm font-black hover:bg-indigo-500 transition-all cn-text">
-                                    升级 / UPGRADE<br/>
-                                    <span className="text-[10px] text-amber-300 font-bold">₿{confirmingItem.item.cost}</span>
-                                  </button>
-                                </div>
-                                <button onClick={() => setConfirmingItem(null)} className="w-full mt-6 text-xs text-slate-500 underline hover:text-white transition-colors">取消操作 / CANCEL</button>
-                              </div>
-                            </div>
-                          )}
                         </div>
+
+                        {/* 全局悬停提示框已被移除，转为左侧载荷卡片实时预览 */}
+
+                        {/* 确认操作弹窗 */}
+                        {confirmingItem && (
+                          <div className="absolute inset-0 z-[1100] bg-slate-950/90 flex items-center justify-center p-8 backdrop-blur-md">
+                            <div className="w-full max-w-sm pixel-card p-8 bg-slate-900 border-indigo-500 shadow-[0_0_50px_rgba(99,102,241,0.2)]">
+                              <div className="text-center mb-8">
+                                <span className="text-5xl block mb-4">{confirmingItem.item.icon}</span>
+                                <h4 className="text-xl font-black text-white italic mb-1">{confirmingItem.item.name}</h4>
+                                <p className="text-xs text-slate-500 uppercase tracking-widest">当前等级: Lv.{player.unlockedItems[confirmingItem.item.name] || 0}</p>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, false)} className="py-4 bg-slate-800 border-2 border-slate-700 text-sm font-black hover:bg-slate-700 transition-all cn-text">
+                                  仅装备 / EQUIP<br/>
+                                  <span className="text-[10px] text-emerald-400 font-bold">FREE / 免费</span>
+                                </button>
+                                <button onClick={() => buyItem(confirmingItem.item, confirmingItem.tab, true)} className="py-4 bg-indigo-600 border-2 border-indigo-400 text-sm font-black hover:bg-indigo-500 transition-all cn-text">
+                                  升级 / UPGRADE<br/>
+                                  <span className="text-[10px] text-amber-300 font-bold">₿{confirmingItem.item.cost}</span>
+                                </button>
+                              </div>
+                              <button onClick={() => setConfirmingItem(null)} className="w-full mt-6 text-xs text-slate-500 underline hover:text-white transition-colors">取消操作 / CANCEL</button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1656,7 +1711,7 @@ export default function App() {
             {/* RIGHT SIDEBAR - LOGS */}
             <div className="w-96 pixel-card flex flex-col bg-slate-900/50 backdrop-blur-sm">
               <h3 className="text-xs font-black text-slate-400 uppercase mb-4 border-b-4 border-slate-800 p-4 cn-text">任务数据流 / MISSION LOGS</h3>
-              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 p-4 text-[11px] font-mono">
+              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-3 p-4 text-sm font-mono">
                 {battleLog.map((log, i) => (
                   <div key={i} className={"border-l-4 pl-3 py-1 " + (log.includes('任务完成') ? 'border-emerald-500 text-emerald-400' : log.includes('连接断开') ? 'border-rose-500 text-rose-400' : 'border-slate-700 text-slate-400')}>
                     <span className="opacity-30 mr-2">[{new Date().toLocaleTimeString([], { hour12: false })}]</span>
