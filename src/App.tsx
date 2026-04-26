@@ -1172,10 +1172,10 @@ export default function App() {
 
             {coinToss.active && (
               <div className="absolute inset-0 z-[300] bg-slate-950/80 flex flex-col items-center justify-center animate-in fade-in">
-                <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-4xl shadow-2xl transition-all duration-700 ${!coinToss.result ? 'animate-spin border-slate-400 bg-slate-800' : coinToss.result === 'player' ? 'border-emerald-500 bg-emerald-600 scale-125' : 'border-rose-500 bg-rose-600 scale-125'}`}>
-                  {!coinToss.result ? '🪙' : coinToss.result === 'player' ? 'YOU' : 'HOST'}
+                <div className={`w-32 h-32 rounded-full border-8 flex items-center justify-center text-3xl font-black shadow-2xl transition-all duration-700 cn-text ${!coinToss.result ? 'animate-spin border-slate-400 bg-slate-800' : coinToss.result === 'player' ? 'border-emerald-500 bg-emerald-600 scale-125' : 'border-rose-500 bg-rose-600 scale-125'}`}>
+                  {!coinToss.result ? '🪙' : coinToss.result === 'player' ? '玩家' : '对手'}
                 </div>
-                <p className="mt-8 text-2xl font-black pixel-font text-white uppercase text-center tracking-widest cn-text">判定行动顺序 . . .</p>
+                <p className="mt-8 text-2xl font-black text-white uppercase text-center tracking-widest cn-text">判定行动顺序 . . .</p>
               </div>
             )}
 
@@ -1183,11 +1183,14 @@ export default function App() {
             {(gameState === 'victory' || gameState === 'defeat') && (
               <div className="absolute inset-0 z-[400] bg-slate-950/80 flex items-center justify-center animate-in zoom-in-95">
                 <div className={`p-12 border-4 ${gameState === 'victory' ? 'border-emerald-500 bg-emerald-950/50 victory-stripes' : 'border-rose-500 bg-rose-950/50 defeat-stripes'} text-center shadow-[0_0_100px_rgba(0,0,0,1)] relative overflow-hidden`}>
-                  <h2 className={`text-6xl font-black italic mb-4 ${gameState === 'victory' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {gameState === 'victory' ? 'MISSION COMPLETE' : 'CONNECTION LOST'}
+                  <h2 className={`text-6xl font-black italic mb-2 ${gameState === 'victory' ? 'text-emerald-400' : 'text-rose-400'} cn-text`}>
+                    {gameState === 'victory' ? '任务达成 SUCCESS' : '链接中断 FAILED'}
                   </h2>
+                  <div className={`text-2xl font-black mb-8 tracking-[0.3em] ${gameState === 'victory' ? 'text-emerald-500' : 'text-rose-500'} pixel-font`}>
+                    {gameState === 'victory' ? 'MISSION COMPLETE' : 'CONNECTION LOST'}
+                  </div>
                   <p className="text-white text-sm mb-10 tracking-[0.2em] cn-text">{gameState === 'victory' ? '目标已被彻底清除' : '严重损伤，被迫断开连接'}</p>
-                  <button onClick={() => { setGameState('lobby'); resetGame(); }} className="px-12 py-4 bg-white text-black font-bold pixel-font text-xs hover:bg-indigo-500 hover:text-white transition-all cn-text">RETURN TO BASE [ESC]</button>
+                  <button onClick={() => { setGameState('lobby'); resetGame(); }} className="px-12 py-4 bg-white text-black font-black text-sm hover:bg-indigo-500 hover:text-white transition-all cn-text">返回基地 / RETURN TO BASE [ESC]</button>
                 </div>
               </div>
             )}
