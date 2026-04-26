@@ -1496,10 +1496,22 @@ export default function App() {
                   {/* 1. 左侧：参数与装载 (STATS & LOADOUT) */}
                   <div className="w-[340px] flex flex-col gap-4">
                     {/* 属性面板 */}
-                    <div className="pixel-card bg-slate-900/80 p-6 flex-none">
+                    <div className={`pixel-card bg-slate-900/80 p-6 flex-none transition-all duration-500 ${player.statPoints > 0 ? '!border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.2)]' : ''}`}>
                       <div className="flex justify-between items-end border-b-2 border-indigo-500/30 pb-2 mb-4">
-                        <h2 className="text-sm font-black italic text-indigo-400 uppercase tracking-widest">参数调优 / TUNING</h2>
-                        <span className="text-[10px] text-slate-500">POINTS: {player.statPoints}</span>
+                        <h2 className="text-sm font-black italic text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                          参数调优 / TUNING
+                          {player.statPoints > 0 && (
+                            <span className="flex items-center gap-1 text-[8px] bg-amber-500 text-black px-1.5 py-0.5 rounded-sm animate-bounce font-black not-italic tracking-normal">
+                              LEVEL UP!
+                            </span>
+                          )}
+                        </h2>
+                        <div className="flex flex-col items-end leading-none">
+                          <span className={`text-[10px] font-black transition-all flex items-center gap-1 ${player.statPoints > 0 ? 'text-amber-400' : 'text-slate-500'}`}>
+                            {player.statPoints > 0 && <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span>}
+                            {player.statPoints > 0 ? '待分配 / PENDING' : '点数 / POINTS'}: {player.statPoints}
+                          </span>
+                        </div>
                       </div>
                       <div className="space-y-4">
                         {(['strength', 'agility', 'constitution'] as Stat[]).map(s => (
