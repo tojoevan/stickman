@@ -1223,7 +1223,7 @@ export default function App() {
               loop
               className="w-full h-full object-cover"
             >
-              <source src="/assets/charged_strike.mp4" type="video/mp4" />
+              <source src="/01-xunengzhongji.mp4" type="video/mp4" />
             </video>
             
             {/* 电影感遮罩 */}
