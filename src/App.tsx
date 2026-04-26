@@ -269,6 +269,8 @@ class StickmanRenderer {
     load('cyborg_ninja_laser', '/cyborg_ninja_laser.png');
     load('cyborg_ninja_bow', '/cyborg_ninja_bow.png');
     load('cyborg_ninja_hammer', '/cyborg_ninja_hammer.png');
+    load('m_idle', '/assets/m_idle.png');
+    load('m_atk', '/assets/m_atk.png');
     load('s_idle_0', '/assets/s_idle.png');
     load('s_idle_1', '/assets/s_idle.png'); // 暂时复用同一张，也可后期补齐
     load('s_atk', '/assets/s_atk.png');
@@ -291,11 +293,15 @@ class StickmanRenderer {
   private drawStickmanPath(pose: any, t: number, weaponIcon: string, isElite: boolean = false, isP: boolean = true) {
     const ctx = this.ctx;
 
-    let frameName = 's_idle_0';
-    if (pose === 'idle') {
-      frameName = 's_idle_0';
-    } else if (pose === 'attack') {
-      frameName = 's_atk';
+    let frameName = isP ? 'm_idle' : 's_idle_0';
+    
+    if (pose === 'attack') {
+      frameName = isP ? 'm_atk' : 's_atk';
+    } else if (isP) {
+      // 玩家待机状态下根据武器切换外观
+      if (weaponIcon.includes('弓')) frameName = 'cyborg_ninja_bow';
+      else if (weaponIcon.includes('锤')) frameName = 'cyborg_ninja_hammer';
+      else if (weaponIcon.includes('激光剑')) frameName = 'cyborg_ninja_laser';
     }
 
     const img = this.assets[frameName];
@@ -307,11 +313,15 @@ class StickmanRenderer {
 
       ctx.save();
       // 绘制带呼吸效果的资产
-      const w = 96 * (1 - breath * 0.5);
-      const h = 96 * (1 + breath);
+      // 调整显示尺寸：增加100%（从48恢复至96）
+      const baseSize = 96;
+      const w = baseSize * (1 - breath * 0.5);
+      const h = baseSize * (1 + breath);
 
-      // 修正：总偏移量 82 像素
-      ctx.drawImage(img, -w / 2, -h + 82, w, h);
+      const offsetX = -w / 2;
+      const offsetY = -h + 82;
+      
+      ctx.drawImage(img, offsetX, offsetY, w, h);
 
       ctx.restore();
     } else {
@@ -487,7 +497,7 @@ class StickmanRenderer {
     ctx.restore();
   }
 
-  drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️', hasGhost: boolean = false, isElite: boolean = false) {
+  drawCharacter(x: number, y: number, pose: any, flip: boolean = false, agility: number = 10, weaponIcon: string = '⚔️', hasGhost: boolean = false, isElite: boolean = false, isP: boolean = true) {
     const ctx = this.ctx; const t = this.time * (1 + agility / 45);
     
     // 动态修正：由于素材 s_idle(右) 和 s_atk(左) 基础朝向相反，进攻时需要自动反转 flip 逻辑
@@ -499,7 +509,7 @@ class StickmanRenderer {
       ctx.globalAlpha = 0.15 + Math.abs(Math.sin(this.time * 3)) * 0.25;
       ctx.strokeStyle = '#f43f5e'; ctx.lineWidth = 20; ctx.lineCap = 'round';
       ctx.shadowBlur = 15; ctx.shadowColor = '#f43f5e';
-      this.drawStickmanPath(pose, t, '', isElite, !finalFlip);
+      this.drawStickmanPath(pose, t, '', isElite, isP);
       ctx.stroke(); ctx.restore();
     }
 
@@ -512,7 +522,7 @@ class StickmanRenderer {
         ctx.globalAlpha = 0.5 / i;
 
         const tGhost = this.time * (1 + agility * 0.02);
-        this.drawStickmanPath(pose, tGhost - i * 0.12, weaponIcon, isElite, !finalFlip);
+        this.drawStickmanPath(pose, tGhost - i * 0.12, weaponIcon, isElite, isP);
         ctx.restore();
       }
     }
@@ -520,7 +530,7 @@ class StickmanRenderer {
     // --- 绘制本体 ---
     ctx.save(); ctx.translate(x, y); if (finalFlip) ctx.scale(-1, 1);
     if (isElite && pose !== 'dead') { ctx.shadowBlur = 10; ctx.shadowColor = '#f43f5e'; }
-    this.drawStickmanPath(pose, t, weaponIcon, isElite, !finalFlip);
+    this.drawStickmanPath(pose, t, weaponIcon, isElite, isP);
     ctx.restore();
   }
 
@@ -791,8 +801,8 @@ export default function App() {
         // 调用升级：x, y, pose, isFlip, agility, weaponIcon, hasGhost, isElite
         // 修正：当前素材(s_idle, s_atk)均默认面向右侧
         // 玩家(左)不翻转(false)以面向右侧对手，对手(右)翻转(true)以面向左侧玩家
-        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility || 10, player.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && activeSkill.isP));
-        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility || 10, enemy.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && !activeSkill.isP));
+        r.drawCharacter(240, 280, currentPose.player, false, player.stats.agility || 10, player.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && activeSkill.isP), true);
+        r.drawCharacter(560, 280, currentPose.enemy, true, enemy.stats.agility || 10, enemy.equipment.weapon, false, Boolean(activeSkill?.name === '幻影连击' && !activeSkill.isP), false);
         r.renderEffects();
       }
 
