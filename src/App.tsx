@@ -566,9 +566,9 @@ class StickmanRenderer {
 
     const img = this.assets[imgKey];
     if (img) {
-      const w = 540; // 图片放大 20%
+      const w = 950; // 再次增大角色比例
       const h = (img.height / img.width) * w;
-      ctx.drawImage(img, -w / 2, -h / 2 - 20, w, h); // 居中调整
+      ctx.drawImage(img, -w / 2, -h / 2, w, h); // 居中调整
     } else {
       ctx.fillStyle = '#334155';
       ctx.fillRect(-20, -100, 40, 100);
@@ -884,12 +884,12 @@ export default function App() {
           const lr = lobbyRendererRef.current;
           // 动态绑定最新画布上下文
           (lr as any).ctx = ctx;
-          ctx.clearRect(0, 0, 600, 700);
+          ctx.clearRect(0, 0, 1000, 1250);
           lr.advance();
           const pW = ITEMS.weapons.find(w => w.name === player.equipment.weapon);
           ctx.save();
           // 居中校准
-          ctx.translate(300, 350);
+          ctx.translate(500, 625);
           // 使用全新的高阶全息绘制方法
           lr.drawLobbyHero(0, 0, player.stats.agility, player.equipment);
           ctx.restore();
@@ -1334,29 +1334,23 @@ export default function App() {
         /* --- PERSISTENT BATTLE HUD --- */
         <div className="fixed inset-0 bg-slate-950 flex flex-col overflow-hidden text-white font-mono z-[500]">
 
-
           {/* TOP HUD */}
-          <div className="cyber-hud border-b-4 border-slate-900">
+          <div className="cyber-hud border-b-4 border-slate-900 flex-none h-[100px]">
             <div className="hud-unit pl-4">
               <img src={`${CDN_BASE}/assets/p_port.png`} className="portrait-box" alt="P" />
               <div className="bar-stack">
                 <div className="unit-name text-cyan-400 cn-text">玩家 / {player.username}</div>
-                {/* 玩家当前装备展示 */}
-                <div className="flex gap-2 text-xs text-slate-500 font-bold mb-1 cn-text">
+                <div className="flex gap-2 text-[10px] text-slate-500 font-bold mb-1 cn-text">
                   <span className="text-indigo-400">{player.equipment.weapon}</span>
                   <span className="opacity-30">|</span>
                   <span className="text-indigo-400">{player.equipment.armor}</span>
                   <span className="opacity-30">|</span>
                   <span className="text-indigo-400">{player.equipment.skill}</span>
                 </div>
-                <div className="flex gap-2 w-[400px]">
-                  <div className="flex-1 pixel-bar-container !mb-0">
+                <div className="flex gap-2 w-[300px]">
+                  <div className="flex-1 pixel-bar-container !mb-0 h-[20px]">
                     <div className="pixel-bar-fill bg-emerald-500" style={{ width: `${(player.health / player.maxHealth) * 100}%` }} />
-                    <span className="bar-label cn-text">HP {player.health}/{player.maxHealth}</span>
-                  </div>
-                  <div className="w-[180px] pixel-bar-container !mb-0">
-                    <div className="pixel-bar-fill bg-indigo-500 shadow-[0_0_15px_#6366f1]" style={{ width: '100%' }} />
-                    <span className="bar-label cn-text">EP 能量 100%</span>
+                    <span className="bar-label cn-text !top-[1px] !text-[10px]">HP {player.health}/{player.maxHealth}</span>
                   </div>
                 </div>
               </div>
@@ -1374,435 +1368,300 @@ export default function App() {
               <img src={`${CDN_BASE}/assets/e_port.png`} className="portrait-box border-rose-900" alt="E" />
               <div className="bar-stack text-right">
                 <div className="unit-name text-rose-400 cn-text">目标 / {enemy.username}</div>
-                {/* 敌人当前装备展示 (提供博弈信息) */}
-                <div className="flex justify-end gap-2 text-xs text-slate-500 font-bold mb-1 cn-text">
+                <div className="flex justify-end gap-2 text-[10px] text-slate-500 font-bold mb-1 cn-text">
                   <span className="text-rose-400">{isIntelBlurred.weapon ? '???' : enemy.equipment.weapon}</span>
                   <span className="opacity-30">|</span>
                   <span className="text-rose-400">{isIntelBlurred.armor ? '???' : enemy.equipment.armor}</span>
                   <span className="opacity-30">|</span>
                   <span className="text-rose-400">{isIntelBlurred.skill ? '???' : enemy.equipment.skill}</span>
                 </div>
-                <div className="flex flex-row-reverse gap-2 w-[400px]">
-                  <div className="flex-1 pixel-bar-container !mb-0">
+                <div className="flex flex-row-reverse gap-2 w-[300px]">
+                  <div className="flex-1 pixel-bar-container !mb-0 h-[20px]">
                     <div className="pixel-bar-fill bg-rose-600" style={{ width: `${(enemy.health / enemy.maxHealth) * 100}%` }} />
-                    <span className="bar-label left-2 right-auto cn-text">HP {enemy.health}/{enemy.maxHealth}</span>
-                  </div>
-                  <div className="w-[180px] pixel-bar-container !mb-0">
-                    <div className="pixel-bar-fill bg-sky-500 shadow-[0_0_15px_#0ea5e9]" style={{ width: '100%' }} />
-                    <span className="bar-label left-2 right-auto cn-text">盾 状态条 100%</span>
+                    <span className="bar-label left-2 right-auto cn-text !top-[1px] !text-[10px]">HP {enemy.health}/{enemy.maxHealth}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* BATTLE FIELD / 场景展示 */}
-          <div className="flex-1 relative flex items-center justify-center gap-8 px-8 py-2 bg-[radial-gradient(circle_at_center,_#1e1b4b_0%,_#020617_100%)]">
-
-            {/* 环境与目标情报 (移至场景左侧) */}
-            <div className="w-[280px] h-[400px] pixel-card bg-slate-900/80 p-5 flex flex-col gap-4 border-indigo-500/40 backdrop-blur-md animate-in slide-in-from-left-8 duration-500">
-              <div className="flex flex-col gap-2">
+          {/* BATTLE CONTENT (MIDDLE ROW) */}
+          <div className="flex-1 flex gap-4 p-4 min-h-0 bg-[radial-gradient(circle_at_center,_#1e1b4b_0%,_#020617_100%)]">
+            
+            {/* LEFT: INTEL TERMINAL */}
+            <div className="w-[280px] flex flex-col gap-4">
+              <div className="flex-1 pixel-card bg-slate-900/80 p-5 flex flex-col gap-4 border-indigo-500/40 backdrop-blur-md animate-in slide-in-from-left-8 duration-500 overflow-hidden">
                 <p className="text-xs font-black text-indigo-400 uppercase tracking-wider border-b-2 border-indigo-500/20 pb-2 cn-text">情报终端 / INTEL</p>
-                <div className="space-y-3 mt-2">
+                <div className="space-y-4 mt-2 overflow-y-auto custom-scrollbar pr-2">
                   <div>
-                    <p className="text-xs text-slate-400 font-bold cn-text">环境特征</p>
-                    <p className="text-sm font-black text-white mt-1 cn-text">"{field.name}"</p>
-                    <p className="text-xs text-indigo-400 font-semibold mt-1 cn-text">{field.effect}</p>
+                    <p className="text-[10px] text-slate-500 font-bold cn-text uppercase mb-1">环境特征 / ENVIRONMENT</p>
+                    <p className="text-sm font-black text-white cn-text">"{field.name}"</p>
+                    <p className="text-xs text-indigo-400 font-semibold mt-1 cn-text leading-relaxed">{field.effect}</p>
                   </div>
-                  <div className="border-t border-slate-800 pt-3">
-                    <p className="text-xs text-slate-400 font-bold uppercase mb-2 cn-text">目标情报</p>
+                  <div className="border-t border-slate-800 pt-4">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase mb-2 cn-text">目标规格 / TARGET_SPEC</p>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
-                        <span className="text-xs text-slate-400 font-bold cn-text">武器</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.weapon ? '数据无法精确解析' : enemy.equipment.weapon}</span>
+                        <span className="text-[10px] text-slate-500 font-bold cn-text">武器</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.weapon ? 'DATA_LOCKED' : enemy.equipment.weapon}</span>
                       </div>
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
-                        <span className="text-xs text-slate-400 font-bold cn-text">防具</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.armor ? '数据无法精确解析' : enemy.equipment.armor}</span>
+                        <span className="text-[10px] text-slate-500 font-bold cn-text">防具</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.armor ? 'DATA_LOCKED' : enemy.equipment.armor}</span>
                       </div>
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
-                        <span className="text-xs text-slate-400 font-bold cn-text">技能</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.skill ? '无法准确获取情报' : enemy.equipment.skill}</span>
+                        <span className="text-[10px] text-slate-500 font-bold cn-text">技能</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.skill ? 'DATA_LOCKED' : enemy.equipment.skill}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="mt-auto pt-4 border-t border-slate-800">
-                <div className="flex items-center gap-2 animate-pulse">
-                  <div className={`w-2 h-2 rounded-full ${Object.values(isIntelBlurred).some(v => v) ? 'bg-rose-500 shadow-[0_0_10px_#f43f5e]' : 'bg-emerald-500 shadow-[0_0_10px_#10b981]'}`}></div>
-                  <span className={`text-xs ${Object.values(isIntelBlurred).some(v => v) ? 'text-rose-500' : 'text-emerald-500'} font-black tracking-wide cn-text`}>
-                    {Object.values(isIntelBlurred).some(v => v) ? `信号干扰 INTERFERENCE (${Object.values(isIntelBlurred).filter(v => v).length}/3)` : '终端在线 ONLINE'}
-                  </span>
+                <div className="mt-auto pt-4 border-t border-slate-800">
+                  <div className="flex items-center gap-2 animate-pulse">
+                    <div className={`w-2 h-2 rounded-full ${Object.values(isIntelBlurred).some(v => v) ? 'bg-rose-500 shadow-[0_0_10px_#f43f5e]' : 'bg-emerald-500 shadow-[0_0_10px_#10b981]'}`}></div>
+                    <span className={`text-[10px] ${Object.values(isIntelBlurred).some(v => v) ? 'text-rose-500' : 'text-emerald-500'} font-black tracking-wide cn-text`}>
+                      {Object.values(isIntelBlurred).some(v => v) ? `信号干扰 INTERFERENCE (${Object.values(isIntelBlurred).filter(v => v).length}/3)` : '数据同步 ONLINE'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="relative w-fit mx-auto">
-              <canvas ref={canvasRef} width={800} height={400} className="max-w-full h-auto border-4 border-slate-800 shadow-2xl bg-black image-pixelated" />
+            {/* CENTER: BATTLEFIELD CANVAS */}
+            <div className="flex-1 relative flex items-center justify-center min-w-0">
+              <div className="relative">
+                <canvas ref={canvasRef} width={800} height={400} className="max-w-full h-auto max-h-[70vh] border-4 border-slate-800 shadow-[0_0_60px_rgba(0,0,0,0.5)] bg-black image-pixelated" />
 
-              {activeSkill && (
-                <div className="absolute top-1/4 left-0 right-0 text-center -ml-24 whitespace-nowrap z-50 text-5xl font-black italic text-cyan-400 drop-shadow-[0_0_15px_#00f2ff] animate-bounce">
-                  {activeSkill.name}!!
-                </div>
-              )}
-
-              {coinToss.active && (
-                <div className="absolute inset-0 z-[500] bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in" style={{ perspective: '1200px' }}>
-                  <div className={`coin-container ${!coinToss.result ? 'flipping' : ''} ${coinToss.result === 'enemy' ? 'show-tails' : 'show-heads'}`}>
-                    <div className="coin-face heads" style={{ backgroundImage: `url(${CDN_BASE}/assets/coin_heads.png)`, backgroundSize: 'cover' }}></div>
-                    <div className="coin-face tails" style={{ backgroundImage: `url(${CDN_BASE}/assets/coin_tails.png)`, backgroundSize: 'cover' }}></div>
+                {activeSkill && (
+                  <div className="absolute top-1/4 left-0 right-0 text-center whitespace-nowrap z-50 text-5xl font-black italic text-cyan-400 drop-shadow-[0_0_20px_#00f2ff] animate-bounce">
+                    {activeSkill.name}!!
                   </div>
-                  <p className="mt-12 text-2xl font-black text-white italic tracking-[0.3em] uppercase cn-text animate-pulse">
-                    {!coinToss.result ? '同步协议优先级计算中...' : (coinToss.result === 'player' ? '正面：指挥官取得优先权' : '反面：敌方占据主动')}
-                  </p>
-                </div>
-              )}
+                )}
 
-              {/* MISSION RESULT OVERLAY */}
-              {(gameState === 'victory' || gameState === 'defeat') && (
-                <div className="absolute inset-0 z-[400] bg-slate-950/80 flex items-center justify-center animate-in zoom-in-95">
-                  <div className={`p-12 border-4 ${gameState === 'victory' ? 'border-emerald-500 bg-emerald-950/50 victory-stripes' : 'border-rose-500 bg-rose-950/50 defeat-stripes'} text-center shadow-[0_0_100px_rgba(0,0,0,1)] relative overflow-hidden`}>
-                    <h2 className={`text-6xl font-black italic mb-2 ${gameState === 'victory' ? 'text-emerald-400' : 'text-rose-400'} cn-text`}>
-                      {gameState === 'victory' ? '任务达成 SUCCESS' : '链接中断 FAILED'}
-                    </h2>
-                    <div className={`text-2xl font-black mb-8 tracking-[0.3em] ${gameState === 'victory' ? 'text-emerald-500' : 'text-rose-500'} pixel-font`}>
-                      {gameState === 'victory' ? 'MISSION COMPLETE' : 'CONNECTION LOST'}
+                {coinToss.active && (
+                  <div className="absolute inset-0 z-[500] bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in" style={{ perspective: '1200px' }}>
+                    <div className={`coin-container ${!coinToss.result ? 'flipping' : ''} ${coinToss.result === 'enemy' ? 'show-tails' : 'show-heads'}`}>
+                      <div className="coin-face heads" style={{ backgroundImage: `url(${CDN_BASE}/assets/coin_heads.png)`, backgroundSize: 'cover' }}></div>
+                      <div className="coin-face tails" style={{ backgroundImage: `url(${CDN_BASE}/assets/coin_tails.png)`, backgroundSize: 'cover' }}></div>
                     </div>
-                    <p className="text-white text-sm mb-10 tracking-[0.2em] cn-text">{gameState === 'victory' ? '目标已被彻底清除' : '严重损伤，被迫断开连接'}</p>
-                    <button onClick={() => { setGameState('lobby'); resetGame(); }} className="px-12 py-4 bg-white text-black font-black text-sm hover:bg-indigo-500 hover:text-white transition-all cn-text">返回基地 / RETURN TO BASE [ESC]</button>
+                    <p className="mt-12 text-2xl font-black text-white italic tracking-[0.3em] uppercase cn-text animate-pulse">
+                      {!coinToss.result ? '同步协议优先级计算中...' : (coinToss.result === 'player' ? '正面：指挥官取得优先权' : '反面：敌方占据主动')}
+                    </p>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
 
-            {/* 数据流卡片 (场景右侧) */}
-            <div className="w-[240px] h-[400px] pixel-card bg-slate-900/80 p-4 flex flex-col gap-3 border-cyan-500/20 backdrop-blur-md animate-in slide-in-from-right-8 duration-500">
-              <div className="flex items-center justify-between border-b-2 border-cyan-500/20 pb-2">
-                <p className="text-xs font-black text-cyan-400 uppercase tracking-wider cn-text">数据流 / STREAM</p>
-                <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
-                  <span className="text-[8px] text-cyan-500 font-black">LIVE</span>
-                </div>
-              </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1.5 text-[9px] font-mono">
-                {battleLog.length === 0 ? (
-                  <div className="text-slate-600 italic text-center mt-8 text-xs cn-text">等待战斗数据...</div>
-                ) : (
-                  [...battleLog].reverse().map((log, i) => (
-                    <div key={i} className={"px-2 py-1.5 border-l-2 text-xs leading-relaxed " + (
-                      log.includes('打击') ? 'border-emerald-400 text-emerald-300 bg-emerald-500/5' :
-                        log.includes('受创') ? 'border-rose-400 text-rose-300 bg-rose-500/5' :
-                          log.includes('任务完成') ? 'border-yellow-400 text-yellow-300 bg-yellow-500/5' :
-                            log.includes('修复') ? 'border-teal-400 text-teal-300 bg-teal-500/5' :
-                              'border-slate-700 text-slate-400'
-                    ) + " cn-text"}>{log}</div>
-                  ))
+                {(gameState === 'victory' || gameState === 'defeat') && (
+                  <div className="absolute inset-0 z-[400] bg-slate-950/90 flex items-center justify-center animate-in zoom-in-95 backdrop-blur-md">
+                    <div className={`p-12 border-4 ${gameState === 'victory' ? 'border-emerald-500 bg-emerald-950/50 victory-stripes' : 'border-rose-500 bg-rose-950/50 defeat-stripes'} text-center shadow-[0_0_100px_rgba(0,0,0,1)] relative overflow-hidden`}>
+                      <h2 className={`text-6xl font-black italic mb-2 ${gameState === 'victory' ? 'text-emerald-400' : 'text-rose-400'} cn-text`}>
+                        {gameState === 'victory' ? '任务达成 SUCCESS' : '链接中断 FAILED'}
+                      </h2>
+                      <div className={`text-2xl font-black mb-8 tracking-[0.3em] ${gameState === 'victory' ? 'text-emerald-500' : 'text-rose-500'} pixel-font`}>
+                        {gameState === 'victory' ? 'MISSION COMPLETE' : 'CONNECTION LOST'}
+                      </div>
+                      <button onClick={() => { setGameState('lobby'); resetGame(); }} className="px-12 py-4 bg-white text-black font-black text-sm hover:bg-indigo-500 hover:text-white transition-all cn-text">返回基地 / RETURN TO BASE</button>
+                    </div>
+                  </div>
                 )}
               </div>
-              <div className="pt-2 border-t border-slate-800">
-                <div className="flex justify-between text-xs text-slate-500 font-bold cn-text">
-                  <span>日志 {battleLog.length} 条</span>
-                  <span className="text-cyan-500">R{round}</span>
+            </div>
+
+            {/* RIGHT: TACTICAL LOADOUT PANEL */}
+            <div className="w-[320px] flex flex-col gap-4">
+              <div className="flex-1 pixel-card bg-slate-900/80 p-4 flex flex-col gap-4 border-cyan-500/20 backdrop-blur-md animate-in slide-in-from-right-8 duration-500 overflow-hidden">
+                <p className="text-xs font-black text-cyan-400 uppercase tracking-wider border-b border-cyan-500/20 pb-2 cn-text">实时载荷调节 / LOADOUT</p>
+                
+                <div className="flex-1 flex flex-col gap-4 min-h-0">
+                  {/* WEAPON PICKER */}
+                  <div className="flex-1 flex flex-col min-h-0 bg-slate-950/30 border border-slate-800 rounded p-2">
+                    <label className="text-[9px] text-slate-500 font-bold uppercase mb-1 flex justify-between">
+                      <span>攻击链路 / WEAPON</span>
+                      <span className="text-indigo-400">{player.equipment.weapon}</span>
+                    </label>
+                    <div className="flex-1 relative overflow-hidden group/picker">
+                      {(() => {
+                        const items = ITEMS.weapons.filter(i => player.unlockedItems[i.name]);
+                        return (
+                          <div
+                            onWheel={(e) => {
+                              if (isDeployed) return;
+                              const now = Date.now();
+                              if (now - lastWheelTime.current < 300) return;
+                              lastWheelTime.current = now;
+                              const direction = e.deltaY > 0 ? 1 : -1;
+                              const newIdx = wheelIndices.weapon + direction;
+                              setWheelIndices(prev => ({ ...prev, weapon: newIdx }));
+                              const realIdx = (newIdx % items.length + items.length) % items.length;
+                              setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[realIdx].name } }));
+                            }}
+                            className="absolute inset-0 flex flex-col"
+                          >
+                            <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
+                              <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                              <div className="h-[40px] border-y border-indigo-500/30 bg-indigo-500/5"></div>
+                              <div className="flex-1 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                            </div>
+                            <div className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)" style={{ top: '50%', marginTop: '-20px', transform: `translateY(${-wheelIndices.weapon * 40}px)` }}>
+                              {Array.from({ length: 120 }).map((_, vIdx) => {
+                                const item = items[vIdx % items.length];
+                                if (!item) return null;
+                                const isActive = vIdx === wheelIndices.weapon;
+                                if (Math.abs(vIdx - wheelIndices.weapon) > 3) return <div key={vIdx} className="h-[40px]" />;
+                                return (
+                                  <div key={vIdx} onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: item.name } }))} className={`h-[40px] flex items-center justify-center gap-3 px-3 transition-all duration-300 ${isActive ? 'text-white scale-110 opacity-100' : 'text-slate-600 opacity-30 scale-90'} ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+                                    <span className="text-xl">{item.icon}</span>
+                                    <span className="text-[12px] font-black truncate cn-text">{item.name}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* ARMOR PICKER */}
+                  <div className="flex-1 flex flex-col min-h-0 bg-slate-950/30 border border-slate-800 rounded p-2">
+                    <label className="text-[9px] text-slate-500 font-bold uppercase mb-1 flex justify-between">
+                      <span>防御规格 / ARMOR</span>
+                      <span className="text-emerald-400">{player.equipment.armor}</span>
+                    </label>
+                    <div className="flex-1 relative overflow-hidden group/picker">
+                      {(() => {
+                        const items = ITEMS.armors.filter(i => player.unlockedItems[i.name]);
+                        return (
+                          <div
+                            onWheel={(e) => {
+                              if (isDeployed) return;
+                              const now = Date.now();
+                              if (now - lastWheelTime.current < 300) return;
+                              lastWheelTime.current = now;
+                              const direction = e.deltaY > 0 ? 1 : -1;
+                              const newIdx = wheelIndices.armor + direction;
+                              setWheelIndices(prev => ({ ...prev, armor: newIdx }));
+                              const realIdx = (newIdx % items.length + items.length) % items.length;
+                              setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[realIdx].name } }));
+                            }}
+                            className="absolute inset-0 flex flex-col"
+                          >
+                            <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
+                              <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                              <div className="h-[40px] border-y border-emerald-500/30 bg-emerald-500/5"></div>
+                              <div className="flex-1 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                            </div>
+                            <div className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)" style={{ top: '50%', marginTop: '-20px', transform: `translateY(${-wheelIndices.armor * 40}px)` }}>
+                              {Array.from({ length: 120 }).map((_, vIdx) => {
+                                const item = items[vIdx % items.length];
+                                if (!item) return null;
+                                const isActive = vIdx === wheelIndices.armor;
+                                if (Math.abs(vIdx - wheelIndices.armor) > 3) return <div key={vIdx} className="h-[40px]" />;
+                                return (
+                                  <div key={vIdx} onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: item.name } }))} className={`h-[40px] flex items-center justify-center gap-3 px-3 transition-all duration-300 ${isActive ? 'text-white scale-110 opacity-100' : 'text-slate-600 opacity-30 scale-90'} ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+                                    <span className="text-xl">{item.icon}</span>
+                                    <span className="text-[12px] font-black truncate cn-text">{item.name}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* SKILL PICKER */}
+                  <div className="flex-1 flex flex-col min-h-0 bg-slate-950/30 border border-slate-800 rounded p-2">
+                    <label className="text-[9px] text-slate-500 font-bold uppercase mb-1 flex justify-between">
+                      <span>核心逻辑 / SKILL</span>
+                      <span className="text-amber-400">{player.equipment.skill}</span>
+                    </label>
+                    <div className="flex-1 relative overflow-hidden group/picker">
+                      {(() => {
+                        const items = ITEMS.skills.filter(i => player.unlockedItems[i.name]);
+                        return (
+                          <div
+                            onWheel={(e) => {
+                              if (isDeployed) return;
+                              const now = Date.now();
+                              if (now - lastWheelTime.current < 300) return;
+                              lastWheelTime.current = now;
+                              const direction = e.deltaY > 0 ? 1 : -1;
+                              const newIdx = wheelIndices.skill + direction;
+                              setWheelIndices(prev => ({ ...prev, skill: newIdx }));
+                              const realIdx = (newIdx % items.length + items.length) % items.length;
+                              setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[realIdx].name } }));
+                            }}
+                            className="absolute inset-0 flex flex-col"
+                          >
+                            <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
+                              <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                              <div className="h-[40px] border-y border-amber-500/50 bg-amber-500/10"></div>
+                              <div className="flex-1 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
+                            </div>
+                            <div className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)" style={{ top: '50%', marginTop: '-20px', transform: `translateY(${-wheelIndices.skill * 40}px)` }}>
+                              {Array.from({ length: 120 }).map((_, vIdx) => {
+                                const item = items[vIdx % items.length];
+                                if (!item) return null;
+                                const isActive = vIdx === wheelIndices.skill;
+                                if (Math.abs(vIdx - wheelIndices.skill) > 3) return <div key={vIdx} className="h-[40px]" />;
+                                return (
+                                  <div key={vIdx} onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: item.name } }))} className={`h-[40px] flex items-center justify-center gap-3 px-3 transition-all duration-300 ${isActive ? 'text-white scale-110 opacity-100' : 'text-slate-600 opacity-30 scale-90'} ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+                                    <span className="text-xl">{item.icon}</span>
+                                    <span className="text-[12px] font-black truncate cn-text">{item.name}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-2 h-[80px]">
+                  {!isDeployed ? (
+                    <button onClick={startRound} className="w-full h-full pixel-button success btn-deploy-anim !p-0 shadow-[0_0_20px_rgba(16,185,129,0.2)] flex flex-col items-center justify-center leading-tight">
+                      <span className="text-lg font-black cn-text">执行任务部署</span>
+                      <span className="text-[9px] font-bold opacity-70 tracking-widest uppercase">DEPLOY MISSION</span>
+                    </button>
+                  ) : (
+                    <div className="w-full h-full pixel-card bg-slate-950 flex items-center justify-center text-slate-500 font-bold italic animate-pulse border-indigo-500/30 text-xs cn-text">
+                      同步中... SYNCING
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-
           </div>
 
-          {/* 实时战术底部面板 - 整合优化 */}
-          <div className="flex gap-4 p-4 bg-slate-950 border-t-4 border-slate-900 h-[300px]">
-            {/* 实时载荷调节 (左侧 - 滚动选择器) */}
-            <div className="flex-1 pixel-card bg-slate-900/50 p-3 flex flex-col gap-3 overflow-hidden">
-              <p className="text-xs font-black text-indigo-400 uppercase tracking-wider border-b border-indigo-500/20 pb-1.5 cn-text">实时载荷调节 / LOADOUT ADJUSTMENT</p>
-              <div className="flex-1 grid grid-cols-3 gap-4 min-h-0">
-                {/* 武器选择器 */}
-                <div className="flex flex-col gap-2 min-h-0">
-                  <label className="text-[10px] text-slate-500 font-bold cn-text uppercase tracking-tight">攻击链路 / WEAPON</label>
-                  <div className="flex-1 flex flex-col min-h-0">
-                    {(() => {
-                      const items = ITEMS.weapons.filter(i => player.unlockedItems[i.name]);
-                      const currentIdx = items.findIndex(i => i.name === player.equipment.weapon);
-                      const itemHeight = 48; // Reduced height for closer spacing
-
-                      return (
-                        <div
-                          onWheel={(e) => {
-                            if (isDeployed) return;
-                            const now = Date.now();
-                            if (now - lastWheelTime.current < 400) return;
-                            lastWheelTime.current = now;
-
-                            const items = ITEMS.weapons.filter(i => player.unlockedItems[i.name]);
-                            const direction = e.deltaY > 0 ? 1 : -1;
-                            const newIdx = wheelIndices.weapon + direction;
-
-                            setWheelIndices(prev => ({ ...prev, weapon: newIdx }));
-                            const realIdx = (newIdx % items.length + items.length) % items.length;
-                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[realIdx].name } }));
-                          }}
-                          onTouchStart={(e) => {
-                            if (isDeployed) return;
-                            touchStartY.current = e.touches[0].clientY;
-                          }}
-                          onTouchMove={(e) => {
-                            if (isDeployed) return;
-                            const now = Date.now();
-                            if (now - lastWheelTime.current < 150) return;
-                            
-                            const deltaY = touchStartY.current - e.touches[0].clientY;
-                            if (Math.abs(deltaY) < 30) return;
-
-                            lastWheelTime.current = now;
-                            touchStartY.current = e.touches[0].clientY;
-
-                            const items = ITEMS.weapons.filter(i => player.unlockedItems[i.name]);
-                            const direction = deltaY > 0 ? 1 : -1;
-                            const newIdx = wheelIndices.weapon + direction;
-
-                            setWheelIndices(prev => ({ ...prev, weapon: newIdx }));
-                            const realIdx = (newIdx % items.length + items.length) % items.length;
-                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[realIdx].name } }));
-                          }}
-                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded touch-none"
-                        >
-                          <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
-                            <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
-                            <div className="h-[48px] border-y border-indigo-500/30 bg-indigo-500/5"></div>
-                            <div className="flex-1 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
-                          </div>
-                          <div
-                            className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)"
-                            style={{
-                              top: '50%',
-                              marginTop: '-24px',
-                              transform: `translateY(${-wheelIndices.weapon * 48}px)`
-                            }}
-                          >
-                            {items.length > 0 ? Array.from({ length: 120 }).map((_, vIdx) => {
-                              const item = items[vIdx % items.length];
-                              if (!item) return null;
-                              const isActive = vIdx === wheelIndices.weapon;
-                              // 只渲染可见区域附近的项，性能更好
-                              if (Math.abs(vIdx - wheelIndices.weapon) > 4) return <div key={vIdx} className="h-[48px]" />;
-                              return (
-                                <div
-                                  key={vIdx}
-                                  onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: item.name } }))}
-                                  className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
-                                    } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                                >
-                                  <span className={isActive ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
-                                  <span className={`font-black truncate cn-text ${isActive ? 'text-base' : 'text-sm'}`}>{item.name}</span>
-                                </div>
-                              );
-                            }) : (
-                              <div className="h-full flex items-center justify-center text-slate-500 text-xs italic">同步中...</div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
+          {/* BOTTOM: HORIZONTAL MISSION LOG STREAM */}
+          <div className="h-[80px] bg-slate-950 border-t-4 border-slate-900 flex items-center px-6 gap-6 flex-none overflow-hidden">
+            <div className="flex-none flex flex-col">
+              <span className="text-xs font-black text-cyan-400 tracking-wider cn-text">任务数据流</span>
+              <span className="text-[8px] font-black text-slate-500 tracking-[0.2em] uppercase">MISSION_LOG_STREAM</span>
+            </div>
+            
+            <div className="flex-1 flex flex-row-reverse items-center gap-4 overflow-x-auto no-scrollbar py-2">
+              {[...battleLog].map((log, i) => (
+                <div key={i} className={`flex-none px-4 py-2 border-l-2 text-[12px] font-bold whitespace-nowrap cn-text transition-all ${
+                  i === 0 ? 'bg-cyan-500/10 border-cyan-400 text-white animate-in slide-in-from-right-4' : 'border-slate-800 text-slate-500'
+                } ${
+                  log.includes('打击') ? 'border-emerald-500/50 text-emerald-400' :
+                  log.includes('受创') ? 'border-rose-500/50 text-rose-400' :
+                  log.includes('修复') ? 'border-teal-500/50 text-teal-400' : ''
+                }`}>
+                  {log}
                 </div>
-
-                {/* 防具选择器 */}
-                <div className="flex flex-col gap-2 min-h-0">
-                  <label className="text-[10px] text-slate-500 font-bold cn-text uppercase tracking-tight">防御规格 / ARMOR</label>
-                  <div className="flex-1 flex flex-col min-h-0">
-                    {(() => {
-                      const items = ITEMS.armors.filter(i => player.unlockedItems[i.name]);
-                      const currentIdx = items.findIndex(i => i.name === player.equipment.armor);
-                      const itemHeight = 48;
-
-                      return (
-                        <div
-                          onWheel={(e) => {
-                            if (isDeployed) return;
-                            const now = Date.now();
-                            if (now - lastWheelTime.current < 400) return;
-                            lastWheelTime.current = now;
-
-                            const items = ITEMS.armors.filter(i => player.unlockedItems[i.name]);
-                            const direction = e.deltaY > 0 ? 1 : -1;
-                            const newIdx = wheelIndices.armor + direction;
-
-                            setWheelIndices(prev => ({ ...prev, armor: newIdx }));
-                            const realIdx = (newIdx % items.length + items.length) % items.length;
-                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[realIdx].name } }));
-                          }}
-                          onTouchStart={(e) => {
-                            if (isDeployed) return;
-                            touchStartY.current = e.touches[0].clientY;
-                          }}
-                          onTouchMove={(e) => {
-                            if (isDeployed) return;
-                            const now = Date.now();
-                            if (now - lastWheelTime.current < 150) return;
-                            
-                            const deltaY = touchStartY.current - e.touches[0].clientY;
-                            if (Math.abs(deltaY) < 30) return;
-
-                            lastWheelTime.current = now;
-                            touchStartY.current = e.touches[0].clientY;
-
-                            const items = ITEMS.armors.filter(i => player.unlockedItems[i.name]);
-                            const direction = deltaY > 0 ? 1 : -1;
-                            const newIdx = wheelIndices.armor + direction;
-
-                            setWheelIndices(prev => ({ ...prev, armor: newIdx }));
-                            const realIdx = (newIdx % items.length + items.length) % items.length;
-                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[realIdx].name } }));
-                          }}
-                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded touch-none"
-                        >
-                          <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
-                            <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
-                            <div className="h-[48px] border-y border-emerald-500/30 bg-emerald-500/5"></div>
-                            <div className="flex-1 bg-gradient-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
-                          </div>
-                          <div
-                            className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)"
-                            style={{
-                              top: '50%',
-                              marginTop: '-24px',
-                              transform: `translateY(${-wheelIndices.armor * 48}px)`
-                            }}
-                          >
-                            {items.length > 0 ? Array.from({ length: 120 }).map((_, vIdx) => {
-                              const item = items[vIdx % items.length];
-                              if (!item) return null;
-                              const isActive = vIdx === wheelIndices.armor;
-                              if (Math.abs(vIdx - wheelIndices.armor) > 4) return <div key={vIdx} className="h-[48px]" />;
-                              return (
-                                <div
-                                  key={vIdx}
-                                  onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: item.name } }))}
-                                  className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
-                                    } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                                >
-                                  <span className={isActive ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
-                                  <span className={`font-black truncate cn-text ${isActive ? 'text-base' : 'text-sm'}`}>{item.name}</span>
-                                </div>
-                              );
-                            }) : (
-                              <div className="h-full flex items-center justify-center text-slate-500 text-xs italic">同步中...</div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                {/* 技能选择器 */}
-                <div className="flex flex-col gap-2 min-h-0">
-                  <label className="text-[10px] text-slate-500 font-bold cn-text uppercase tracking-tight">核心逻辑 / SKILL</label>
-                  <div className="flex-1 flex flex-col min-h-0">
-                    {(() => {
-                      const items = ITEMS.skills.filter(i => player.unlockedItems[i.name]);
-                      const currentIdx = items.findIndex(i => i.name === player.equipment.skill);
-                      const itemHeight = 48;
-
-                      return (
-                        <div
-                          onWheel={(e) => {
-                            if (isDeployed) return;
-                            const now = Date.now();
-                            if (now - lastWheelTime.current < 400) return;
-                            lastWheelTime.current = now;
-
-                            const items = ITEMS.skills.filter(i => player.unlockedItems[i.name]);
-                            const direction = e.deltaY > 0 ? 1 : -1;
-                            const newIdx = wheelIndices.skill + direction;
-
-                            setWheelIndices(prev => ({ ...prev, skill: newIdx }));
-                            const realIdx = (newIdx % items.length + items.length) % items.length;
-                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[realIdx].name } }));
-                          }}
-                          onTouchStart={(e) => {
-                            if (isDeployed) return;
-                            touchStartY.current = e.touches[0].clientY;
-                          }}
-                          onTouchMove={(e) => {
-                            if (isDeployed) return;
-                            const now = Date.now();
-                            if (now - lastWheelTime.current < 150) return;
-                            
-                            const deltaY = touchStartY.current - e.touches[0].clientY;
-                            if (Math.abs(deltaY) < 30) return;
-
-                            lastWheelTime.current = now;
-                            touchStartY.current = e.touches[0].clientY;
-
-                            const items = ITEMS.skills.filter(i => player.unlockedItems[i.name]);
-                            const direction = deltaY > 0 ? 1 : -1;
-                            const newIdx = wheelIndices.skill + direction;
-
-                            setWheelIndices(prev => ({ ...prev, skill: newIdx }));
-                            const realIdx = (newIdx % items.length + items.length) % items.length;
-                            setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[realIdx].name } }));
-                          }}
-                          className="flex-1 relative overflow-hidden group/picker border border-slate-800 bg-slate-950/50 rounded touch-none"
-                        >
-                          <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
-                            <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
-                            <div className="h-[48px] border-y border-amber-500/50 bg-amber-500/10"></div>
-                            <div className="flex-1 bg-gradient-t from-slate-950/90 via-slate-950/20 to-transparent"></div>
-                          </div>
-                          <div
-                            className="absolute left-0 right-0 transition-transform duration-500 cubic-bezier(0.2, 0.8, 0.2, 1)"
-                            style={{
-                              top: '50%',
-                              marginTop: '-24px',
-                              transform: `translateY(${-wheelIndices.skill * 48}px)`
-                            }}
-                          >
-                            {items.length > 0 ? Array.from({ length: 120 }).map((_, vIdx) => {
-                              const item = items[vIdx % items.length];
-                              if (!item) return null; // 安全保障
-                              const isActive = vIdx === wheelIndices.skill;
-                              if (Math.abs(vIdx - wheelIndices.skill) > 4) return <div key={vIdx} className="h-[48px]" />;
-                              return (
-                                <div
-                                  key={vIdx}
-                                  onClick={() => !isDeployed && setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: item.name } }))}
-                                  className={`h-[48px] flex items-center justify-center gap-4 px-3 transition-all duration-300 ${isActive ? 'text-white scale-110 opacity-100' : 'text-slate-500 opacity-40 scale-90'
-                                    } ${isDeployed ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                                >
-                                  <span className={isActive ? 'text-3xl' : 'text-xl'}>{item.icon}</span>
-                                  <span className={`font-black truncate cn-text ${isActive ? 'text-base' : 'text-sm'}`}>{item.name}</span>
-                                </div>
-                              );
-                            }) : (
-                              <div className="h-full flex items-center justify-center text-slate-500 text-xs italic">
-                                正在同步核心数据...
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-              </div>
+              ))}
+              {battleLog.length === 0 && <div className="text-slate-700 italic text-xs cn-text">等待首个数据包注入...</div>}
             </div>
 
-            {/* 操作控制 (右侧) */}
-            <div className="w-[300px] flex flex-col gap-2">
-              {!isDeployed ? (
-                <button onClick={startRound} className="flex-1 pixel-button success btn-deploy-anim !p-0 shadow-[0_0_20px_rgba(16,185,129,0.2)] flex flex-col items-center justify-center leading-tight py-2">
-                  <span className="text-xl font-black cn-text">执行任务部署</span>
-                  <span className="text-xs font-bold opacity-70 tracking-widest">DEPLOY MISSION</span>
-                </button>
-              ) : (
-                <div className="flex-1 pixel-card bg-slate-900 flex items-center justify-center text-slate-400 font-bold italic animate-pulse border-indigo-500/30 text-sm cn-text">
-                  同步中... SYNCING
-                </div>
-              )}
-              <button onClick={() => { setGameState('lobby'); resetGame(); }} className="flex-1 flex flex-col items-center justify-center leading-tight py-2 text-rose-400 hover:text-white hover:bg-rose-500/20 border border-rose-500/30 transition-all cn-text">
-                <span className="text-base font-black">终止任务</span>
-                <span className="text-[10px] font-bold opacity-60 tracking-wider">TERMINATE MISSION</span>
+            <div className="flex-none flex items-center gap-4 border-l-2 border-slate-800 pl-6 h-full">
+              <button onClick={() => { setGameState('lobby'); resetGame(); }} className="flex flex-col items-center justify-center text-rose-500 hover:text-white hover:bg-rose-500/10 px-4 transition-all">
+                <span className="text-xs font-black cn-text">终止任务</span>
+                <span className="text-[8px] font-bold opacity-50 uppercase">TERMINATE</span>
               </button>
             </div>
           </div>
@@ -2006,75 +1865,90 @@ export default function App() {
                     <div className="hero-platform absolute top-[360px] w-80 h-16 bg-indigo-500/20 rounded-[100%] blur-2xl animate-pulse border-t border-indigo-500/40"></div>
 
                     {/* 实时渲染 Canvas */}
-                    <div className="relative z-10 animate-in zoom-in-90 duration-700 mt-[100px]">
+                    <div className="relative z-10 animate-in zoom-in-95 duration-1000 mt-[1vh]">
                       <canvas
                         ref={lobbyCanvasRef}
-                        width={600}
-                        height={700}
+                        width={1000}
+                        height={1250}
                         onClick={() => {
                           const skills: ('xuneng' | 'huanying' | 'support')[] = ['xuneng', 'huanying', 'support'];
                           const rand = skills[Math.floor(Math.random() * skills.length)];
                           setShowcasedSkill(rand);
                         }}
-                        className="drop-shadow-[0_0_25px_rgba(99,102,241,0.4)] cursor-pointer hover:scale-[1.02] transition-transform"
+                        className="drop-shadow-[0_0_60px_rgba(99,102,241,0.6)] cursor-pointer hover:scale-[1.01] transition-transform max-h-[85vh] h-auto object-contain"
                       />
 
-                      {/* 浮动交互节点 (Hotspots) - 强化引导 */}
+                      {/* 浮动交互节点 (Hotspots) - 适配大尺寸画布 */}
                       <div className="absolute inset-0 pointer-events-none">
-                        {/* 动态精准引导线 */}
-                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+                        {/* 动态技术引导线 (SVG) */}
+                        <svg viewBox="0 0 1000 1250" className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible">
                           <defs>
-                            <linearGradient id="lineGradCyan" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.8" />
-                              <stop offset="100%" stopColor="#22d3ee" stopOpacity="0.1" />
-                            </linearGradient>
-                            <linearGradient id="lineGradIndigo" x1="0%" y1="0%" x2="100%" y2="0%">
-                              <stop offset="0%" stopColor="#6366f1" stopOpacity="0.8" />
-                              <stop offset="100%" stopColor="#6366f1" stopOpacity="0.1" />
-                            </linearGradient>
-                            <linearGradient id="lineGradRev" x1="100%" y1="0%" x2="0%" y2="0%">
-                              <stop offset="0%" stopColor="#f97316" stopOpacity="0.8" />
-                              <stop offset="100%" stopColor="#f97316" stopOpacity="0.1" />
-                            </linearGradient>
+                            <filter id="glow">
+                              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                              <feMerge>
+                                <feMergeNode in="coloredBlur" />
+                                <feMergeNode in="SourceGraphic" />
+                              </feMerge>
+                            </filter>
                           </defs>
-                          {/* Armor (Back): Indigo */}
-                          <path d="M 180 150 L 320 220" stroke="url(#lineGradIndigo)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
-                          {/* Weapon (Left Hand): Orange */}
-                          <path d="M 330 400 L 280 430" stroke="url(#lineGradRev)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
-                          {/* Skill (Core): Cyan */}
-                          <path d="M 170 480 L 360 350" stroke="url(#lineGradCyan)" strokeWidth="2" strokeDasharray="4 4" fill="none" className="animate-pulse" />
+                          
+                          {/* Armor Path */}
+                          <path d="M 500 520 L 300 520 L 250 350" stroke="#6366f1" strokeWidth="2" fill="none" 
+                            className="opacity-20 group-hover/armor:opacity-80 transition-opacity duration-500" filter="url(#glow)" />
+                          <circle cx="500" cy="520" r="5" fill="#6366f1" 
+                            className="opacity-30 group-hover/armor:opacity-100 animate-pulse transition-opacity duration-500" />
+                          
+                          {/* Weapon Path */}
+                          <path d="M 650 680 L 800 680 L 850 780" stroke="#f59e0b" strokeWidth="2" fill="none" 
+                            className="opacity-20 group-hover/weapon:opacity-80 transition-opacity duration-500" filter="url(#glow)" />
+                          <circle cx="650" cy="680" r="5" fill="#f59e0b" 
+                            className="opacity-30 group-hover/weapon:opacity-100 animate-pulse transition-opacity duration-500" />
+                          
+                          {/* Skill Path */}
+                          <path d="M 510 630 L 510 850 L 550 950" stroke="#22d3ee" strokeWidth="2" fill="none" 
+                            className="opacity-20 group-hover/skill:opacity-80 transition-opacity duration-500" filter="url(#glow)" />
+                          <circle cx="510" cy="630" r="5" fill="#22d3ee" 
+                            className="opacity-30 group-hover/skill:opacity-100 animate-pulse transition-opacity duration-500" />
                         </svg>
 
-                        {/* 头部：防护 (后背位置) */}
-                        <div onClick={() => setShopTab('armors')} className="pointer-events-auto absolute top-[100px] left-[120px] w-24 h-24 rounded-full cursor-pointer group/h">
-                          <div className="absolute inset-0 border border-indigo-500/30 rounded-full animate-[ping_3s_linear_infinite]"></div>
-                          <div className="absolute inset-0 border-2 border-indigo-500/20 rounded-full flex items-center justify-center">
-                            <div className="w-1 h-1 bg-indigo-400 rounded-full shadow-[0_0_10px_#6366f1]"></div>
-                          </div>
-                          <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            <span className="text-[9px] text-indigo-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-indigo-500/50">防护系统 / ARMOR_SYSTEM</span>
-                            <div className="w-[1px] h-4 bg-indigo-500/50"></div>
-                          </div>
-                        </div>
-
-                        {/* 手臂：武器 */}
-                        <div onClick={() => setShopTab('weapons')} className="pointer-events-auto absolute top-[300px] right-[190px] w-32 h-48 cursor-pointer group/w">
-                          <div className="absolute inset-0 border-2 border-amber-500/10 rounded-lg animate-pulse"></div>
-                          <div className="absolute -right-28 top-1/2 -translate-y-1/2 flex items-center flex-row-reverse">
-                            <div className="flex flex-col items-start">
-                              <span className="text-[9px] text-amber-500 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-amber-500/50">武器系统 / ATK_WEAPONRY</span>
-                              <span className="text-[8px] text-amber-500/60 font-bold mt-1">CLICK_UPGRADE</span>
+                        {/* 1. 防护系统呼号 (Top Left) */}
+                        <div onClick={() => setShopTab('armors')} className="pointer-events-auto absolute top-[20%] left-[5%] cursor-pointer group/armor">
+                          <div className="flex flex-col items-start group-hover/armor:translate-x-2 transition-all duration-500 opacity-40 group-hover/armor:opacity-100">
+                            <div className="bg-slate-950/40 border-l-4 border-indigo-500/50 group-hover/armor:border-indigo-500 px-5 py-3 backdrop-blur-sm group-hover/armor:backdrop-blur-md shadow-[0_0_40px_rgba(99,102,241,0.1)] group-hover/armor:shadow-[0_0_40px_rgba(99,102,241,0.4)] transition-all">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="w-2 h-2 bg-indigo-500/50 group-hover/armor:bg-indigo-500 animate-pulse"></span>
+                                <span className="text-[11px] text-indigo-400/50 group-hover/armor:text-indigo-400 font-black tracking-[0.2em] uppercase">SYSTEM.DEFENSE</span>
+                              </div>
+                              <h4 className="text-lg font-black text-white/40 group-hover/armor:text-white italic tracking-widest">{player.equipment.armor}</h4>
+                              <div className="text-[9px] text-indigo-500/30 group-hover/armor:text-indigo-500/60 font-bold mt-1 uppercase">HIDDEN_LAYER_ACTIVE</div>
                             </div>
-                            <div className="w-8 h-[1px] bg-amber-500/50 mr-2"></div>
                           </div>
                         </div>
 
-                        {/* 核心：技能 */}
-                        <div onClick={() => setShopTab('skills')} className="pointer-events-auto absolute top-[440px] left-[130px] w-16 h-16 cursor-pointer group/s">
-                          <div className="absolute inset-0 bg-cyan-500/10 border-2 border-cyan-500/30 rounded-full animate-pulse shadow-[0_0_20px_rgba(34,211,238,0.4)]"></div>
-                          <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                            <div className="w-[1px] h-6 bg-cyan-500/50 mb-1"></div>
-                            <span className="text-[9px] text-cyan-400 font-black tracking-widest bg-slate-950/80 px-2 py-0.5 border border-cyan-500/50 uppercase">神经核心 / Neural_Core</span>
+                        {/* 2. 武器系统呼号 (Right Bottom) */}
+                        <div onClick={() => setShopTab('weapons')} className="pointer-events-auto absolute top-[60%] right-[2%] cursor-pointer group/weapon">
+                          <div className="flex flex-col items-end group-hover/weapon:-translate-x-2 transition-all duration-500 opacity-40 group-hover/weapon:opacity-100 text-right">
+                            <div className="bg-slate-950/40 border-r-4 border-amber-500/50 group-hover/weapon:border-amber-500 px-5 py-3 backdrop-blur-sm group-hover/weapon:backdrop-blur-md shadow-[0_0_40px_rgba(245,158,11,0.1)] group-hover/weapon:shadow-[0_0_40px_rgba(245,158,11,0.4)] transition-all">
+                              <div className="flex items-center justify-end gap-2 mb-1">
+                                <span className="text-[11px] text-amber-500/50 group-hover/weapon:text-amber-500 font-black tracking-[0.2em] uppercase">LINK.OFFENSE</span>
+                                <span className="w-2 h-2 bg-amber-500/50 group-hover/weapon:bg-amber-500 animate-pulse"></span>
+                              </div>
+                              <h4 className="text-lg font-black text-white/40 group-hover/weapon:text-white italic tracking-widest">{player.equipment.weapon}</h4>
+                              <div className="text-[9px] text-amber-500/30 group-hover/weapon:text-amber-500/60 font-bold mt-1 uppercase">MODULE_STANDBY</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 3. 核心逻辑呼号 (Bottom Center) */}
+                        <div onClick={() => setShopTab('skills')} className="pointer-events-auto absolute top-[75%] left-[45%] -translate-x-1/2 cursor-pointer group/skill">
+                          <div className="flex flex-col items-center group-hover/skill:-translate-y-2 transition-all duration-500 opacity-40 group-hover/skill:opacity-100">
+                            <div className="bg-slate-950/40 border-t-4 border-cyan-500/50 group-hover/skill:border-cyan-500 px-8 py-3 backdrop-blur-sm group-hover/skill:backdrop-blur-md shadow-[0_0_40px_rgba(34,211,238,0.1)] group-hover/skill:shadow-[0_0_40px_rgba(34,211,238,0.4)] text-center transition-all">
+                              <div className="flex items-center justify-center gap-2 mb-1">
+                                <span className="text-[11px] text-cyan-400/50 group-hover/skill:text-cyan-400 font-black tracking-[0.2em] uppercase">CORE.NEURAL_LINK</span>
+                              </div>
+                              <h4 className="text-lg font-black text-white/40 group-hover/skill:text-white italic tracking-widest uppercase">{player.equipment.skill}</h4>
+                              <div className="text-[9px] text-cyan-500/30 group-hover/skill:text-cyan-500/60 font-bold mt-1 uppercase">SYNC_OPTIMIZED</div>
+                            </div>
                           </div>
                         </div>
                       </div>
