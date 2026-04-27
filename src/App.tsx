@@ -1403,15 +1403,15 @@ export default function App() {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
                         <span className="text-[10px] text-slate-500 font-bold cn-text">武器</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.weapon ? 'DATA_LOCKED' : enemy.equipment.weapon}</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.weapon ? '情报已锁定' : enemy.equipment.weapon}</span>
                       </div>
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
                         <span className="text-[10px] text-slate-500 font-bold cn-text">防具</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.armor ? 'DATA_LOCKED' : enemy.equipment.armor}</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.armor ? '情报已锁定' : enemy.equipment.armor}</span>
                       </div>
                       <div className="flex justify-between items-center bg-rose-500/5 p-2 border-l-2 border-rose-500">
                         <span className="text-[10px] text-slate-500 font-bold cn-text">技能</span>
-                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.skill ? 'DATA_LOCKED' : enemy.equipment.skill}</span>
+                        <span className="text-xs text-rose-400 font-black cn-text">{isIntelBlurred.skill ? '情报已锁定' : enemy.equipment.skill}</span>
                       </div>
                     </div>
                   </div>
