@@ -739,6 +739,31 @@ export default function App() {
   const hasLoaded = useRef(false);
   const lastWheelTime = useRef(0);
   const touchStartY = useRef(0);
+  
+  // 新增：处理移动端/平板触摸滚动
+  const handlePickerTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handlePickerTouchMove = (e: React.TouchEvent, type: 'weapon' | 'armor' | 'skill', items: any[]) => {
+    if (isDeployed || items.length === 0) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = touchStartY.current - currentY;
+    
+    // 灵敏度控制：每滑动 30px 切换一个选项
+    if (Math.abs(deltaY) > 30) {
+      const direction = deltaY > 0 ? 1 : -1;
+      const newIdx = wheelIndices[type] + direction;
+      setWheelIndices(prev => ({ ...prev, [type]: newIdx }));
+      const realIdx = (newIdx % items.length + items.length) % items.length;
+      setPlayer(prev => ({ 
+        ...prev, 
+        equipment: { ...prev.equipment, [type]: items[realIdx].name } 
+      }));
+      touchStartY.current = currentY;
+    }
+  };
+
   const [isIntelBlurred, setIsIntelBlurred] = useState({ weapon: false, armor: false, skill: false });
   const [wheelIndices, setWheelIndices] = useState({ weapon: 60, armor: 60, skill: 60 });
 
@@ -1494,7 +1519,10 @@ export default function App() {
                               const realIdx = (newIdx % items.length + items.length) % items.length;
                               setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, weapon: items[realIdx].name } }));
                             }}
+                            onTouchStart={handlePickerTouchStart}
+                            onTouchMove={(e) => handlePickerTouchMove(e, 'weapon', items)}
                             className="absolute inset-0 flex flex-col"
+                            style={{ touchAction: 'none' }}
                           >
                             <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
                               <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
@@ -1543,7 +1571,10 @@ export default function App() {
                               const realIdx = (newIdx % items.length + items.length) % items.length;
                               setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, armor: items[realIdx].name } }));
                             }}
+                            onTouchStart={handlePickerTouchStart}
+                            onTouchMove={(e) => handlePickerTouchMove(e, 'armor', items)}
                             className="absolute inset-0 flex flex-col"
+                            style={{ touchAction: 'none' }}
                           >
                             <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
                               <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
@@ -1592,7 +1623,10 @@ export default function App() {
                               const realIdx = (newIdx % items.length + items.length) % items.length;
                               setPlayer(prev => ({ ...prev, equipment: { ...prev.equipment, skill: items[realIdx].name } }));
                             }}
+                            onTouchStart={handlePickerTouchStart}
+                            onTouchMove={(e) => handlePickerTouchMove(e, 'skill', items)}
                             className="absolute inset-0 flex flex-col"
+                            style={{ touchAction: 'none' }}
                           >
                             <div className="absolute inset-0 flex flex-col pointer-events-none z-10">
                               <div className="flex-1 bg-gradient-to-b from-slate-950/90 via-slate-950/20 to-transparent"></div>
